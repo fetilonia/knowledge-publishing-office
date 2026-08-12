@@ -1,0 +1,864 @@
+<title>Knowledge Publishing Office — Console</title>
+<style>
+:root{
+  --page-bg:#EAE3D4; --ink:#24221D; --muted:#6B6558; --card:#FFFDF5;
+  --line:#D2C8B2; --soft:#E2DACA; --accent:#2E8B84; --shell:#4A4237;
+  --ok:#4E7A3E; --warn:#B07A22; --bad:#A8443C; --idle:#8A8377;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --page-bg:#16171A; --ink:#E9E4D8; --muted:#98928A; --card:#1E2024;
+    --line:#33363B; --soft:#232629; --accent:#57B4AB; --shell:#0E0F11;
+    --ok:#7FB367; --warn:#D6A353; --bad:#D9736A; --idle:#7B7568;
+  }
+}
+:root[data-theme="dark"]{
+  --page-bg:#16171A; --ink:#E9E4D8; --muted:#98928A; --card:#1E2024;
+  --line:#33363B; --soft:#232629; --accent:#57B4AB; --shell:#0E0F11;
+  --ok:#7FB367; --warn:#D6A353; --bad:#D9736A; --idle:#7B7568;
+}
+*{ box-sizing:border-box; }
+body{ margin:0; background:var(--page-bg); color:var(--ink);
+  font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif; }
+.sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; }
+.mono{ font-family:ui-monospace,"SF Mono","Cascadia Code",Menlo,monospace; }
+.page{ max-width:1120px; margin:0 auto; padding:2.2rem 1.25rem 3rem; display:flex; flex-direction:column; gap:1.1rem; }
+.eyebrow{ margin:0; font-size:11.5px; font-weight:500; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); }
+h1{ margin:.3rem 0 0; font-size:28px; font-weight:500; letter-spacing:-.01em; }
+.lede{ margin:.55rem 0 0; font-size:14.5px; line-height:1.7; color:var(--muted); max-width:68ch; }
+
+.rt{ display:flex; flex-wrap:wrap; gap:9px; align-items:center; padding:9px 12px;
+  background:var(--card); border:1px solid var(--line); border-radius:10px; font-size:12.5px; }
+.led{ width:8px; height:8px; border-radius:50%; background:var(--idle); flex:none; }
+.led.live{ background:var(--ok); } .led.err{ background:var(--bad); }
+.rt input{ font:inherit; font-size:12px; padding:6px 9px; border:1px solid var(--line);
+  border-radius:6px; background:var(--page-bg); color:var(--ink); min-width:190px; }
+.rt .grow{ flex:1; }
+
+.tiles{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:9px; }
+.tile{ background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
+.tile .k{ font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); }
+.tile .v{ font-size:19px; font-weight:500; margin-top:3px; font-variant-numeric:tabular-nums; line-height:1.2; }
+.tile .v.sm{ font-size:13px; }
+.tile.wide{ grid-column:span 2; }
+.pbar{ height:6px; background:var(--soft); border-radius:3px; margin-top:8px; overflow:hidden; }
+.pbar i{ display:block; height:100%; width:0; background:var(--accent); transition:width .45s ease; }
+.badge{ display:inline-block; font-size:11px; font-weight:500; letter-spacing:.06em;
+  padding:2px 7px; border-radius:4px; background:var(--soft); color:var(--muted); }
+.badge.run{ background:rgba(46,139,132,.16); color:var(--accent); }
+.badge.ok{ background:rgba(78,122,62,.16); color:var(--ok); }
+.badge.wait{ background:rgba(176,122,34,.16); color:var(--warn); }
+.badge.bad{ background:rgba(168,68,60,.16); color:var(--bad); }
+
+.stage{ background:var(--shell); border-radius:16px; padding:12px; align-self:center; max-width:100%; }
+canvas#office{ display:block; image-rendering:pixelated; border-radius:6px; max-width:100%; height:auto; }
+
+.rail{ display:grid; grid-template-columns:repeat(auto-fit,minmax(172px,1fr)); gap:9px; }
+.seat{ display:flex; gap:10px; align-items:flex-start; padding:10px 11px; background:var(--card);
+  border:1px solid var(--line); border-left:3px solid var(--line); border-radius:10px;
+  border-top-left-radius:0; border-bottom-left-radius:0; }
+.seat.on{ border-left-color:var(--k); }
+.seat.dim{ opacity:.55; }
+.seat canvas{ flex:none; }
+.seat .nm{ font-size:12.5px; font-weight:500; line-height:1.3; }
+.seat.on .nm{ color:var(--k); }
+.seat .rl{ font-size:11px; color:var(--muted); margin-top:2px; }
+.seat .st{ margin-top:5px; }
+.seat.head{ background:var(--soft); border-left-color:var(--k); }
+
+.ticker{ display:flex; gap:11px; align-items:baseline; font-size:13px; min-height:1.5em;
+  padding:10px 13px; background:var(--card); border:1px solid var(--line); border-radius:10px; margin:0; }
+.ticker .tag{ font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--muted); flex:none; }
+
+.approve{ display:flex; flex-wrap:wrap; gap:9px; align-items:center; padding:11px 13px;
+  background:var(--card); border:1px solid var(--warn); border-radius:10px; font-size:12.5px; }
+.approve .hdr{ font-weight:500; }
+.approve input{ font:inherit; font-size:12px; padding:6px 9px; border:1px solid var(--line);
+  border-radius:6px; background:var(--page-bg); color:var(--ink); min-width:150px; }
+
+form.prompt{ display:flex; flex-direction:column; gap:8px; padding:12px 13px;
+  background:var(--card); border:1px solid var(--line); border-radius:12px; }
+form.prompt label{ font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--muted); }
+textarea{ font:inherit; font-size:14px; line-height:1.6; padding:9px 11px; border:1px solid var(--line);
+  border-radius:8px; background:var(--page-bg); color:var(--ink); resize:vertical; min-height:74px; width:100%; }
+textarea:focus-visible,.rt input:focus-visible,.approve input:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+.prow{ display:flex; flex-wrap:wrap; gap:9px; align-items:center; justify-content:flex-end; }
+.prow .hint{ margin-right:auto; font-size:11.5px; color:var(--muted); }
+
+button{ font:inherit; font-size:12.5px; font-weight:500; letter-spacing:.03em; color:var(--ink);
+  background:var(--card); border:1px solid var(--line); border-radius:8px; padding:9px 15px; cursor:pointer; }
+button:hover:not(:disabled){ border-color:var(--ink); }
+button:disabled{ color:var(--muted); opacity:.55; cursor:default; }
+button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+button.go{ background:var(--ink); color:var(--page-bg); border-color:var(--ink); }
+button.go:hover:not(:disabled){ opacity:.88; }
+.note{ margin:0; font-size:11.5px; color:var(--muted); line-height:1.65; }
+.note code{ font-family:ui-monospace,Menlo,monospace; font-size:11px; }
+</style>
+
+<div class="page">
+  <header>
+    <p class="eyebrow mono">Knowledge publishing runtime &middot; agent floor</p>
+    <h1>지식 퍼블리싱 오피스 콘솔</h1>
+    <p class="lede">아래 프롬프트에 요청을 넣으면 층 전체가 움직입니다. 에이전트가 자리에서 일하고, 산출물이 책상 사이를 건너다니며, 마지막엔 파티션 너머 Head Director 결재함에 도착합니다. 그 의자는 비어 있습니다 &mdash; 최종 승인은 사람이 합니다.</p>
+  </header>
+
+  <div class="rt">
+    <span class="led" id="led" aria-hidden="true"></span>
+    <span id="rtLabel" class="mono">데모 모드</span>
+    <span class="grow"></span>
+    <label class="sr-only" for="rtUrl">런타임 주소</label>
+    <input id="rtUrl" class="mono" value="http://127.0.0.1:8787" spellcheck="false">
+    <button type="button" id="rtConnect">런타임 연결</button>
+  </div>
+
+  <div class="tiles">
+    <div class="tile"><div class="k mono">상태</div><div class="v sm"><span class="badge" id="tState">IDLE</span></div></div>
+    <div class="tile wide"><div class="k mono">진행률</div><div class="v" id="tPct">0%</div><div class="pbar"><i id="tBar"></i></div></div>
+    <div class="tile"><div class="k mono">경과</div><div class="v mono" id="tElapsed">0:00</div></div>
+    <div class="tile"><div class="k mono">아티팩트</div><div class="v mono" id="tArt">0</div></div>
+    <div class="tile"><div class="k mono">결재 대기</div><div class="v mono" id="tTray">0</div></div>
+    <div class="tile wide"><div class="k mono">Job</div><div class="v sm mono" id="tJob">—</div></div>
+  </div>
+
+  <div class="stage">
+    <canvas id="office" role="img" aria-label="픽셀 아트 사무실 평면도. 왼쪽 업무 공간의 다섯 책상에서 에이전트가 일하고, 오른쪽 유리 파티션 너머에 비어 있는 Head Director 책상과 결재함이 있습니다."></canvas>
+  </div>
+
+  <div class="rail" id="roster"></div>
+
+  <p class="ticker" aria-live="polite"><span class="tag mono">Status</span><span id="ticker">요청을 기다리는 중입니다.</span></p>
+
+  <div class="approve" id="approveBar" hidden>
+    <span class="hdr">QA를 통과했습니다. 최종 승인은 직접 하셔야 합니다.</span>
+    <span class="grow"></span>
+    <label class="sr-only" for="actorId">검토자 ID</label>
+    <input id="actorId" placeholder="검토자 ID" spellcheck="false">
+    <button type="button" id="btnApprove">승인</button>
+    <button type="button" id="btnReject">반려</button>
+  </div>
+
+  <form class="prompt" id="promptForm">
+    <label for="promptInput">요청 입력</label>
+    <textarea id="promptInput" placeholder="예) Microsoft Entra Pass-through Authentication의 Alternate ID와 Email as an Alternate Login ID 차이를 근거 중심 기술 문서로 정리해줘."></textarea>
+    <div class="prow">
+      <span class="hint" id="promptHint">데모 모드 — 실제 모델 호출 없이 층의 동작만 재생합니다.</span>
+      <button type="button" id="btnReset">초기화</button>
+      <button type="submit" class="go" id="btnRun">작업 시작</button>
+    </div>
+  </form>
+
+  <p class="note">런타임은 <code>research-worker</code> / <code>document-writer</code> / <code>qa-critic</code> 세 워커와 Human Approval까지 구현되어 있습니다. <strong>Poster와 Proofreader는 아직 백엔드에 없어</strong> 연결 시 &ldquo;미연결&rdquo;로 표시되며, 데모 모드에서만 동작합니다. 브라우저에서 런타임에 붙으려면 이 페이지를 <code>http://localhost:3000</code> 또는 <code>:5173</code>에서 서빙하거나, 런타임의 <code>RUNTIME_ALLOWED_ORIGINS</code>에 이 페이지의 origin을 추가해야 합니다.</p>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+var T=16, COLS=32, ROWS=20, W=COLS*T, HH=ROWS*T;
+var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+var C={
+  floorA:"#CEC6B4", floorB:"#C6BDAA", grout:"#B7AE9A",
+  wallTop:"#525C66", wallFace:"#78838E", wallCap:"#3F4851", base:"#39424A",
+  ink:"#2A2822", ink2:"#413E36",
+  wood:"#B08050", woodD:"#8A6038", woodL:"#C89A64",
+  metal:"#909CA5", metalD:"#6A757D",
+  paper:"#F3EEE1", paperD:"#D8D1BE",
+  screen:"#334B57", screenOff:"#28373F",
+  glass:"#A9C9CB", glassD:"#7FA5A8",
+  rug:"#4C5D6D", rugD:"#3D4B58",
+  gold:"#BE9743", leaf:"#4F7B3F", leafD:"#37592B", soil:"#6E5238"
+};
+
+var HEAD_MAG=["..KKKKK..",".KMMMMMK.","KMWWWWWMK","KMWLLWWMK","KMWWWWWMK",".KMMMMMK.","..KKKKK..","...KMK...","...KMK..."];
+var HEAD_PEN=["...KKK...","..KMMMK..","..KMMMK..","..KMMMK..","..KMMMK..","..KDDDK..","..KWWWK..","...KWK...","....K...."];
+var HEAD_SHD=[".KKKKKKK.","KMMMMMMMK","KMMMMMLMK","KMLMMLMMK","KMMLLMMMK",".KMMMMMK.","..KMMMK..","...KMK...","....K...."];
+var HEAD_PLN=["....K....","...KKK...","..KKMKK..","..KMMMK..",".KKMMMKK.",".KMMWMMK.",".KKMMMKK.","...KMK...","...KMK..."];
+var HEAD_GLS=[".........","..K...K..","KKKKKKKKK","KMMKKKMMK","KMWKMKWMK","KMMKKKMMK",".KKK.KKK.","...KKK...","...KKK..."];
+var BODY=["..KKKKK..",".KMMMMMK.","KMMMMMMMK","KMMDDDMMK",".KMMMMMK."];
+var FEET=[["..KK.KK..","..KK....."],["..KK.KK..","..KK.KK.."],["..KK.KK..",".....KK.."],["..KK.KK..","..KK.KK.."]];
+
+var AGENTS=[
+  {key:"researcher",name:"Researcher",role:"자료 수집",head:HEAD_MAG,m:"#2E8B84",d:"#1E625B",
+   deskR:4,deskC:2,seat:{r:3,c:3},errand:{r:15,c:3},backend:"research-worker",
+   verb:"공식 출처를 뒤져 근거를 모읍니다"},
+  {key:"documentor",name:"Documentor",role:"문서 작성",head:HEAD_PEN,m:"#C0812F",d:"#8E5D1F",
+   deskR:4,deskC:8,seat:{r:3,c:9},errand:null,backend:"document-writer",
+   verb:"모인 근거로 초안을 씁니다"},
+  {key:"techqa",name:"Technical QA",role:"스킬 기반 검수",head:HEAD_SHD,m:"#5B8C43",d:"#3F632E",
+   deskR:4,deskC:14,seat:{r:3,c:15},errand:null,backend:"qa-critic",
+   verb:"기술 정확성과 출처 추적성을 검증합니다"},
+  {key:"poster",name:"Poster",role:"Notion 게시",head:HEAD_PLN,m:"#7A62B6",d:"#554189",
+   deskR:11,deskC:2,seat:{r:10,c:3},errand:{r:15,c:15},backend:null,
+   verb:"검수를 통과한 문서를 Notion에 올립니다"},
+  {key:"proofreader",name:"Proofreader",role:"포맷·이미지 검토",head:HEAD_GLS,m:"#B5514A",d:"#853934",
+   deskR:11,deskC:8,seat:{r:10,c:9},errand:null,backend:null,
+   verb:"문장 구조와 이미지 삽입 상태를 훑습니다"}
+];
+var BACKEND_TO_IDX={};
+AGENTS.forEach(function(a,i){ if(a.backend) BACKEND_TO_IDX[a.backend]=i; });
+
+var solid=[],r,c;
+for(r=0;r<ROWS;r++){ solid.push(new Array(COLS).fill(false)); }
+function block(rr,cc,w,h){ w=w||1; h=h||1; for(var y=rr;y<rr+h;y++) for(var x=cc;x<cc+w;x++) if(y>=0&&y<ROWS&&x>=0&&x<COLS) solid[y][x]=true; }
+function unblock(rr,cc,w,h){ w=w||1; h=h||1; for(var y=rr;y<rr+h;y++) for(var x=cc;x<cc+w;x++) if(y>=0&&y<ROWS&&x>=0&&x<COLS) solid[y][x]=false; }
+
+block(0,0,COLS,2); block(2,0,1,ROWS-2); block(2,COLS-1,1,ROWS-2);
+block(ROWS-1,0,COLS,1); unblock(ROWS-1,10,2,1);
+block(2,22,1,ROWS-3); unblock(12,22,1,2);
+
+var FURN=[
+  {k:"window",r:2,c:2,w:3},{k:"notes",r:2,c:8,w:3},{k:"qaboard",r:2,c:14,w:3},{k:"cooler",r:6,c:18,w:2},
+  {k:"desk",r:4,c:2,w:3,a:0},{k:"desk",r:4,c:8,w:3,a:1},{k:"desk",r:4,c:14,w:3,a:2},
+  {k:"desk",r:11,c:2,w:3,a:3},{k:"desk",r:11,c:8,w:3,a:4},
+  {k:"archive",r:16,c:2,w:3},{k:"printer",r:16,c:8,w:3},{k:"uplink",r:16,c:14,w:3},
+  {k:"plant",r:17,c:20,w:1},{k:"plant",r:6,c:20,w:1},
+  {k:"cabinet",r:2,c:24,w:3},{k:"exchair",r:5,c:25,w:2},{k:"bigdesk",r:6,c:24,w:4},{k:"tray",r:6,c:28,w:1},
+  {k:"plant",r:16,c:24,w:1},{k:"plant",r:16,c:29,w:1}
+];
+FURN.forEach(function(f){ block(f.r,f.c,f.w,1); });
+function walkable(rr,cc){ return rr>=0&&rr<ROWS&&cc>=0&&cc<COLS&&!solid[rr][cc]; }
+
+function astar(sr,sc,gr,gc){
+  if(!walkable(gr,gc)) return null;
+  if(sr===gr&&sc===gc) return [];
+  var key=function(a,b){ return a*COLS+b; };
+  var openSet=[{r:sr,c:sc,g:0,f:Math.abs(sr-gr)+Math.abs(sc-gc)}];
+  var came=new Map(), gs=new Map(), seen=new Set();
+  gs.set(key(sr,sc),0);
+  var dirs=[[1,0],[-1,0],[0,1],[0,-1]], guard=0;
+  while(openSet.length && guard++<4000){
+    var bi=0,i;
+    for(i=1;i<openSet.length;i++) if(openSet[i].f<openSet[bi].f) bi=i;
+    var cur=openSet.splice(bi,1)[0], ck=key(cur.r,cur.c);
+    if(seen.has(ck)) continue;
+    seen.add(ck);
+    if(cur.r===gr&&cur.c===gc){
+      var path=[], k=ck;
+      while(came.has(k)){ var p=came.get(k); path.push({r:Math.floor(k/COLS),c:k%COLS}); k=p; }
+      path.reverse(); return path;
+    }
+    for(i=0;i<4;i++){
+      var nr=cur.r+dirs[i][0], nc=cur.c+dirs[i][1];
+      if(!walkable(nr,nc)) continue;
+      var nk=key(nr,nc), ng=cur.g+1;
+      if(gs.has(nk) && gs.get(nk)<=ng) continue;
+      gs.set(nk,ng); came.set(nk,ck);
+      openSet.push({r:nr,c:nc,g:ng,f:ng+Math.abs(nr-gr)+Math.abs(nc-gc)});
+    }
+  }
+  return null;
+}
+
+var cv=document.getElementById("office"), ctx=cv.getContext("2d"), S=2, bg=null;
+function fit(){
+  var avail=Math.min(document.querySelector(".page").clientWidth-24,1096);
+  S = avail>=W*3 ? 3 : 2;
+  var dpr=Math.min(window.devicePixelRatio||1,2);
+  cv.width=W*S*dpr; cv.height=HH*S*dpr;
+  cv.style.width=(W*S)+"px"; cv.style.height=(HH*S)+"px";
+  ctx.setTransform(S*dpr,0,0,S*dpr,0,0);
+  ctx.imageSmoothingEnabled=false; bg=null;
+}
+window.addEventListener("resize",fit);
+
+function px(g,x,y,w,h,col){ g.fillStyle=col; g.fillRect(x|0,y|0,w|0,h|0); }
+function stamp(g,map,x,y,pal){
+  for(var i=0;i<map.length;i++){
+    var row=map[i];
+    for(var j=0;j<row.length;j++){
+      var col=pal[row.charAt(j)];
+      if(col){ g.fillStyle=col; g.fillRect((x+j)|0,(y+i)|0,1,1); }
+    }
+  }
+}
+
+function buildBG(){
+  var o=document.createElement("canvas"); o.width=W; o.height=HH;
+  var g=o.getContext("2d"); g.imageSmoothingEnabled=false;
+  for(r=2;r<ROWS;r++) for(c=1;c<COLS-1;c++){
+    px(g,c*T,r*T,T,T,(r+c)%2===0?C.floorA:C.floorB);
+    px(g,c*T,r*T,T,1,C.grout); px(g,c*T,r*T,1,T,C.grout);
+  }
+  for(r=8;r<15;r++) for(c=24;c<30;c++) px(g,c*T,r*T,T,T,(r+c)%2===0?C.rug:C.rugD);
+  px(g,24*T,8*T,6*T,1,"#6A7C8C"); px(g,24*T,15*T-1,6*T,1,"#33404B");
+  [[2,5,"#2E8B84"],[8,5,"#C0812F"],[14,5,"#5B8C43"],[2,12,"#7A62B6"],[8,12,"#B5514A"]].forEach(function(z){
+    g.globalAlpha=.16; px(g,z[0]*T+2,z[1]*T+2,3*T-4,T-4,z[2]); g.globalAlpha=1;
+    g.globalAlpha=.42; px(g,z[0]*T+2,z[1]*T+2,3*T-4,1,z[2]); px(g,z[0]*T+2,z[1]*T+T-3,3*T-4,1,z[2]); g.globalAlpha=1;
+  });
+  px(g,0,0,W,T,C.wallTop); px(g,0,T,W,T,C.wallFace); px(g,0,2*T-2,W,2,C.wallCap);
+  for(c=2;c<16;c+=5){ px(g,c*T+2,T+3,T+8,9,C.glass); px(g,c*T+2,T+3,T+8,1,C.glassD); px(g,c*T+2,T+11,T+8,1,C.glassD); }
+  for(c=24;c<COLS-2;c+=5){ px(g,c*T+2,T+3,T+8,9,C.glass); px(g,c*T+2,T+3,T+8,1,C.glassD); px(g,c*T+2,T+11,T+8,1,C.glassD); }
+  px(g,0,2*T,T,HH-2*T,C.wallFace); px(g,T-2,2*T,2,HH-2*T,C.wallCap);
+  px(g,(COLS-1)*T,2*T,T,HH-2*T,C.wallFace); px(g,(COLS-1)*T,2*T,2,HH-2*T,C.wallCap);
+  px(g,0,(ROWS-1)*T,W,T,C.wallFace); px(g,0,(ROWS-1)*T,W,2,C.wallCap);
+  px(g,10*T,(ROWS-1)*T,2*T,T,"#2F3A34"); px(g,10*T,(ROWS-1)*T,2*T,2,C.base);
+  px(g,10*T+1,(ROWS-1)*T+4,2*T-2,2,"#48564D");
+  for(r=2;r<ROWS-1;r++){
+    if(r===12||r===13){ px(g,22*T+6,r*T,4,T,C.metalD); continue; }
+    px(g,22*T+3,r*T,10,T,C.glass);
+    g.globalAlpha=.5; px(g,22*T+5,r*T,3,T,"#FFFFFF"); g.globalAlpha=1;
+    px(g,22*T+2,r*T,2,T,C.metalD); px(g,22*T+13,r*T,2,T,C.metalD);
+  }
+  px(g,22*T+2,2*T,13,2,C.metalD); px(g,22*T+2,12*T-3,13,3,C.metalD); px(g,22*T+2,14*T,13,3,C.metalD);
+  bg=o;
+}
+
+function drawBoard(g){
+  var x=17*T-2, y=T+2, w=5*T-4, h=12;
+  px(g,x,y,w,h,"#2E363D"); px(g,x,y,w,1,"#4A555E"); px(g,x,y+h-1,w,1,"#1B2126");
+  px(g,x+2,y+4,w-4,4,"#1B2126");
+  var fillW=Math.round((w-6)*Math.max(0,Math.min(1,scene.progress)));
+  if(fillW>0) px(g,x+3,y+5,fillW,2, scene.jobFailed?"#A8443C":(scene.progress>=1?C.gold:"#5FB8AE"));
+  for(var i=1;i<5;i++) px(g,x+2+Math.round((w-4)*i/5),y+4,1,4,"#3D474F");
+  var led = scene.jobFailed?"#D9736A":(scene.progress>=1?C.gold:(scene.active>=0?"#7FD0A8":"#6A757D"));
+  px(g,x+w-7,y+2,4,2,led);
+}
+
+function drawFurn(g,f){
+  var x=f.c*T, y=f.r*T, w=f.w*T, a=(f.a!=null)?AGENTS[f.a]:null;
+  if(f.k==="desk"||f.k==="bigdesk"){
+    var top=y-6;
+    px(g,x,top,w,12,C.wood); px(g,x,top,w,2,C.woodL);
+    px(g,x,y+6,w,7,C.woodD);
+    px(g,x+2,y+13,3,3,C.ink2); px(g,x+w-5,y+13,3,3,C.ink2);
+    px(g,x,top,w,1,C.ink); px(g,x,y+13,w,1,C.ink);
+    if(f.k==="desk"&&a){
+      var lit = scene.active===f.a;
+      px(g,x+3,y-19,11,11,C.ink);
+      px(g,x+4,y-18,9,9, lit?C.screen:C.screenOff);
+      if(lit){
+        var ln=Math.floor(scene.t/160)%3;
+        px(g,x+5,y-16+ln*3,7,1,a.m);
+        px(g,x+5,y-16+((ln+1)%3)*3,4,1,a.d);
+      }
+      px(g,x+7,y-8,3,2,C.ink2);
+      px(g,x+2*T+4,y-3,9,6,C.paper); px(g,x+2*T+4,y-3,9,1,C.paperD);
+      px(g,x+2*T+5,y-1,5,1,C.paperD); px(g,x+2*T+5,y+1,6,1,C.paperD);
+      var ix=x+2*T-5, iy=y-4;
+      if(f.a===0){ px(g,ix,iy+4,8,3,a.m); px(g,ix+1,iy+1,7,3,a.d); px(g,ix,iy-2,8,3,C.paperD); }
+      else if(f.a===1){ px(g,ix+1,iy,6,7,C.paper); px(g,ix+1,iy,6,2,a.m); px(g,ix+7,iy+2,2,3,C.paperD); }
+      else if(f.a===2){ px(g,ix+1,iy+3,7,4,a.d); px(g,ix+3,iy-2,3,5,a.m); px(g,ix+2,iy-3,5,2,C.ink); }
+      else if(f.a===3){ px(g,ix,iy+3,9,4,C.metalD); px(g,ix+2,iy,5,4,C.paper); px(g,ix+2,iy,5,1,a.m); }
+      else { px(g,ix,iy+2,9,5,C.paper); px(g,ix+1,iy+4,5,1,a.m); px(g,ix+1,iy+6,3,1,a.m);
+             px(g,ix+6,iy-2,2,7,a.d); px(g,ix+6,iy+5,2,2,a.m); }
+    }
+    if(f.k==="bigdesk"){
+      px(g,x+w-24,y-3,14,4,C.gold); px(g,x+w-23,y-2,12,2,"#3A2F14");
+      px(g,x+6,y-4,10,7,C.paper); px(g,x+6,y-4,10,1,C.paperD);
+      px(g,x+7,y-2,7,1,C.paperD); px(g,x+7,y,5,1,C.paperD);
+      px(g,x+20,y-5,7,8,C.screenOff); px(g,x+21,y-4,5,6,C.glassD);
+    }
+  } else if(f.k==="exchair"){
+    px(g,x+3,y-2,w-6,14,"#3B4C5A"); px(g,x+3,y-2,w-6,2,"#4E6373");
+    px(g,x+5,y+12,3,4,C.ink2); px(g,x+w-8,y+12,3,4,C.ink2);
+    px(g,x+3,y-2,w-6,1,C.ink);
+  } else if(f.k==="tray"){
+    px(g,x+1,y-2,T-2,10,C.metalD); px(g,x+1,y-2,T-2,2,C.metal);
+    var n=Math.min(scene.tray,5);
+    for(var i=0;i<n;i++){ px(g,x+3,y-4-i*2,T-6,2,C.paper); px(g,x+3,y-4-i*2,T-6,1,C.paperD); }
+    px(g,x+1,y+8,T-2,3,C.ink2);
+  } else if(f.k==="window"){
+    px(g,x,y+2,w,13,C.metalD); px(g,x+2,y+4,w-4,9,C.glass);
+    px(g,x+2,y+4,w-4,1,"#CFE4E5"); px(g,x+w/2,y+4,1,9,C.metalD);
+  } else if(f.k==="notes"){
+    px(g,x,y+2,w,13,C.woodD); px(g,x+1,y+3,w-2,11,"#8E9C7E");
+    for(var q=0;q<5;q++) px(g,x+3+q*9,y+5+(q%2)*4,7,6,q%2?C.paper:"#F0DE9E");
+  } else if(f.k==="qaboard"){
+    px(g,x,y+1,w,14,C.ink2); px(g,x+1,y+2,w-2,12,C.paper);
+    for(var t=0;t<4;t++){
+      px(g,x+4,y+4+t*3,3,2, t<scene.qaTicks?AGENTS[2].m:C.paperD);
+      px(g,x+9,y+4+t*3,w-13,2,C.paperD);
+    }
+  } else if(f.k==="cooler"){
+    px(g,x+6,y-14,13,10,C.glass); px(g,x+6,y-14,13,2,C.glassD);
+    px(g,x+9,y-5,7,2,C.metalD); px(g,x+5,y-3,15,18,"#DDE4E7");
+    px(g,x+5,y-3,15,2,"#F0F4F5"); px(g,x+8,y+3,9,4,C.metalD);
+    px(g,x+10,y+7,5,2,C.glassD); px(g,x+5,y-3,15,1,C.ink); px(g,x+6,y-14,13,1,C.ink);
+  } else if(f.k==="archive"){
+    px(g,x,y-8,w,23,C.woodD); px(g,x+1,y-7,w-2,21,"#6E4E2E");
+    for(var s=0;s<3;s++){
+      px(g,x+2,y-6+s*7,w-4,5,"#5A3F26");
+      for(var b=0;b<7;b++) px(g,x+3+b*6,y-6+s*7,4,5, b%3===0?"#B7723F":(b%3===1?"#8E9C7E":"#9E5C55"));
+    }
+    px(g,x,y-8,w,1,C.ink);
+  } else if(f.k==="printer"){
+    px(g,x+4,y-6,w-8,21,"#B9BEC2"); px(g,x+4,y-6,w-8,2,"#D6DADD");
+    px(g,x+7,y-1,w-14,4,C.ink2); px(g,x+7,y+6,w-14,3,C.paper); px(g,x+4,y-6,w-8,1,C.ink);
+  } else if(f.k==="uplink"){
+    px(g,x+2,y-10,w-4,25,"#3E4750"); px(g,x+3,y-9,w-6,23,"#2E363D");
+    for(var u=0;u<5;u++){
+      px(g,x+5,y-7+u*5,w-10,3,"#232A30");
+      px(g,x+6,y-7+u*5,2,3,(Math.floor(scene.t/300)+u)%3===0?AGENTS[3].m:"#46525C");
+      px(g,x+9,y-7+u*5,2,3,(Math.floor(scene.t/220)+u)%4===0?"#7FD0A8":"#46525C");
+    }
+    px(g,x+2,y-10,w-4,1,C.ink);
+  } else if(f.k==="cabinet"){
+    px(g,x,y+1,w,14,C.woodD); px(g,x+1,y+2,w-2,12,"#7A5634");
+    px(g,x+2,y+4,w-4,3,"#6A4A2C"); px(g,x+2,y+9,w-4,3,"#6A4A2C");
+    px(g,x+w/2-1,y+5,3,1,C.gold); px(g,x+w/2-1,y+10,3,1,C.gold);
+  } else if(f.k==="plant"){
+    px(g,x+5,y+7,6,8,C.soil); px(g,x+5,y+7,6,1,"#8A6A4A");
+    px(g,x+6,y-4,4,11,C.leafD); px(g,x+3,y-2,4,5,C.leaf); px(g,x+9,y-5,4,5,C.leaf);
+    px(g,x+5,y-8,6,5,C.leaf); px(g,x+7,y-9,3,3,C.leafD);
+  }
+}
+
+function drawChar(g,a,x,y,dir,frame,seated,dim){
+  if(dim) g.globalAlpha=.42;
+  var pal={K:C.ink,M:a.m,D:a.d,W:C.paper,L:C.paper};
+  var lift=seated?4:0;
+  var sx=Math.round(x)-4, sy=Math.round(y)-16-lift;
+  if(seated){
+    px(g,sx-2,sy+7,13,11,"#3B4B57"); px(g,sx-1,sy+8,11,9,"#61798C");
+    px(g,sx-2,sy+7,13,1,C.ink); px(g,sx-2,sy+17,13,1,C.ink);
+  }else{
+    g.globalAlpha=(dim?.42:1)*.20; px(g,sx+1,Math.round(y)-1,7,2,"#000000"); g.globalAlpha=dim?.42:1;
+  }
+  var hx=sx+(dir==="left"?-1:(dir==="right"?1:0));
+  stamp(g,a.head,hx,sy,pal);
+  stamp(g,BODY,sx,sy+9,pal);
+  if(!seated) stamp(g,FEET[frame],sx,sy+14,pal);
+  if(dir==="up"){ g.globalAlpha=(dim?.42:1)*.22; px(g,hx,sy,9,9,"#000000"); g.globalAlpha=dim?.42:1; }
+  g.globalAlpha=1;
+}
+
+function Agent(def,i){
+  this.def=def; this.i=i;
+  this.r=ROWS-1; this.c=(i%2===0)?10:11;
+  this.x=this.c*T+8; this.y=this.r*T+16;
+  this.path=null; this.pi=0; this.dir="up"; this.frame=1; this.anim=0;
+  this.seated=false; this.wait=0; this.goal="seat"; this.status="PENDING";
+}
+Agent.prototype.navigate=function(rr,cc,goal){
+  var p=astar(this.r,this.c,rr,cc);
+  if(p){ this.path=p; this.pi=0; this.seated=false; this.goal=goal||this.goal; }
+};
+Agent.prototype.atSeat=function(){ return this.r===this.def.seat.r&&this.c===this.def.seat.c&&!this.path; };
+Agent.prototype.snapToSeat=function(){
+  this.r=this.def.seat.r; this.c=this.def.seat.c;
+  this.x=this.c*T+8; this.y=this.r*T+16;
+  this.path=null; this.seated=true; this.dir="down";
+};
+Agent.prototype.update=function(dt){
+  var SP=42;
+  if(this.path && this.pi<this.path.length){
+    var wp=this.path[this.pi], tx=wp.c*T+8, ty=wp.r*T+16;
+    var dx=tx-this.x, dy=ty-this.y, dist=Math.sqrt(dx*dx+dy*dy), step=SP*dt/1000;
+    if(dist<=step+0.5){ this.x=tx; this.y=ty; this.r=wp.r; this.c=wp.c; this.pi++; }
+    else{ this.x+=dx/dist*step; this.y+=dy/dist*step; }
+    this.dir = Math.abs(dx)>=Math.abs(dy) ? (dx>0?"right":"left") : (dy>0?"down":"up");
+    this.anim+=dt; this.frame=Math.floor(this.anim/130)%4;
+    if(this.pi>=this.path.length){ this.path=null; this.onArrive(); }
+    return;
+  }
+  this.frame=1;
+  if(this.atSeat()){ this.seated=true; this.dir="down"; }
+  if(this.wait>0){ this.wait-=dt; return; }
+  if(this.goal==="errand"){ this.goal="seat"; this.navigate(this.def.seat.r,this.def.seat.c,"seat"); return; }
+  if(!REDUCED && this.seated && scene.active!==this.i && scene.alive && Math.random()<0.0016){
+    var tries=0;
+    while(tries++<14){
+      var nr=this.r+(Math.floor(Math.random()*9)-4), nc=this.c+(Math.floor(Math.random()*13)-6);
+      if(nc>=1&&nc<=21&&nr>=3&&nr<=18&&walkable(nr,nc)){ this.goal="errand"; this.navigate(nr,nc,"errand"); break; }
+    }
+  }
+};
+Agent.prototype.onArrive=function(){
+  if(this.goal==="errand"){ this.wait=900+Math.random()*900; }
+  else{ this.seated=this.atSeat(); this.dir="down"; }
+};
+
+function Token(fromR,fromC,toR,toC,color,done){
+  this.path=astar(fromR,fromC,toR,toC)||[];
+  this.pi=0; this.x=fromC*T+8; this.y=fromR*T+16; this.col=color; this.done=done; this.dead=false;
+}
+Token.prototype.update=function(dt){
+  if(this.pi>=this.path.length){ this.dead=true; if(this.done) this.done(); return; }
+  var wp=this.path[this.pi], tx=wp.c*T+8, ty=wp.r*T+16;
+  var dx=tx-this.x, dy=ty-this.y, dist=Math.sqrt(dx*dx+dy*dy), step=118*dt/1000;
+  if(dist<=step+0.5){ this.x=tx; this.y=ty; this.pi++; }
+  else{ this.x+=dx/dist*step; this.y+=dy/dist*step; }
+};
+Token.prototype.draw=function(g){
+  var bobY=Math.round(this.y)-14+Math.round(Math.sin(scene.t/170)*1.5), x=Math.round(this.x)-4;
+  g.globalAlpha=.18; px(g,x+1,Math.round(this.y)-1,7,2,"#000000"); g.globalAlpha=1;
+  px(g,x,bobY,9,10,C.ink); px(g,x+1,bobY+1,7,8,C.paper);
+  px(g,x+2,bobY+3,5,1,C.paperD); px(g,x+2,bobY+5,5,1,C.paperD);
+  px(g,x+1,bobY+1,7,2,this.col);
+};
+
+var scene={t:0,active:-1,qaTicks:0,tray:0,progress:0,alive:false,jobFailed:false,unwired:[]};
+var agents=[], tokens=[];
+
+var Scene={
+  reset:function(walkIn){
+    agents=AGENTS.map(function(d,i){ return new Agent(d,i); });
+    tokens=[]; scene.active=-1; scene.qaTicks=0; scene.progress=0;
+    scene.jobFailed=false; scene.alive=true;
+    if(walkIn && !REDUCED){
+      agents.forEach(function(a,i){ setTimeout(function(){ a.navigate(a.def.seat.r,a.def.seat.c,"seat"); },i*560); });
+    }else{
+      agents.forEach(function(a){ a.snapToSeat(); });
+    }
+  },
+  activate:function(i){
+    scene.active=i;
+    if(i===2) scene.qaTicks=0;
+    var a=agents[i], d=AGENTS[i];
+    if(d && d.errand && !REDUCED && a){ a.goal="errand"; a.navigate(d.errand.r,d.errand.c,"errand"); }
+  },
+  idle:function(){ scene.active=-1; },
+  handoff:function(from,to,done){
+    var f=AGENTS[from].seat, t=AGENTS[to].seat;
+    scene.active=-1;
+    tokens.push(new Token(f.r,f.c,t.r,t.c,AGENTS[from].m,done));
+  },
+  deliver:function(from,done){
+    var f=AGENTS[from].seat;
+    scene.active=-1;
+    tokens.push(new Token(f.r,f.c,7,28,AGENTS[from].m,function(){ scene.tray++; if(done) done(); }));
+  },
+  rework:function(from,to,done){
+    var f=AGENTS[from].seat, t=AGENTS[to].seat;
+    scene.active=-1;
+    tokens.push(new Token(f.r,f.c,t.r,t.c,"#A8443C",done));
+  },
+  setProgress:function(p){ scene.progress=p; },
+  setUnwired:function(list){ scene.unwired=list||[]; },
+  fail:function(){ scene.jobFailed=true; scene.active=-1; },
+  clearTray:function(){ scene.tray=0; }
+};
+
+var App={
+  mode:"demo", base:"", adapter:"", jobId:null, es:null,
+  t0:0, running:false, artifacts:0, jobState:"IDLE", demoTimer:null, demoStage:-1, demoT:0
+};
+
+var el=function(id){ return document.getElementById(id); };
+var tickerEl=el("ticker"), rosterEl=el("roster");
+function say(m){ tickerEl.textContent=m; }
+
+var STATE_CLASS={ RESEARCHING:"run", DRAFTING:"run", QA_REVIEW:"wait", REWORK:"wait",
+  APPROVED:"ok", FAILED:"bad", NEW:"run", IDLE:"" };
+var AGENT_LABEL={ PENDING:"대기", RUNNING:"작업 중", COMPLETED:"완료", WAITING_HUMAN:"사람 대기",
+  REWORK_REQUIRED:"재작업", FAILED:"실패", UNWIRED:"미연결" };
+var AGENT_CLASS={ PENDING:"", RUNNING:"run", COMPLETED:"ok", WAITING_HUMAN:"wait",
+  REWORK_REQUIRED:"wait", FAILED:"bad", UNWIRED:"" };
+
+function setState(s){ App.jobState=s; }
+function setProgress(p){ Scene.setProgress(p); }
+
+function paintDash(){
+  var b=el("tState"); b.textContent=App.jobState;
+  b.className="badge "+(STATE_CLASS[App.jobState]||"");
+  var pct=Math.round(scene.progress*100);
+  el("tPct").textContent=pct+"%"; el("tBar").style.width=pct+"%";
+  el("tArt").textContent=String(App.artifacts);
+  el("tTray").textContent=String(scene.tray);
+  el("tJob").textContent=App.jobId||"—";
+  var end=App.running?Date.now():(App.tEnd||App.t0);
+  var secs=App.t0?Math.max(0,Math.floor((end-App.t0)/1000)):0;
+  el("tElapsed").textContent=Math.floor(secs/60)+":"+String(secs%60).padStart(2,"0");
+}
+
+function paintRoster(){
+  Array.prototype.forEach.call(rosterEl.children,function(node,i){
+    if(i<AGENTS.length){
+      node.classList.toggle("on",scene.active===i);
+      var unwired=scene.unwired.indexOf(i)>=0;
+      node.classList.toggle("dim",unwired);
+      var st=unwired?"UNWIRED":(agents[i]?agents[i].status:"PENDING");
+      var chip=node.querySelector(".st .badge");
+      chip.textContent=AGENT_LABEL[st]||st;
+      chip.className="badge "+(AGENT_CLASS[st]||"");
+    }else{
+      var chip2=node.querySelector(".st .badge");
+      chip2.textContent=scene.tray>0?("결재 대기 "+scene.tray):"비어 있음";
+      chip2.className="badge "+(scene.tray>0?"wait":"");
+    }
+  });
+}
+
+function buildRoster(){
+  AGENTS.forEach(function(d,i){
+    var node=document.createElement("div");
+    node.className="seat"; node.style.setProperty("--k",d.m);
+    var ic=document.createElement("canvas"); ic.width=27; ic.height=27; ic.setAttribute("aria-hidden","true");
+    var g=ic.getContext("2d"); g.imageSmoothingEnabled=false; g.setTransform(3,0,0,3,0,0);
+    stamp(g,d.head,0,0,{K:C.ink,M:d.m,D:d.d,W:C.paper,L:C.paper});
+    node.appendChild(ic);
+    var box=document.createElement("div");
+    box.innerHTML='<div class="nm"></div><div class="rl"></div><div class="st"><span class="badge"></span></div>';
+    box.querySelector(".nm").textContent=(i+1)+". "+d.name;
+    box.querySelector(".rl").textContent=d.role;
+    node.appendChild(box); rosterEl.appendChild(node);
+  });
+  var h=document.createElement("div");
+  h.className="seat head"; h.style.setProperty("--k",C.gold);
+  var hc=document.createElement("canvas"); hc.width=27; hc.height=27; hc.setAttribute("aria-hidden","true");
+  var hg=hc.getContext("2d"); hg.imageSmoothingEnabled=false; hg.setTransform(3,0,0,3,0,0);
+  px(hg,0,2,9,5,C.metalD); px(hg,0,2,9,1,C.metal); px(hg,1,0,7,2,C.paper); px(hg,0,7,9,2,C.ink);
+  h.appendChild(hc);
+  var hb=document.createElement("div");
+  hb.innerHTML='<div class="nm">Head Director</div><div class="rl">최종 승인 · 사용자 본인</div><div class="st"><span class="badge"></span></div>';
+  h.appendChild(hb); rosterEl.appendChild(h);
+}
+
+function showApprove(on){ el("approveBar").hidden=!on; }
+
+var DEMO_DUR=[5200,3400,3400,5200,3400];
+function demoStart(){
+  App.demoStage=-1; App.demoT=0;
+  setState("RESEARCHING");
+  setTimeout(function(){ demoAdvance(0); }, REDUCED?0:3200);
+  say("출근 — 다섯 에이전트가 각자 자리로 향합니다.");
+}
+function demoAdvance(i){
+  if(App.mode!=="demo"||!App.running) return;
+  App.demoStage=i; App.demoT=0;
+  agents.forEach(function(a,j){ a.status = j===i?"RUNNING":(j<i?"COMPLETED":"PENDING"); });
+  Scene.activate(i);
+  setState(i===0?"RESEARCHING":(i===1?"DRAFTING":(i===2?"QA_REVIEW":"PUBLISHING")));
+  setProgress(0.08+i*0.16);
+  say(AGENTS[i].name+"이(가) "+AGENTS[i].verb+".");
+}
+function demoTick(dt){
+  if(App.mode!=="demo"||!App.running||App.demoStage<0) return;
+  App.demoT+=dt;
+  var i=App.demoStage;
+  if(i===2) scene.qaTicks=Math.min(4,Math.floor(App.demoT/700));
+  if(App.demoT>DEMO_DUR[i]){
+    App.demoStage=-1;
+    agents[i].status="COMPLETED";
+    App.artifacts++;
+    setProgress(0.08+i*0.16+0.10);
+    if(i<AGENTS.length-1){
+      say(AGENTS[i].name+" → "+AGENTS[i+1].name+" 산출물 전달 중");
+      Scene.handoff(i,i+1,function(){ demoAdvance(i+1); });
+    }else{
+      say(AGENTS[i].name+" → Head Director 결재함으로 배달 중");
+      Scene.deliver(i,function(){
+        App.running=false; App.tEnd=Date.now();
+        setState("QA_REVIEW"); setProgress(0.9);
+        agents.forEach(function(a){ a.status="COMPLETED"; });
+        say("Head Director 결재함에 도착 — 최종 승인은 사용자가 직접 합니다.");
+        showApprove(true);
+      });
+    }
+  }
+}
+
+function liveAgentStatus(agentId,status,detail){
+  var i=BACKEND_TO_IDX[agentId];
+  if(i==null||!agents[i]) return;
+  agents[i].status=status;
+  if(status==="RUNNING"){ Scene.activate(i); say(AGENTS[i].name+"이(가) "+AGENTS[i].verb+"."+(detail?" ("+detail+")":"")); }
+  if(status==="COMPLETED"){
+    if(scene.active===i) Scene.idle();
+    if(i===2) scene.qaTicks=4;
+  }
+  if(status==="FAILED"){ Scene.fail(); }
+}
+
+var LIVE_PROGRESS={ NEW:0.04, RESEARCHING:0.14, DRAFTING:0.40, QA_REVIEW:0.66, REWORK:0.5, APPROVED:1, FAILED:0 };
+
+function liveEvent(type,ev){
+  var d=ev.data||{};
+  if(type==="job.created"){
+    App.artifacts=0; setState("NEW"); setProgress(LIVE_PROGRESS.NEW);
+    say("Job 생성됨 — 어댑터 "+(d.adapter||"?"));
+  } else if(type==="agent.status.changed"){
+    liveAgentStatus(d.agent_id,d.status,d.detail);
+  } else if(type==="job.transition"){
+    setState(d.to);
+    if(LIVE_PROGRESS[d.to]!=null) setProgress(LIVE_PROGRESS[d.to]);
+    if(d.to==="DRAFTING") Scene.handoff(0,1,function(){});
+    if(d.to==="QA_REVIEW") Scene.handoff(1,2,function(){});
+    if(d.to==="REWORK"){ say("QA 게이트 실패 — 문서 작성자에게 반송되었습니다."); Scene.rework(2,1,function(){}); }
+    if(d.to==="FAILED"){ Scene.fail(); say("작업 실패: "+(d.reason||"")); App.running=false; App.tEnd=Date.now(); }
+    if(d.to==="APPROVED"){ setProgress(1); App.running=false; App.tEnd=Date.now(); say("승인 완료 — Job "+App.jobId+" 이 APPROVED 상태입니다."); }
+  } else if(type==="artifact.created"){
+    App.artifacts++; say("아티팩트 생성: "+d.artifact_id+" ("+d.artifact_type+")");
+  } else if(type==="approval.required"){
+    setProgress(0.88); setState("QA_REVIEW");
+    Scene.deliver(2,function(){
+      say("QA PASS — 결재함에 도착했습니다. 최종 승인은 사용자가 직접 합니다.");
+      showApprove(true);
+    });
+  } else if(type==="approval.decided"){
+    showApprove(false);
+    say("사람 결정 기록됨: "+d.decision);
+    if(d.decision==="approved") Scene.clearTray();
+  } else if(type==="job.failed"){
+    Scene.fail(); setState("FAILED");
+    say("실패 코드 "+(d.code||"?")+": "+(d.message||""));
+    App.running=false; App.tEnd=Date.now();
+  }
+}
+
+var LIVE_TYPES=["job.created","agent.status.changed","job.transition","artifact.created",
+                "approval.required","approval.decided","job.failed"];
+
+function openStream(jobId){
+  if(App.es){ App.es.close(); App.es=null; }
+  var es=new EventSource(App.base+"/api/jobs/"+jobId+"/events");
+  LIVE_TYPES.forEach(function(t){
+    es.addEventListener(t,function(e){
+      var parsed; try{ parsed=JSON.parse(e.data); }catch(err){ return; }
+      liveEvent(t,parsed);
+    });
+  });
+  es.onerror=function(){ say("이벤트 스트림이 끊겼습니다. 런타임이 살아 있는지 확인하세요."); };
+  App.es=es;
+}
+
+function setMode(mode,adapter){
+  App.mode=mode; App.adapter=adapter||"";
+  var led=el("led"), label=el("rtLabel"), hint=el("promptHint");
+  if(mode==="live"){
+    led.className="led live";
+    label.textContent="LIVE · "+App.adapter;
+    hint.textContent="런타임 연결됨 — Poster와 Proofreader는 백엔드에 없어 미연결로 표시됩니다.";
+    Scene.setUnwired([3,4]);
+  }else{
+    led.className="led";
+    label.textContent="데모 모드";
+    hint.textContent="데모 모드 — 실제 모델 호출 없이 층의 동작만 재생합니다.";
+    Scene.setUnwired([]);
+  }
+  paintRoster();
+}
+
+el("rtConnect").addEventListener("click",function(){
+  var base=el("rtUrl").value.trim().replace(/\/+$/,"");
+  if(!base) return;
+  say("런타임에 연결하는 중…");
+  fetch(base+"/health").then(function(res){
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    return res.json();
+  }).then(function(h){
+    App.base=base; setMode("live",h.adapter);
+    try{ localStorage.setItem("kpo.runtime",base); }catch(e){}
+    say("런타임 연결됨 — 어댑터 "+h.adapter+(h.live_model?" (실모델)":" (재생)"));
+  }).catch(function(err){
+    el("led").className="led err";
+    setMode("demo");
+    say("연결 실패: "+err.message+" — 데모 모드로 계속합니다. CORS 허용 origin과 포트를 확인하세요.");
+  });
+});
+
+el("promptForm").addEventListener("submit",function(e){
+  e.preventDefault();
+  var text=el("promptInput").value.trim();
+  if(!text){ say("요청 내용을 입력해 주세요."); el("promptInput").focus(); return; }
+  showApprove(false);
+  App.artifacts=0; App.jobId=null; App.t0=Date.now(); App.tEnd=0; App.running=true;
+  Scene.reset(true); Scene.clearTray();
+  agents.forEach(function(a){ a.status="PENDING"; });
+  el("btnRun").disabled=true;
+  if(App.mode==="live"){
+    setState("NEW"); say("런타임에 Job을 생성하는 중…");
+    fetch(App.base+"/api/jobs",{ method:"POST", headers:{"content-type":"application/json"},
+      body:JSON.stringify({request:text}) })
+      .then(function(res){ return res.json().then(function(b){ if(!res.ok) throw new Error(b.error?b.error.message:("HTTP "+res.status)); return b; }); })
+      .then(function(b){ App.jobId=b.job_id; openStream(b.job_id); say("Job "+b.job_id+" 시작됨."); })
+      .catch(function(err){ App.running=false; App.tEnd=Date.now(); setState("FAILED"); Scene.fail(); say("Job 생성 실패: "+err.message); })
+      .then(function(){ el("btnRun").disabled=false; });
+  }else{
+    App.jobId="DEMO-"+String(Date.now()).slice(-8);
+    demoStart();
+    el("btnRun").disabled=false;
+  }
+});
+
+el("btnReset").addEventListener("click",function(){
+  if(App.es){ App.es.close(); App.es=null; }
+  App.running=false; App.jobId=null; App.artifacts=0; App.t0=0; App.tEnd=0; App.demoStage=-1;
+  setState("IDLE"); showApprove(false);
+  Scene.reset(false); Scene.clearTray(); setProgress(0);
+  agents.forEach(function(a){ a.status="PENDING"; });
+  say("초기화했습니다. 요청을 입력하면 다시 시작합니다.");
+});
+
+function decide(decision){
+  if(App.mode!=="live"){
+    var n=scene.tray; Scene.clearTray(); showApprove(false);
+    setState(decision==="approved"?"APPROVED":"REWORK");
+    setProgress(decision==="approved"?1:0.5);
+    say(decision==="approved" ? ("승인 완료 — "+n+"건을 결재했습니다.") : "반려했습니다. 문서 작성자에게 돌아갑니다.");
+    return;
+  }
+  var actor=el("actorId").value.trim();
+  if(!actor){ say("검토자 ID를 입력해야 결재를 기록할 수 있습니다."); el("actorId").focus(); return; }
+  el("btnApprove").disabled=true; el("btnReject").disabled=true;
+  fetch(App.base+"/api/jobs/"+App.jobId+"/approval",{ method:"POST",
+    headers:{"content-type":"application/json"},
+    body:JSON.stringify({decision:decision,actor_id:actor,comment:""}) })
+    .then(function(res){ return res.json().then(function(b){ if(!res.ok) throw new Error(b.error?b.error.message:("HTTP "+res.status)); return b; }); })
+    .then(function(){ showApprove(false); })
+    .catch(function(err){ say("결재 기록 실패: "+err.message); })
+    .then(function(){ el("btnApprove").disabled=false; el("btnReject").disabled=false; });
+}
+el("btnApprove").addEventListener("click",function(){ decide("approved"); });
+el("btnReject").addEventListener("click",function(){ decide("rejected"); });
+
+var last=0, dashAcc=0;
+function loop(ts){
+  if(!last) last=ts;
+  var dt=Math.min(ts-last,50); last=ts;
+  scene.t+=dt;
+  if(!bg) buildBG();
+  demoTick(dt);
+  agents.forEach(function(a){ a.update(dt); });
+  for(var i=tokens.length-1;i>=0;i--){ tokens[i].update(dt); if(tokens[i].dead) tokens.splice(i,1); }
+
+  ctx.clearRect(0,0,W,HH);
+  ctx.drawImage(bg,0,0);
+  drawBoard(ctx);
+
+  var items=[];
+  FURN.forEach(function(f){ items.push({y:f.r*T+16,kind:"f",v:f}); });
+  agents.forEach(function(a){ items.push({y:a.y,kind:"a",v:a}); });
+  tokens.forEach(function(t){ items.push({y:t.y,kind:"t",v:t}); });
+  items.sort(function(p,q){ return p.y-q.y; });
+  items.forEach(function(it){
+    if(it.kind==="f") drawFurn(ctx,it.v);
+    else if(it.kind==="a") drawChar(ctx,it.v.def,it.v.x,it.v.y,it.v.dir,it.v.frame,
+      it.v.seated&&!it.v.path, scene.unwired.indexOf(it.v.i)>=0);
+    else it.v.draw(ctx);
+  });
+
+  agents.forEach(function(a){
+    if(scene.active===a.i){
+      var by=Math.round(a.y)-24+Math.round(Math.sin(scene.t/240)*1.2), bx=Math.round(a.x)-3;
+      px(ctx,bx,by,7,7,a.def.m); px(ctx,bx+1,by+1,5,5,C.paper);
+      px(ctx,bx+2,by+3,3,1,a.def.d); px(ctx,bx+2,by+2,1,3,a.def.d); px(ctx,bx+3,by+7,2,2,a.def.m);
+    }
+  });
+
+  if(scene.tray>0){
+    var pulse=(Math.sin(scene.t/300)+1)/2, tx=28*T-14, ty=6*T-22;
+    ctx.globalAlpha=.55+pulse*.45;
+    px(ctx,tx,ty,30,9,C.gold); px(ctx,tx+1,ty+1,28,7,"#3A2F14");
+    ctx.globalAlpha=1;
+    px(ctx,tx+3,ty+3,3,3,C.gold); px(ctx,tx+8,ty+3,18,1,C.gold); px(ctx,tx+8,ty+5,13,1,C.gold);
+  }
+
+  dashAcc+=dt;
+  if(dashAcc>250){ dashAcc=0; paintDash(); paintRoster(); }
+  requestAnimationFrame(loop);
+}
+
+buildRoster();
+fit();
+try{ var saved=localStorage.getItem("kpo.runtime"); if(saved) el("rtUrl").value=saved; }catch(e){}
+setMode("demo");
+Scene.reset(false);
+scene.alive=true;
+setState("IDLE");
+paintDash(); paintRoster();
+requestAnimationFrame(loop);
+})();
+</script>
