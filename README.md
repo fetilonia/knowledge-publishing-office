@@ -1,5 +1,7 @@
 # Knowledge Publishing Office
 
+**https://fetilonia.github.io/knowledge-publishing-office/**
+
 에이전트 파이프라인의 진행 상태를 픽셀 사무실로 보여주는 정적 프론트엔드다. 의존성이 없는 단일 HTML 파일이며, 빌드 단계가 없다.
 
 요청을 입력하면 에이전트가 자리에서 일하고, 산출물이 책상 사이를 건너다니다가, 파티션 너머 Head Director 결재함에 도착한다. 그 의자는 비어 있다 — 최종 승인은 사람이 한다.
@@ -22,7 +24,7 @@ node runtime/backend/server.mjs
 이 페이지의 origin을 런타임 허용 목록에 추가해야 한다.
 
 ```bash
-RUNTIME_ALLOWED_ORIGINS=https://<owner>.github.io node runtime/backend/server.mjs
+RUNTIME_ALLOWED_ORIGINS=https://fetilonia.github.io node runtime/backend/server.mjs
 ```
 
 그다음 상단 바에 런타임 주소(`http://127.0.0.1:8787`)를 넣고 **런타임 연결**을 누른다. 주소는 브라우저 localStorage에 저장된다.
