@@ -317,10 +317,10 @@ var AGENTS=[
    deskR:4,deskC:14,seat:{r:3,c:15},errand:null,backend:"qa-critic",
    verb:"기술 정확성과 출처 추적성을 검증합니다"},
   {key:"poster",name:"Poster",role:"Notion 게시",head:HEAD_PLN,m:"#7A62B6",d:"#554189",l:"#9C86D6",
-   deskR:11,deskC:2,seat:{r:10,c:3},errand:{r:15,c:15},backend:null,
+   deskR:11,deskC:2,seat:{r:10,c:3},errand:{r:15,c:15},backend:"poster",
    verb:"검수를 통과한 문서를 Notion에 올립니다"},
   {key:"proofreader",name:"Proofreader",role:"포맷·이미지 검토",head:HEAD_GLS,m:"#B5514A",d:"#853934",l:"#D4756D",
-   deskR:11,deskC:8,seat:{r:10,c:9},errand:null,backend:null,
+   deskR:11,deskC:8,seat:{r:10,c:9},errand:null,backend:"proofreader",
    verb:"문장 구조와 이미지 삽입 상태를 훑습니다"}
 ];
 var BACKEND_TO_IDX={};
@@ -820,8 +820,11 @@ function syncBubbles(){
   }
 }
 
-var STATE_CLASS={ RESEARCHING:"run", DRAFTING:"run", QA_REVIEW:"wait", REWORK:"wait",
-  APPROVED:"ok", FAILED:"bad", NEW:"run", IDLE:"" };
+// job-state 스키마의 10개 상태를 모두 덮는다. 빠진 상태가 있으면 배지와 진행률이
+// 그 구간에서 멈춘 것처럼 보인다. PROOFREADING 은 QA 앞의 필수 관문이다.
+var STATE_CLASS={ NEW:"run", RESEARCHING:"run", DRAFTING:"run", PROOFREADING:"run",
+  QA_REVIEW:"wait", REWORK:"wait", APPROVED:"ok", PUBLISHING:"run", PUBLISHED:"ok",
+  FAILED:"bad", IDLE:"" };
 var AGENT_LABEL={ PENDING:"대기", RUNNING:"작업 중", COMPLETED:"완료", WAITING_HUMAN:"사람 대기",
   REWORK_REQUIRED:"재작업", FAILED:"실패", UNWIRED:"미연결" };
 var AGENT_CLASS={ PENDING:"", RUNNING:"run", COMPLETED:"ok", WAITING_HUMAN:"wait",
@@ -968,7 +971,9 @@ function liveAgentStatus(agentId,status,detail){
   if(status==="PENDING") setTask(i,null);
 }
 
-var LIVE_PROGRESS={ NEW:0.04, RESEARCHING:0.14, DRAFTING:0.40, QA_REVIEW:0.66, REWORK:0.5, APPROVED:1, FAILED:0 };
+// APPROVED 는 더 이상 종착점이 아니다. 게시까지 남아 있으므로 1.0 을 주지 않는다.
+var LIVE_PROGRESS={ NEW:0.04, RESEARCHING:0.14, DRAFTING:0.36, PROOFREADING:0.52,
+  QA_REVIEW:0.66, REWORK:0.50, APPROVED:0.86, PUBLISHING:0.94, PUBLISHED:1, FAILED:0 };
 
 function liveEvent(type,ev){
   var d=ev.data||{};
@@ -984,16 +989,22 @@ function liveEvent(type,ev){
       d.to==="FAILED"?"bad":(d.to==="APPROVED"?"ok":(d.to==="REWORK"?"wait":"run")));
     if(LIVE_PROGRESS[d.to]!=null) setProgress(LIVE_PROGRESS[d.to]);
     if(d.to==="DRAFTING") Scene.handoff(0,1,function(){});
-    if(d.to==="QA_REVIEW") Scene.handoff(1,2,function(){});
+    if(d.to==="PROOFREADING") Scene.handoff(1,4,function(){});   // Documentor → Proofreader
+    if(d.to==="QA_REVIEW") Scene.handoff(4,2,function(){});      // Proofreader → Technical QA
+    if(d.to==="PUBLISHING"){ Scene.handoff(2,3,function(){}); say("승인 완료 — Poster 가 게시합니다."); }
+    if(d.to==="PUBLISHED"){
+      setProgress(1); App.running=false; App.tEnd=Date.now();
+      agents.forEach(function(a){ a.setTask(null); });
+      say("게시 완료 — Job "+App.jobId+" 이 PUBLISHED 상태입니다.");
+    }
     if(d.to==="REWORK"){
       say("QA 게이트 실패 — 문서 작성자에게 반송되었습니다."); Scene.rework(2,1,function(){});
       setTask(2,null); setTask(1,"QA 지적사항을 반영해 다시 씁니다.","wait");
     }
     if(d.to==="FAILED"){ Scene.fail(); say("작업 실패: "+(d.reason||"")); App.running=false; App.tEnd=Date.now(); }
     if(d.to==="APPROVED"){
-      setProgress(1); App.running=false; App.tEnd=Date.now();
       agents.forEach(function(a){ a.setTask(null); });
-      say("승인 완료 — Job "+App.jobId+" 이 APPROVED 상태입니다.");
+      say("승인 완료 — 게시를 기다립니다. Job "+App.jobId);
     }
   } else if(type==="artifact.created"){
     App.artifacts++; App.artifactList.push({id:d.artifact_id,type:d.artifact_type});
@@ -1033,14 +1044,33 @@ function openStream(jobId){
   App.es=es;
 }
 
-function setMode(mode,adapter){
-  App.mode=mode; App.adapter=adapter||"";
+// 어떤 자리가 미연결인지 하드코딩하지 않는다. 런타임이 /health 로 보고한 agent 목록과
+// 대조해 없는 것만 흐리게 표시한다. 목록을 주지 않으면 알 수 없으므로 그렇게 밝힌다.
+function unwiredFrom(health){
+  var list = health && Array.isArray(health.agents) ? health.agents : null;
+  if(!list) return null;
+  var out=[];
+  AGENTS.forEach(function(d,i){ if(list.indexOf(d.backend)<0) out.push(i); });
+  return out;
+}
+function setMode(mode,health){
+  health = (typeof health==="string") ? {adapter:health} : (health||{});
+  App.mode=mode; App.adapter=health.adapter||"";
   var led=el("led"), label=el("rtLabel"), hint=el("promptHint");
   if(mode==="live"){
     led.className="led live";
     label.textContent="LIVE · "+App.adapter;
-    hint.textContent="런타임 연결됨 — Poster와 Proofreader는 백엔드에 없어 미연결로 표시됩니다.";
-    Scene.setUnwired([3,4]);
+    var unwired=unwiredFrom(health);
+    if(unwired===null){
+      hint.textContent="런타임 연결됨 — /health 가 agent 목록을 보고하지 않아 연결 여부를 확인할 수 없습니다.";
+      Scene.setUnwired([]);
+    }else if(unwired.length){
+      hint.textContent="런타임 연결됨 — 미연결: "+unwired.map(function(i){ return AGENTS[i].name; }).join(", ");
+      Scene.setUnwired(unwired);
+    }else{
+      hint.textContent="런타임 연결됨 — 6단계 전 구간이 연결되어 있습니다.";
+      Scene.setUnwired([]);
+    }
   }else{
     led.className="led";
     label.textContent="데모 모드";
@@ -1058,7 +1088,7 @@ el("rtConnect").addEventListener("click",function(){
     if(!res.ok) throw new Error("HTTP "+res.status);
     return res.json();
   }).then(function(h){
-    App.base=base; setMode("live",h.adapter);
+    App.base=base; setMode("live",h);
     try{ localStorage.setItem("kpo.runtime",base); }catch(e){}
     say("런타임 연결됨 — 어댑터 "+h.adapter+(h.live_model?" (실모델)":" (재생)"));
   }).catch(function(err){
