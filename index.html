@@ -1,3 +1,10 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="지식 퍼블리싱 에이전트 파이프라인을 픽셀 오피스로 보여 주는 정적 콘솔. 데모 모드로 재생하거나 런타임에 SSE로 연결한다.">
 <title>Knowledge Publishing Office — Console</title>
 <style>
 :root{
@@ -50,8 +57,97 @@ h1{ margin:.3rem 0 0; font-size:28px; font-weight:500; letter-spacing:-.01em; }
 .badge.wait{ background:rgba(176,122,34,.16); color:var(--warn); }
 .badge.bad{ background:rgba(168,68,60,.16); color:var(--bad); }
 
-.stage{ background:var(--shell); border-radius:16px; padding:12px; align-self:center; max-width:100%; }
+.stage{ background:var(--shell); border-radius:16px; padding:12px; align-self:center; max-width:100%; position:relative; }
 canvas#office{ display:block; image-rendering:pixelated; border-radius:6px; max-width:100%; height:auto; }
+
+.bubbles{ position:absolute; left:0; top:0; width:0; height:0; pointer-events:none; }
+.bub{ position:absolute; left:0; top:0; width:max-content; max-width:var(--bw,160px);
+  padding:5px 8px 6px; background:var(--card); color:var(--ink);
+  border:1px solid var(--line); border-left:3px solid var(--k,var(--accent)); border-radius:8px;
+  box-shadow:0 2px 0 rgba(0,0,0,.3); font-size:11.5px; line-height:1.45;
+  opacity:0; transform:translate(-50%,-100%); transition:opacity .18s ease; }
+.bub.show{ opacity:1; }
+.bub::after{ content:""; position:absolute; left:50%; bottom:-4px; margin-left:-4px;
+  width:8px; height:5px; background:var(--card); clip-path:polygon(0 0,100% 0,50% 100%); }
+.bub.below::after{ top:-4px; bottom:auto; clip-path:polygon(50% 0,100% 100%,0 100%); }
+.bub .who{ display:block; font-size:10px; font-weight:600; letter-spacing:.04em;
+  color:var(--k,var(--accent)); margin-bottom:1px; }
+.bub .what{ display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.bub.ok{ border-left-color:var(--ok); } .bub.ok .who{ color:var(--ok); }
+.bub.wait{ border-left-color:var(--warn); } .bub.wait .who{ color:var(--warn); }
+.bub.bad{ border-left-color:var(--bad); } .bub.bad .who{ color:var(--bad); }
+@media (prefers-reduced-motion: reduce){ .bub{ transition:none; } }
+
+.docmask{ position:fixed; inset:0; z-index:50; background:rgba(0,0,0,.58);
+  display:flex; align-items:center; justify-content:center; padding:1.2rem; }
+.docmask[hidden]{ display:none; }
+/* display를 지정한 요소는 hidden 속성만으로 숨겨지지 않는다. */
+.approve[hidden]{ display:none; }
+.doc{ background:var(--card); border:1px solid var(--line); border-radius:12px;
+  width:min(800px,100%); max-height:86vh; display:flex; flex-direction:column;
+  box-shadow:0 18px 48px rgba(0,0,0,.45); }
+.doc > header{ padding:.85rem 1.1rem; border-bottom:1px solid var(--line); }
+.doc h2{ margin:0; font-size:15px; font-weight:500; }
+.doc .meta{ margin:.3rem 0 0; font-size:11.5px; color:var(--muted); }
+.doc .body{ padding:1rem 1.1rem; overflow:auto; font-size:13px; line-height:1.75;
+  word-break:break-word; }
+.doc .body.raw{ white-space:pre-wrap; }
+.doc .body h1,.doc .body h2,.doc .body h3{ margin:1.1em 0 .4em; font-weight:600; line-height:1.4; }
+.doc .body h1{ font-size:1.28em; } .doc .body h2{ font-size:1.12em; } .doc .body h3{ font-size:1em; }
+.doc .body p,.doc .body ul{ margin:.5em 0; } .doc .body ul{ padding-left:1.2em; }
+.doc .body code{ font-family:ui-monospace,"SF Mono",Menlo,monospace; font-size:.9em;
+  background:var(--soft); padding:1px 4px; border-radius:3px; }
+.doc .body pre{ background:var(--soft); padding:.6em .8em; border-radius:6px; overflow-x:auto; }
+.doc .body pre code{ background:none; padding:0; }
+.doc .body hr{ border:0; border-top:1px solid var(--line); margin:1em 0; }
+.doc .body a{ color:var(--accent); }
+.doc figure{ margin:.9em 0; }
+.doc figure img{ display:block; max-width:100%; height:auto; border:1px solid var(--line); border-radius:6px; }
+.doc figcaption{ margin-top:.35em; font-size:11px; color:var(--muted); }
+.doc .imgbad{ border:1px dashed var(--bad); border-radius:6px; padding:.5em .7em;
+  font-size:11.5px; color:var(--bad); }
+.doc .imgchk{ font-size:11.5px; }
+
+.qlist{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:7px; }
+.qitem{ width:100%; text-align:left; display:flex; gap:10px; align-items:center;
+  padding:11px 12px; background:var(--page-bg); color:var(--ink); font:inherit;
+  border:1px solid var(--line); border-left:3px solid var(--warn); border-radius:8px; cursor:pointer; }
+.qitem:hover,.qitem:focus-visible{ border-color:var(--accent); border-left-color:var(--accent); }
+.qitem .qx{ flex:1; min-width:0; }
+.qitem .qn{ display:block; font-size:13px; font-weight:500; line-height:1.45; }
+.qitem .qm{ display:block; font-size:11px; color:var(--muted); margin-top:3px; }
+.qempty{ color:var(--muted); font-size:12.5px; margin:0; }
+#tileTray.clickable{ cursor:pointer; }
+#tileTray.clickable:hover{ border-color:var(--accent); }
+.doc .imgchk.ok{ color:var(--ok); } .doc .imgchk.bad{ color:var(--bad); }
+.doc > footer{ padding:.8rem 1.1rem; border-top:1px solid var(--line);
+  display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; }
+.doc > footer .grow{ flex:1; }
+.doc .hint{ font-size:11.5px; color:var(--muted); }
+
+/* 게시판은 캔버스의 코르크 면 위에 겹치므로 테마 토큰이 아니라 고정색을 쓴다. */
+.histboard{ position:absolute; left:0; top:0; pointer-events:none; overflow:hidden;
+  padding:3px 5px 0; color:#33281D; line-height:1.34; }
+.histboard .hb-t{ margin:0 0 3px; font-size:.92em; font-weight:700;
+  letter-spacing:.08em; color:#6E5940; border-bottom:1px solid #B4946E; padding-bottom:2px; }
+.histboard .hb-i{ display:flex; gap:4px; align-items:flex-start; margin-bottom:3px; }
+.histboard .hb-d{ width:5px; height:5px; border-radius:1px; flex:none; margin-top:.42em; }
+.histboard .hb-x{ flex:1; min-width:0; }
+.histboard .hb-n{ font-weight:700; }
+.histboard .hb-ok .hb-x{ color:#3F5C2E; }
+.histboard .hb-wait .hb-x{ color:#7A5714; }
+.histboard .hb-bad .hb-x{ color:#8A2F28; }
+.histboard .hb-empty{ margin:0; color:#6E5940; }
+/* 캔버스가 좁아지면 코르크 면이 판독 불가가 된다. 그때는 오버레이를 접고
+   스테이지 아래 일반 카드로 떨어뜨린다. */
+.histboard.flat{ position:static; width:auto; height:auto; margin-top:10px;
+  padding:10px 12px; background:var(--card); border:1px solid var(--line);
+  border-radius:8px; color:var(--ink); font-size:12px; overflow:visible; }
+.histboard.flat .hb-t{ color:var(--muted); border-bottom-color:var(--line); }
+.histboard.flat .hb-empty{ color:var(--muted); }
+.histboard.flat .hb-ok .hb-x{ color:var(--ok); }
+.histboard.flat .hb-wait .hb-x{ color:var(--warn); }
+.histboard.flat .hb-bad .hb-x{ color:var(--bad); }
 
 .rail{ display:grid; grid-template-columns:repeat(auto-fit,minmax(172px,1fr)); gap:9px; }
 .seat{ display:flex; gap:10px; align-items:flex-start; padding:10px 11px; background:var(--card);
@@ -95,12 +191,14 @@ button.go:hover:not(:disabled){ opacity:.88; }
 .note{ margin:0; font-size:11.5px; color:var(--muted); line-height:1.65; }
 .note code{ font-family:ui-monospace,Menlo,monospace; font-size:11px; }
 </style>
+</head>
+<body>
 
 <div class="page">
   <header>
     <p class="eyebrow mono">Knowledge publishing runtime &middot; agent floor</p>
     <h1>지식 퍼블리싱 오피스 콘솔</h1>
-    <p class="lede">아래 프롬프트에 요청을 넣으면 층 전체가 움직입니다. 에이전트가 자리에서 일하고, 산출물이 책상 사이를 건너다니며, 마지막엔 파티션 너머 Head Director 결재함에 도착합니다. 그 의자는 비어 있습니다 &mdash; 최종 승인은 사람이 합니다.</p>
+    <p class="lede">아래 프롬프트에 요청을 넣으면 층 전체가 움직입니다. 에이전트가 자리에서 일하고, 산출물이 책상 사이를 건너다니며, 마지막엔 Proofreader 맞은편 Head Director 책상으로 보고가 올라갑니다. 그 의자는 비어 있습니다 &mdash; 최종 승인은 사람이 합니다.</p>
   </header>
 
   <div class="rt">
@@ -117,12 +215,12 @@ button.go:hover:not(:disabled){ opacity:.88; }
     <div class="tile wide"><div class="k mono">진행률</div><div class="v" id="tPct">0%</div><div class="pbar"><i id="tBar"></i></div></div>
     <div class="tile"><div class="k mono">경과</div><div class="v mono" id="tElapsed">0:00</div></div>
     <div class="tile"><div class="k mono">아티팩트</div><div class="v mono" id="tArt">0</div></div>
-    <div class="tile"><div class="k mono">결재 대기</div><div class="v mono" id="tTray">0</div></div>
+    <div class="tile" id="tileTray"><div class="k mono">결재 대기</div><div class="v mono" id="tTray">0</div></div>
     <div class="tile wide"><div class="k mono">Job</div><div class="v sm mono" id="tJob">—</div></div>
   </div>
 
   <div class="stage">
-    <canvas id="office" role="img" aria-label="픽셀 아트 사무실 평면도. 왼쪽 업무 공간의 다섯 책상에서 에이전트가 일하고, 오른쪽 유리 파티션 너머에 비어 있는 Head Director 책상과 결재함이 있습니다."></canvas>
+    <canvas id="office" role="img" aria-label="픽셀 아트 사무실 평면도. 다섯 책상에서 에이전트가 일하고, 아래쪽에는 Proofreader와 마주보는 Head Director 책상과 결재함이 있습니다. 그 의자는 비어 있습니다."></canvas>
   </div>
 
   <div class="rail" id="roster"></div>
@@ -134,8 +232,27 @@ button.go:hover:not(:disabled){ opacity:.88; }
     <span class="grow"></span>
     <label class="sr-only" for="actorId">검토자 ID</label>
     <input id="actorId" placeholder="검토자 ID" spellcheck="false">
-    <button type="button" id="btnApprove">승인</button>
-    <button type="button" id="btnReject">반려</button>
+    <button type="button" class="go" id="btnQueue">결재함 열기</button>
+  </div>
+
+  <div class="docmask" id="docMask" hidden role="dialog" aria-modal="true" aria-labelledby="docTitle">
+    <div class="doc">
+      <header>
+        <h2 id="docTitle">결재 문서 확인</h2>
+        <p class="meta mono" id="docMeta">—</p>
+      </header>
+      <div class="body" id="queueView"><ul class="qlist" id="qList"></ul></div>
+      <div class="body" id="docBody" tabindex="0" hidden>불러오는 중…</div>
+      <footer>
+        <span class="hint" id="docHint">내용을 확인한 뒤 결정하세요. 최종 승인은 사람이 합니다.</span>
+        <span class="imgchk" id="docImgChk">—</span>
+        <span class="grow"></span>
+        <button type="button" id="docBack" hidden>목록으로</button>
+        <button type="button" id="docClose">닫기</button>
+        <button type="button" id="docReject" hidden>반려</button>
+        <button type="button" class="go" id="docApprove" hidden>최종 승인</button>
+      </footer>
+    </div>
   </div>
 
   <form class="prompt" id="promptForm">
@@ -159,45 +276,58 @@ var T=16, COLS=32, ROWS=20, W=COLS*T, HH=ROWS*T;
 var REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 var C={
-  floorA:"#CEC6B4", floorB:"#C6BDAA", grout:"#B7AE9A",
-  wallTop:"#525C66", wallFace:"#78838E", wallCap:"#3F4851", base:"#39424A",
+  floorA:"#C2966A", floorB:"#B68A5E", grout:"#8B6440", grain:"#A97F56",
+  wallTop:"#4A3E32", wallFace:"#8E7C67", wallCap:"#3B3229", base:"#2F2820", mortar:"#6F5F4D",
   ink:"#2A2822", ink2:"#413E36",
   wood:"#B08050", woodD:"#8A6038", woodL:"#C89A64",
   metal:"#909CA5", metalD:"#6A757D",
   paper:"#F3EEE1", paperD:"#D8D1BE",
   screen:"#334B57", screenOff:"#28373F",
   glass:"#A9C9CB", glassD:"#7FA5A8",
-  rug:"#4C5D6D", rugD:"#3D4B58",
-  gold:"#BE9743", leaf:"#4F7B3F", leafD:"#37592B", soil:"#6E5238"
+  rug:"#7E3C3C", rugD:"#68302F", rugTrim:"#C9A227",
+  gold:"#BE9743", leaf:"#4F7B3F", leafD:"#37592B", soil:"#6E5238",
+  skin:"#F5CBA3", eye:"#1F1D19", blush:"#E89494"
 };
 
-var HEAD_MAG=["..KKKKK..",".KMMMMMK.","KMWWWWWMK","KMWLLWWMK","KMWWWWWMK",".KMMMMMK.","..KKKKK..","...KMK...","...KMK..."];
-var HEAD_PEN=["...KKK...","..KMMMK..","..KMMMK..","..KMMMK..","..KMMMK..","..KDDDK..","..KWWWK..","...KWK...","....K...."];
-var HEAD_SHD=[".KKKKKKK.","KMMMMMMMK","KMMMMMLMK","KMLMMLMMK","KMMLLMMMK",".KMMMMMK.","..KMMMK..","...KMK...","....K...."];
-var HEAD_PLN=["....K....","...KKK...","..KKMKK..","..KMMMK..",".KKMMMKK.",".KMMWMMK.",".KKMMMKK.","...KMK...","...KMK..."];
-var HEAD_GLS=[".........","..K...K..","KKKKKKKKK","KMMKKKMMK","KMWKMKWMK","KMMKKKMMK",".KKK.KKK.","...KKK...","...KKK..."];
-var BODY=["..KKKKK..",".KMMMMMK.","KMMMMMMMK","KMMDDDMMK",".KMMMMMK."];
-var FEET=[["..KK.KK..","..KK....."],["..KK.KK..","..KK.KK.."],["..KK.KK..",".....KK.."],["..KK.KK..","..KK.KK.."]];
+// 도트 RPG 스프라이트 — 11x11 머리 + 11x5 상체 + 11x2 다리 (총 18px).
+// r0은 캐릭터별 장식 줄, r1~r10이 공통 얼굴 골격.
+// K=윤곽/신발, M=머리, L=머리 하이라이트, D=옷·바지, S=피부, E=눈동자, W=흰자·옷깃, B=볼
+var HEAD_MAG=["....KMK....","...KKKKK...","..KMMMMMK..",".KMMLLLMMK.","KMMMMMMMMMK",
+              "KMMMMMMMMMK","KMSSSSSSSMK","KMWESSSEWMK","KMBSSSSSBMK",".KSSSESSSK.","..KKKKKKK.."];
+var HEAD_PEN=[".....KWWWD.","...KKKKK...","..KMMMMMK..",".KMMLLLMMK.","KMMMMMMMMMK",
+              "KMMMMMMMMMK","KMSSSSSSSMK","KMWESSSEWMK","KMBSSSSSBMK",".KSSSESSSK.","..KKKKKKK.."];
+var HEAD_SHD=["...........","...KKKKK...","..KMMMMMK..",".KMMLLLMMK.","KMMMMMMMMMK",
+              "KMMMMMMMMMK","KMDDDDDDDMK","KMWESSSEWMK","KMBSSSSSBMK",".KSSSESSSK.","..KKKKKKK.."];
+var HEAD_PLN=["...........","...KKKKK...","..KDDDDDK..",".KDDMMMDDK.","KDDDDDDDDDK",
+              "KKKKKKKKKKK","KMSSSSSSSMK","KMWESSSEWMK","KMBSSSSSBMK",".KSSSESSSK.","..KKKKKKK.."];
+var HEAD_GLS=["...........","...KKKKK...","..KMMMMMK..",".KMMLLLMMK.","KMMMMMMMMMK",
+              "KMMMMMMMMMK","KMSSSSSSSMK","KMKEEKEEKMK","KMBSSSSSBMK",".KSSSESSSK.","..KKKKKKK.."];
+var BODY=["..KDDDDDK..",".KDDWWWDDK.","SKDDDDDDDKS",".KDDDDDDDK.",".KDDDDDDDK."];
+var FEET=[["...DD.DD...","...KK......"],["...DD.DD...","...KK.KK..."],
+          ["...DD.DD...","......KK..."],["...DD.DD...","...KK.KK..."]];
 
 var AGENTS=[
-  {key:"researcher",name:"Researcher",role:"자료 수집",head:HEAD_MAG,m:"#2E8B84",d:"#1E625B",
+  {key:"researcher",name:"Researcher",role:"자료 수집",head:HEAD_MAG,m:"#2E8B84",d:"#1E625B",l:"#4FB3AA",
    deskR:4,deskC:2,seat:{r:3,c:3},errand:{r:15,c:3},backend:"research-worker",
    verb:"공식 출처를 뒤져 근거를 모읍니다"},
-  {key:"documentor",name:"Documentor",role:"문서 작성",head:HEAD_PEN,m:"#C0812F",d:"#8E5D1F",
+  {key:"documentor",name:"Documentor",role:"문서 작성",head:HEAD_PEN,m:"#C0812F",d:"#8E5D1F",l:"#E0A44F",
    deskR:4,deskC:8,seat:{r:3,c:9},errand:null,backend:"document-writer",
    verb:"모인 근거로 초안을 씁니다"},
-  {key:"techqa",name:"Technical QA",role:"스킬 기반 검수",head:HEAD_SHD,m:"#5B8C43",d:"#3F632E",
+  {key:"techqa",name:"Technical QA",role:"스킬 기반 검수",head:HEAD_SHD,m:"#5B8C43",d:"#3F632E",l:"#7CB35E",
    deskR:4,deskC:14,seat:{r:3,c:15},errand:null,backend:"qa-critic",
    verb:"기술 정확성과 출처 추적성을 검증합니다"},
-  {key:"poster",name:"Poster",role:"Notion 게시",head:HEAD_PLN,m:"#7A62B6",d:"#554189",
+  {key:"poster",name:"Poster",role:"Notion 게시",head:HEAD_PLN,m:"#7A62B6",d:"#554189",l:"#9C86D6",
    deskR:11,deskC:2,seat:{r:10,c:3},errand:{r:15,c:15},backend:null,
    verb:"검수를 통과한 문서를 Notion에 올립니다"},
-  {key:"proofreader",name:"Proofreader",role:"포맷·이미지 검토",head:HEAD_GLS,m:"#B5514A",d:"#853934",
+  {key:"proofreader",name:"Proofreader",role:"포맷·이미지 검토",head:HEAD_GLS,m:"#B5514A",d:"#853934",l:"#D4756D",
    deskR:11,deskC:8,seat:{r:10,c:9},errand:null,backend:null,
    verb:"문장 구조와 이미지 삽입 상태를 훑습니다"}
 ];
 var BACKEND_TO_IDX={};
 AGENTS.forEach(function(a,i){ if(a.backend) BACKEND_TO_IDX[a.backend]=i; });
+
+// 진행 기록 게시판의 코르크 면 (논리 좌표). HTML 오버레이가 같은 사각형에 정렬된다.
+var BOARD={x:24*T-2, y:4*T, w:6*T+4, h:9*T};
 
 var solid=[],r,c;
 for(r=0;r<ROWS;r++){ solid.push(new Array(COLS).fill(false)); }
@@ -206,16 +336,16 @@ function unblock(rr,cc,w,h){ w=w||1; h=h||1; for(var y=rr;y<rr+h;y++) for(var x=
 
 block(0,0,COLS,2); block(2,0,1,ROWS-2); block(2,COLS-1,1,ROWS-2);
 block(ROWS-1,0,COLS,1); unblock(ROWS-1,10,2,1);
-block(2,22,1,ROWS-3); unblock(12,22,1,2);
 
 var FURN=[
   {k:"window",r:2,c:2,w:3},{k:"notes",r:2,c:8,w:3},{k:"qaboard",r:2,c:14,w:3},{k:"cooler",r:6,c:18,w:2},
   {k:"desk",r:4,c:2,w:3,a:0},{k:"desk",r:4,c:8,w:3,a:1},{k:"desk",r:4,c:14,w:3,a:2},
   {k:"desk",r:11,c:2,w:3,a:3},{k:"desk",r:11,c:8,w:3,a:4},
   {k:"archive",r:16,c:2,w:3},{k:"printer",r:16,c:8,w:3},{k:"uplink",r:16,c:14,w:3},
-  {k:"plant",r:17,c:20,w:1},{k:"plant",r:6,c:20,w:1},
-  {k:"cabinet",r:2,c:24,w:3},{k:"exchair",r:5,c:25,w:2},{k:"bigdesk",r:6,c:24,w:4},{k:"tray",r:6,c:28,w:1},
-  {k:"plant",r:16,c:24,w:1},{k:"plant",r:16,c:29,w:1}
+  // Head Director — Proofreader(seat r10) 맞은편. 책상 아래(r15)에 빈 의자를 두어
+  // 위쪽 Proofreader와 서로 마주보게 한다. 결재함은 책상 오른쪽.
+  {k:"bigdesk",r:14,c:8,w:3},{k:"exchair",r:15,c:9,w:2},{k:"tray",r:14,c:11,w:1},
+  {k:"cabinet",r:2,c:24,w:3},{k:"archive",r:16,c:24,w:3}
 ];
 FURN.forEach(function(f){ block(f.r,f.c,f.w,1); });
 function walkable(rr,cc){ return rr>=0&&rr<ROWS&&cc>=0&&cc<COLS&&!solid[rr][cc]; }
@@ -257,7 +387,9 @@ function fit(){
   S = avail>=W*3 ? 3 : 2;
   var dpr=Math.min(window.devicePixelRatio||1,2);
   cv.width=W*S*dpr; cv.height=HH*S*dpr;
-  cv.style.width=(W*S)+"px"; cv.style.height=(HH*S)+"px";
+  // height는 지정하지 않는다 — max-width:100%로 너비가 줄 때 인라인 height가 남아 있으면
+  // 종횡비가 깨져 캔버스가 세로로 늘어난다. auto로 두면 내부 해상도 비율(512:320)이 유지된다.
+  cv.style.width=(W*S)+"px"; cv.style.height="auto";
   ctx.setTransform(S*dpr,0,0,S*dpr,0,0);
   ctx.imageSmoothingEnabled=false; bg=null;
 }
@@ -277,31 +409,61 @@ function stamp(g,map,x,y,pal){
 function buildBG(){
   var o=document.createElement("canvas"); o.width=W; o.height=HH;
   var g=o.getContext("2d"); g.imageSmoothingEnabled=false;
+  // 바닥 — 가로 나무 판자, 줄마다 엇갈린 이음매와 나뭇결
   for(r=2;r<ROWS;r++) for(c=1;c<COLS-1;c++){
-    px(g,c*T,r*T,T,T,(r+c)%2===0?C.floorA:C.floorB);
-    px(g,c*T,r*T,T,1,C.grout); px(g,c*T,r*T,1,T,C.grout);
+    px(g,c*T,r*T,T,T,(r%2===0)?C.floorA:C.floorB);
+    px(g,c*T,r*T+T-1,T,1,C.grout);
+    if(((c+(r%2))%2)===0) px(g,c*T,r*T,1,T-1,C.grout);
+    px(g,c*T+3,r*T+4,5,1,C.grain); px(g,c*T+9,r*T+9,4,1,C.grain);
   }
-  for(r=8;r<15;r++) for(c=24;c<30;c++) px(g,c*T,r*T,T,T,(r+c)%2===0?C.rug:C.rugD);
-  px(g,24*T,8*T,6*T,1,"#6A7C8C"); px(g,24*T,15*T-1,6*T,1,"#33404B");
+  // 카펫 — Head Director 책상 앞 보고 자리에 금색 테두리 러그
+  for(r=12;r<16;r++) for(c=7;c<12;c++) px(g,c*T,r*T,T,T,(r+c)%2===0?C.rug:C.rugD);
+  px(g,7*T,12*T,5*T,2,C.rugTrim); px(g,7*T,16*T-2,5*T,2,C.rugTrim);
+  px(g,7*T,12*T,2,4*T,C.rugTrim); px(g,12*T-2,12*T,2,4*T,C.rugTrim);
+  px(g,7*T,12*T,5*T,1,C.ink); px(g,7*T,16*T-1,5*T,1,C.ink);
+  // 자리별 바닥 매트
   [[2,5,"#2E8B84"],[8,5,"#C0812F"],[14,5,"#5B8C43"],[2,12,"#7A62B6"],[8,12,"#B5514A"]].forEach(function(z){
-    g.globalAlpha=.16; px(g,z[0]*T+2,z[1]*T+2,3*T-4,T-4,z[2]); g.globalAlpha=1;
-    g.globalAlpha=.42; px(g,z[0]*T+2,z[1]*T+2,3*T-4,1,z[2]); px(g,z[0]*T+2,z[1]*T+T-3,3*T-4,1,z[2]); g.globalAlpha=1;
+    g.globalAlpha=.20; px(g,z[0]*T+2,z[1]*T+2,3*T-4,T-4,z[2]); g.globalAlpha=1;
+    g.globalAlpha=.55;
+    px(g,z[0]*T+2,z[1]*T+2,3*T-4,1,z[2]); px(g,z[0]*T+2,z[1]*T+T-3,3*T-4,1,z[2]);
+    px(g,z[0]*T+2,z[1]*T+2,1,T-4,z[2]); px(g,(z[0]+3)*T-3,z[1]*T+2,1,T-4,z[2]);
+    g.globalAlpha=1;
   });
-  px(g,0,0,W,T,C.wallTop); px(g,0,T,W,T,C.wallFace); px(g,0,2*T-2,W,2,C.wallCap);
-  for(c=2;c<16;c+=5){ px(g,c*T+2,T+3,T+8,9,C.glass); px(g,c*T+2,T+3,T+8,1,C.glassD); px(g,c*T+2,T+11,T+8,1,C.glassD); }
-  for(c=24;c<COLS-2;c+=5){ px(g,c*T+2,T+3,T+8,9,C.glass); px(g,c*T+2,T+3,T+8,1,C.glassD); px(g,c*T+2,T+11,T+8,1,C.glassD); }
-  px(g,0,2*T,T,HH-2*T,C.wallFace); px(g,T-2,2*T,2,HH-2*T,C.wallCap);
-  px(g,(COLS-1)*T,2*T,T,HH-2*T,C.wallFace); px(g,(COLS-1)*T,2*T,2,HH-2*T,C.wallCap);
-  px(g,0,(ROWS-1)*T,W,T,C.wallFace); px(g,0,(ROWS-1)*T,W,2,C.wallCap);
-  px(g,10*T,(ROWS-1)*T,2*T,T,"#2F3A34"); px(g,10*T,(ROWS-1)*T,2*T,2,C.base);
-  px(g,10*T+1,(ROWS-1)*T+4,2*T-2,2,"#48564D");
-  for(r=2;r<ROWS-1;r++){
-    if(r===12||r===13){ px(g,22*T+6,r*T,4,T,C.metalD); continue; }
-    px(g,22*T+3,r*T,10,T,C.glass);
-    g.globalAlpha=.5; px(g,22*T+5,r*T,3,T,"#FFFFFF"); g.globalAlpha=1;
-    px(g,22*T+2,r*T,2,T,C.metalD); px(g,22*T+13,r*T,2,T,C.metalD);
+  // 위쪽 벽 — 나무 보 + 돌 블록 쌓기
+  px(g,0,0,W,T,C.wallTop); px(g,0,T,W,T,C.wallFace);
+  for(c=0;c<COLS;c++){ px(g,c*T,T,1,8,C.mortar); px(g,c*T+8,T+8,1,8,C.mortar); }
+  px(g,0,T+8,W,1,C.mortar); px(g,0,T-1,W,1,C.wallCap); px(g,0,2*T-3,W,3,C.wallCap);
+  // 창 — 나무 창틀에 십자 살
+  function win(cc){
+    var wx=cc*T+2, wy=T+2, ww=T+8, wh=11;
+    px(g,wx-1,wy-1,ww+2,wh+2,C.woodD);
+    px(g,wx,wy,ww,wh,"#7FB6C9"); px(g,wx,wy,ww,3,"#A9D4E0");
+    px(g,wx+(ww>>1),wy,1,wh,C.woodD); px(g,wx,wy+(wh>>1),ww,1,C.woodD);
+    px(g,wx-1,wy-1,ww+2,1,C.ink); px(g,wx-1,wy+wh,ww+2,1,C.ink);
   }
-  px(g,22*T+2,2*T,13,2,C.metalD); px(g,22*T+2,12*T-3,13,3,C.metalD); px(g,22*T+2,14*T,13,3,C.metalD);
+  for(c=2;c<16;c+=5) win(c);
+  for(c=24;c<COLS-2;c+=5) win(c);
+  // 좌우·아래 벽
+  px(g,0,2*T,T,HH-2*T,C.wallFace); px(g,T-3,2*T,3,HH-2*T,C.wallCap);
+  px(g,(COLS-1)*T,2*T,T,HH-2*T,C.wallFace); px(g,(COLS-1)*T,2*T,3,HH-2*T,C.wallCap);
+  px(g,0,(ROWS-1)*T,W,T,C.wallFace); px(g,0,(ROWS-1)*T,W,3,C.wallCap);
+  for(r=2;r<ROWS;r++){ px(g,0,r*T,T-3,1,C.mortar); px(g,(COLS-1)*T+3,r*T,T-3,1,C.mortar); }
+  for(c=1;c<COLS-1;c++) px(g,c*T,(ROWS-1)*T+3,T,1,C.mortar);
+  // 진행 기록 게시판 — 우측 빈 공간의 코르크 보드 (내용은 HTML 오버레이가 그린다)
+  px(g,BOARD.x-6,BOARD.y-16,BOARD.w+12,BOARD.h+22,C.woodD);
+  px(g,BOARD.x-4,BOARD.y-14,BOARD.w+8,BOARD.h+18,C.wood);
+  px(g,BOARD.x,BOARD.y,BOARD.w,BOARD.h,"#CDAD86");
+  px(g,BOARD.x,BOARD.y,BOARD.w,1,"#A98A66"); px(g,BOARD.x,BOARD.y+BOARD.h-1,BOARD.w,1,"#A98A66");
+  px(g,BOARD.x-6,BOARD.y-16,BOARD.w+12,1,C.ink);
+  px(g,BOARD.x-6,BOARD.y+BOARD.h+5,BOARD.w+12,1,C.ink);
+  px(g,BOARD.x-6,BOARD.y-16,1,BOARD.h+22,C.ink);
+  px(g,BOARD.x+BOARD.w+5,BOARD.y-16,1,BOARD.h+22,C.ink);
+  px(g,BOARD.x+4,BOARD.y-11,BOARD.w-8,7,C.woodD);
+  px(g,BOARD.x+10,BOARD.y+4,3,3,C.gold); px(g,BOARD.x+BOARD.w-13,BOARD.y+4,3,3,C.gold);
+  // 출입문 — 나무 양여닫이
+  px(g,10*T,(ROWS-1)*T,2*T,T,C.woodD); px(g,10*T+1,(ROWS-1)*T+2,2*T-2,T-2,C.wood);
+  px(g,10*T,(ROWS-1)*T,2*T,2,C.ink); px(g,11*T-1,(ROWS-1)*T+2,2,T-2,C.woodD);
+  px(g,10*T+5,(ROWS-1)*T+8,2,2,C.gold); px(g,11*T+7,(ROWS-1)*T+8,2,2,C.gold);
   bg=o;
 }
 
@@ -407,20 +569,20 @@ function drawFurn(g,f){
 
 function drawChar(g,a,x,y,dir,frame,seated,dim){
   if(dim) g.globalAlpha=.42;
-  var pal={K:C.ink,M:a.m,D:a.d,W:C.paper,L:C.paper};
+  var pal={K:C.ink,M:a.m,D:a.d,L:a.l,W:C.paper,S:C.skin,E:C.eye,B:C.blush};
   var lift=seated?4:0;
-  var sx=Math.round(x)-4, sy=Math.round(y)-16-lift;
+  var sx=Math.round(x)-5, sy=Math.round(y)-18-lift;
   if(seated){
-    px(g,sx-2,sy+7,13,11,"#3B4B57"); px(g,sx-1,sy+8,11,9,"#61798C");
-    px(g,sx-2,sy+7,13,1,C.ink); px(g,sx-2,sy+17,13,1,C.ink);
+    px(g,sx-1,sy+10,13,11,"#3B4B57"); px(g,sx,sy+11,11,9,"#61798C");
+    px(g,sx-1,sy+10,13,1,C.ink); px(g,sx-1,sy+20,13,1,C.ink);
   }else{
-    g.globalAlpha=(dim?.42:1)*.20; px(g,sx+1,Math.round(y)-1,7,2,"#000000"); g.globalAlpha=dim?.42:1;
+    g.globalAlpha=(dim?.42:1)*.20; px(g,sx+2,Math.round(y)-1,7,2,"#000000"); g.globalAlpha=dim?.42:1;
   }
   var hx=sx+(dir==="left"?-1:(dir==="right"?1:0));
   stamp(g,a.head,hx,sy,pal);
-  stamp(g,BODY,sx,sy+9,pal);
-  if(!seated) stamp(g,FEET[frame],sx,sy+14,pal);
-  if(dir==="up"){ g.globalAlpha=(dim?.42:1)*.22; px(g,hx,sy,9,9,"#000000"); g.globalAlpha=dim?.42:1; }
+  stamp(g,BODY,sx,sy+11,pal);
+  if(!seated) stamp(g,FEET[frame],sx,sy+16,pal);
+  if(dir==="up"){ g.globalAlpha=(dim?.42:1)*.22; px(g,hx+1,sy+2,9,9,"#000000"); g.globalAlpha=dim?.42:1; }
   g.globalAlpha=1;
 }
 
@@ -430,7 +592,13 @@ function Agent(def,i){
   this.x=this.c*T+8; this.y=this.r*T+16;
   this.path=null; this.pi=0; this.dir="up"; this.frame=1; this.anim=0;
   this.seated=false; this.wait=0; this.goal="seat"; this.status="PENDING";
+  this.task=null; this.taskKind="run"; this.taskExp=Infinity;
 }
+Agent.prototype.setTask=function(text,kind,ttl){
+  this.task=text||null;
+  this.taskKind=kind||"run";
+  this.taskExp=(text&&ttl)?scene.t+ttl:Infinity;
+};
 Agent.prototype.navigate=function(rr,cc,goal){
   var p=astar(this.r,this.c,rr,cc);
   if(p){ this.path=p; this.pi=0; this.seated=false; this.goal=goal||this.goal; }
@@ -518,7 +686,7 @@ var Scene={
   deliver:function(from,done){
     var f=AGENTS[from].seat;
     scene.active=-1;
-    tokens.push(new Token(f.r,f.c,7,28,AGENTS[from].m,function(){ scene.tray++; if(done) done(); }));
+    tokens.push(new Token(f.r,f.c,13,11,AGENTS[from].m,function(){ if(done) done(); }));
   },
   rework:function(from,to,done){
     var f=AGENTS[from].seat, t=AGENTS[to].seat;
@@ -528,17 +696,129 @@ var Scene={
   setProgress:function(p){ scene.progress=p; },
   setUnwired:function(list){ scene.unwired=list||[]; },
   fail:function(){ scene.jobFailed=true; scene.active=-1; },
-  clearTray:function(){ scene.tray=0; }
+  clearTray:function(){ scene.tray=0; Q.items=[]; Q.sel=null; }
 };
 
 var App={
   mode:"demo", base:"", adapter:"", jobId:null, es:null,
-  t0:0, running:false, artifacts:0, jobState:"IDLE", demoTimer:null, demoStage:-1, demoT:0
+  t0:0, running:false, artifacts:0, artifactList:[], lastPrompt:"",
+  jobState:"IDLE", demoTimer:null, demoStage:-1, demoT:0
 };
 
 var el=function(id){ return document.getElementById(id); };
 var tickerEl=el("ticker"), rosterEl=el("roster");
 function say(m){ tickerEl.textContent=m; }
+
+var stageEl=document.querySelector(".stage");
+var bubLayer=document.createElement("div");
+bubLayer.className="bubbles"; bubLayer.setAttribute("aria-hidden","true");
+stageEl.appendChild(bubLayer);
+var bubs=[], bubScale=0;
+
+function buildBubbles(){
+  AGENTS.forEach(function(d){
+    var n=document.createElement("div");
+    n.className="bub"; n.style.setProperty("--k",d.m);
+    n.innerHTML='<b class="who"></b><span class="what"></span>';
+    n.querySelector(".who").textContent=d.name;
+    bubLayer.appendChild(n);
+    bubs.push({node:n, what:n.querySelector(".what"), text:null, kind:"run",
+               w:0, h:0, below:false, shown:false});
+  });
+}
+
+function setTask(i,text,kind,ttl){ if(agents[i]) agents[i].setTask(text,kind,ttl); }
+
+// ── 진행 기록 게시판 ─────────────────────────────────────────────
+var histLog=[], histRev=0, histDrawn=-1;
+var histBoard=document.createElement("div");
+histBoard.className="histboard";
+histBoard.innerHTML='<p class="hb-t">진행 기록</p><div class="hb-list"></div>';
+stageEl.appendChild(histBoard);
+var histList=histBoard.querySelector(".hb-list");
+
+function logAction(i,text,kind){
+  var last=histLog[histLog.length-1];
+  if(last && last.i===i && last.text===text) return;
+  histLog.push({i:i,text:text,kind:kind||"run",ts:scene.t});
+  if(histLog.length>60) histLog.shift();
+  histRev++;
+}
+function clearHistory(){ histLog=[]; histRev++; }
+
+function paintHistory(){
+  if(histDrawn===histRev) return;
+  histDrawn=histRev;
+  if(!histLog.length){
+    histList.innerHTML='<p class="hb-empty">아직 기록이 없습니다.</p>';
+    return;
+  }
+  var rows=histLog.slice(-7), html="";
+  for(var k=rows.length-1;k>=0;k--){
+    var h=rows[k], nm=h.i>=0?AGENTS[h.i].name:"System", col=h.i>=0?AGENTS[h.i].m:"#6B573F";
+    html+='<div class="hb-i hb-'+h.kind+'"><span class="hb-d" style="background:'+col+'"></span>'+
+          '<span class="hb-x"><span class="hb-n">'+esc(nm)+'</span> '+esc(h.text)+'</span></div>';
+  }
+  histList.innerHTML=html;
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,function(ch){
+  return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[ch]; }); }
+
+var FLAT_BOARD_MIN=112;   // 이보다 좁아지면 코르크 면에 한글이 들어가지 않는다
+function syncBoard(sx,sy,ox,oy){
+  var w=BOARD.w*sx, flat=w<FLAT_BOARD_MIN;
+  if(flat!==histBoard.classList.contains("flat")){
+    histBoard.classList.toggle("flat",flat);
+    if(flat) histBoard.removeAttribute("style");
+  }
+  if(flat) return;
+  histBoard.style.left=Math.round(BOARD.x*sx+ox)+"px";
+  histBoard.style.top=Math.round(BOARD.y*sy+oy)+"px";
+  histBoard.style.width=Math.round(w)+"px";
+  histBoard.style.height=Math.round(BOARD.h*sy)+"px";
+  histBoard.style.fontSize=Math.max(8.5,+(6.6*sx).toFixed(1))+"px";
+}
+
+// 캔버스는 max-width:100%로 축소될 수 있어 논리좌표→CSS 배율이 고정이 아니다.
+// 배율과 원점을 캐시하지 않고 매 프레임 실측 rect에서 다시 구한다.
+function syncBubbles(){
+  var cr=cv.getBoundingClientRect(), sr=stageEl.getBoundingClientRect();
+  if(!cr.width) return;
+  var sx=cr.width/W, sy=cr.height/HH, ox=cr.left-sr.left, oy=cr.top-sr.top;
+  syncBoard(sx,sy,ox,oy); paintHistory();
+  if(sx!==bubScale){
+    bubScale=sx;
+    bubLayer.style.setProperty("--bw",Math.max(132,Math.round(5*T*sx))+"px");
+    bubs.forEach(function(b){ b.w=0; });
+  }
+  for(var i=0;i<bubs.length;i++){
+    var b=bubs[i], a=agents[i];
+    var live = a && scene.unwired.indexOf(i)<0 && a.task && scene.t<a.taskExp;
+    if(!live){
+      if(b.shown){ b.node.classList.remove("show"); b.shown=false; }
+      continue;
+    }
+    if(a.task!==b.text){ b.what.textContent=a.task; b.text=a.task; b.w=0; }
+    if(a.taskKind!==b.kind){
+      b.node.classList.remove("ok","wait","bad");
+      if(a.taskKind!=="run") b.node.classList.add(a.taskKind);
+      b.kind=a.taskKind;
+    }
+    if(!b.w){ b.w=b.node.offsetWidth; b.h=b.node.offsetHeight; }
+    // drawChar 기준: 스프라이트는 (y-16-lift)에서 시작해 (y-lift)에서 끝난다.
+    var lift=a.seated?4:0;
+    var x=a.x*sx+ox, y=(a.y-16-lift-4)*sy+oy;
+    var below=(y-b.h)<(oy+2);
+    if(below) y=(a.y-lift+5)*sy+oy;
+    if(below!==b.below){ b.node.classList.toggle("below",below); b.below=below; }
+    var half=b.w/2, lo=ox+half+2, hi=ox+cr.width-half-2;
+    if(x<lo) x=lo; if(x>hi) x=hi;
+    if(!REDUCED) y+=Math.sin((scene.t+i*430)/520)*1.2;
+    b.node.style.transform=(below?"translate(-50%,0) ":"translate(-50%,-100%) ")+
+      "translate("+Math.round(x)+"px,"+Math.round(y)+"px)";
+    if(!b.shown){ b.node.classList.add("show"); b.shown=true; }
+  }
+}
 
 var STATE_CLASS={ RESEARCHING:"run", DRAFTING:"run", QA_REVIEW:"wait", REWORK:"wait",
   APPROVED:"ok", FAILED:"bad", NEW:"run", IDLE:"" };
@@ -557,6 +837,7 @@ function paintDash(){
   el("tPct").textContent=pct+"%"; el("tBar").style.width=pct+"%";
   el("tArt").textContent=String(App.artifacts);
   el("tTray").textContent=String(scene.tray);
+  el("tileTray").classList.toggle("clickable",Q.items.length>0);
   el("tJob").textContent=App.jobId||"—";
   var end=App.running?Date.now():(App.tEnd||App.t0);
   var secs=App.t0?Math.max(0,Math.floor((end-App.t0)/1000)):0;
@@ -585,9 +866,9 @@ function buildRoster(){
   AGENTS.forEach(function(d,i){
     var node=document.createElement("div");
     node.className="seat"; node.style.setProperty("--k",d.m);
-    var ic=document.createElement("canvas"); ic.width=27; ic.height=27; ic.setAttribute("aria-hidden","true");
+    var ic=document.createElement("canvas"); ic.width=33; ic.height=33; ic.setAttribute("aria-hidden","true");
     var g=ic.getContext("2d"); g.imageSmoothingEnabled=false; g.setTransform(3,0,0,3,0,0);
-    stamp(g,d.head,0,0,{K:C.ink,M:d.m,D:d.d,W:C.paper,L:C.paper});
+    stamp(g,d.head,0,0,{K:C.ink,M:d.m,D:d.d,L:d.l,W:C.paper,S:C.skin,E:C.eye,B:C.blush});
     node.appendChild(ic);
     var box=document.createElement("div");
     box.innerHTML='<div class="nm"></div><div class="rl"></div><div class="st"><span class="badge"></span></div>';
@@ -597,16 +878,19 @@ function buildRoster(){
   });
   var h=document.createElement("div");
   h.className="seat head"; h.style.setProperty("--k",C.gold);
-  var hc=document.createElement("canvas"); hc.width=27; hc.height=27; hc.setAttribute("aria-hidden","true");
+  var hc=document.createElement("canvas"); hc.width=33; hc.height=33; hc.setAttribute("aria-hidden","true");
   var hg=hc.getContext("2d"); hg.imageSmoothingEnabled=false; hg.setTransform(3,0,0,3,0,0);
-  px(hg,0,2,9,5,C.metalD); px(hg,0,2,9,1,C.metal); px(hg,1,0,7,2,C.paper); px(hg,0,7,9,2,C.ink);
+  px(hg,1,3,9,5,C.metalD); px(hg,1,3,9,1,C.metal); px(hg,2,1,7,2,C.paper); px(hg,1,8,9,2,C.ink);
   h.appendChild(hc);
   var hb=document.createElement("div");
-  hb.innerHTML='<div class="nm">Head Director</div><div class="rl">최종 승인 · 사용자 본인</div><div class="st"><span class="badge"></span></div>';
+  hb.innerHTML='<div class="nm">Head Director</div><div class="rl">최종 승인 · 사용자 본인 (빈 자리)</div><div class="st"><span class="badge"></span></div>';
   h.appendChild(hb); rosterEl.appendChild(h);
 }
 
-function showApprove(on){ el("approveBar").hidden=!on; }
+function showApprove(on){
+  el("approveBar").hidden=!on;
+  el("btnQueue").textContent="결재함 열기 ("+Q.items.length+"건)";
+}
 
 var DEMO_DUR=[5200,3400,3400,5200,3400];
 function demoStart(){
@@ -618,7 +902,12 @@ function demoStart(){
 function demoAdvance(i){
   if(App.mode!=="demo"||!App.running) return;
   App.demoStage=i; App.demoT=0;
-  agents.forEach(function(a,j){ a.status = j===i?"RUNNING":(j<i?"COMPLETED":"PENDING"); });
+  agents.forEach(function(a,j){
+    a.status = j===i?"RUNNING":(j<i?"COMPLETED":"PENDING");
+    if(j>i) a.setTask(null);
+  });
+  setTask(i,AGENTS[i].verb,"run");
+  logAction(i,AGENTS[i].verb+".","run");
   Scene.activate(i);
   setState(i===0?"RESEARCHING":(i===1?"DRAFTING":(i===2?"QA_REVIEW":"PUBLISHING")));
   setProgress(0.08+i*0.16);
@@ -632,18 +921,23 @@ function demoTick(dt){
   if(App.demoT>DEMO_DUR[i]){
     App.demoStage=-1;
     agents[i].status="COMPLETED";
+    var handoff = i<AGENTS.length-1 ? (AGENTS[i+1].name+"에게 산출물을 넘깁니다.")
+                                    : "Head Director 책상으로 보고하러 갑니다.";
+    setTask(i, handoff, "ok", 3400);
+    logAction(i, handoff, "ok");
     App.artifacts++;
     setProgress(0.08+i*0.16+0.10);
     if(i<AGENTS.length-1){
       say(AGENTS[i].name+" → "+AGENTS[i+1].name+" 산출물 전달 중");
       Scene.handoff(i,i+1,function(){ demoAdvance(i+1); });
     }else{
-      say(AGENTS[i].name+" → Head Director 결재함으로 배달 중");
+      say(AGENTS[i].name+" → Head Director 책상으로 보고하러 가는 중");
       Scene.deliver(i,function(){
         App.running=false; App.tEnd=Date.now();
         setState("QA_REVIEW"); setProgress(0.9);
-        agents.forEach(function(a){ a.status="COMPLETED"; });
-        say("Head Director 결재함에 도착 — 최종 승인은 사용자가 직접 합니다.");
+        agents.forEach(function(a){ a.status="COMPLETED"; a.setTask(null); });
+        enqueue();
+        say("Head Director 책상에 보고가 도착 — 최종 승인은 사용자가 직접 합니다.");
         showApprove(true);
       });
     }
@@ -654,12 +948,24 @@ function liveAgentStatus(agentId,status,detail){
   var i=BACKEND_TO_IDX[agentId];
   if(i==null||!agents[i]) return;
   agents[i].status=status;
-  if(status==="RUNNING"){ Scene.activate(i); say(AGENTS[i].name+"이(가) "+AGENTS[i].verb+"."+(detail?" ("+detail+")":"")); }
+  if(status==="RUNNING"){
+    setTask(i,detail||AGENTS[i].verb,"run");
+    logAction(i,detail||AGENTS[i].verb,"run");
+    Scene.activate(i); say(AGENTS[i].name+"이(가) "+AGENTS[i].verb+"."+(detail?" ("+detail+")":""));
+  }
   if(status==="COMPLETED"){
+    setTask(i,detail||"작업을 마쳤습니다.","ok",3600);
+    logAction(i,detail||"작업을 마쳤습니다.","ok");
     if(scene.active===i) Scene.idle();
     if(i===2) scene.qaTicks=4;
   }
-  if(status==="FAILED"){ Scene.fail(); }
+  if(status==="FAILED"){ setTask(i,detail||"작업이 실패했습니다.","bad",8000);
+    logAction(i,detail||"작업이 실패했습니다.","bad"); Scene.fail(); }
+  if(status==="WAITING_HUMAN"){ setTask(i,detail||"사람의 결정을 기다립니다.","wait");
+    logAction(i,detail||"사람의 결정을 기다립니다.","wait"); }
+  if(status==="REWORK_REQUIRED"){ setTask(i,detail||"재작업 요청을 받았습니다.","wait");
+    logAction(i,detail||"재작업 요청을 받았습니다.","wait"); }
+  if(status==="PENDING") setTask(i,null);
 }
 
 var LIVE_PROGRESS={ NEW:0.04, RESEARCHING:0.14, DRAFTING:0.40, QA_REVIEW:0.66, REWORK:0.5, APPROVED:1, FAILED:0 };
@@ -667,28 +973,41 @@ var LIVE_PROGRESS={ NEW:0.04, RESEARCHING:0.14, DRAFTING:0.40, QA_REVIEW:0.66, R
 function liveEvent(type,ev){
   var d=ev.data||{};
   if(type==="job.created"){
-    App.artifacts=0; setState("NEW"); setProgress(LIVE_PROGRESS.NEW);
+    App.artifacts=0; App.artifactList=[]; clearHistory();
+    logAction(-1,"Job 생성 — 어댑터 "+(d.adapter||"?"),"run");
+    setState("NEW"); setProgress(LIVE_PROGRESS.NEW);
     say("Job 생성됨 — 어댑터 "+(d.adapter||"?"));
   } else if(type==="agent.status.changed"){
     liveAgentStatus(d.agent_id,d.status,d.detail);
   } else if(type==="job.transition"){
-    setState(d.to);
+    setState(d.to); logAction(-1,"상태 전이 → "+d.to,
+      d.to==="FAILED"?"bad":(d.to==="APPROVED"?"ok":(d.to==="REWORK"?"wait":"run")));
     if(LIVE_PROGRESS[d.to]!=null) setProgress(LIVE_PROGRESS[d.to]);
     if(d.to==="DRAFTING") Scene.handoff(0,1,function(){});
     if(d.to==="QA_REVIEW") Scene.handoff(1,2,function(){});
-    if(d.to==="REWORK"){ say("QA 게이트 실패 — 문서 작성자에게 반송되었습니다."); Scene.rework(2,1,function(){}); }
+    if(d.to==="REWORK"){
+      say("QA 게이트 실패 — 문서 작성자에게 반송되었습니다."); Scene.rework(2,1,function(){});
+      setTask(2,null); setTask(1,"QA 지적사항을 반영해 다시 씁니다.","wait");
+    }
     if(d.to==="FAILED"){ Scene.fail(); say("작업 실패: "+(d.reason||"")); App.running=false; App.tEnd=Date.now(); }
-    if(d.to==="APPROVED"){ setProgress(1); App.running=false; App.tEnd=Date.now(); say("승인 완료 — Job "+App.jobId+" 이 APPROVED 상태입니다."); }
+    if(d.to==="APPROVED"){
+      setProgress(1); App.running=false; App.tEnd=Date.now();
+      agents.forEach(function(a){ a.setTask(null); });
+      say("승인 완료 — Job "+App.jobId+" 이 APPROVED 상태입니다.");
+    }
   } else if(type==="artifact.created"){
-    App.artifacts++; say("아티팩트 생성: "+d.artifact_id+" ("+d.artifact_type+")");
+    App.artifacts++; App.artifactList.push({id:d.artifact_id,type:d.artifact_type});
+    logAction(-1,"아티팩트 생성 "+d.artifact_id+" ("+d.artifact_type+")","ok");
+    say("아티팩트 생성: "+d.artifact_id+" ("+d.artifact_type+")");
   } else if(type==="approval.required"){
     setProgress(0.88); setState("QA_REVIEW");
     Scene.deliver(2,function(){
-      say("QA PASS — 결재함에 도착했습니다. 최종 승인은 사용자가 직접 합니다.");
+      enqueue();
+      say("QA PASS — Head Director 책상에 도착했습니다. 최종 승인은 사용자가 직접 합니다.");
       showApprove(true);
     });
   } else if(type==="approval.decided"){
-    showApprove(false);
+    showApprove(false); logAction(-1,"사람 결정 — "+d.decision, d.decision==="approved"?"ok":"wait");
     say("사람 결정 기록됨: "+d.decision);
     if(d.decision==="approved") Scene.clearTray();
   } else if(type==="job.failed"){
@@ -753,6 +1072,8 @@ el("promptForm").addEventListener("submit",function(e){
   e.preventDefault();
   var text=el("promptInput").value.trim();
   if(!text){ say("요청 내용을 입력해 주세요."); el("promptInput").focus(); return; }
+  App.lastPrompt=text; clearHistory();
+  logAction(-1,"요청 접수 — "+text.slice(0,40)+(text.length>40?"…":""),"run");
   showApprove(false);
   App.artifacts=0; App.jobId=null; App.t0=Date.now(); App.tEnd=0; App.running=true;
   Scene.reset(true); Scene.clearTray();
@@ -783,26 +1104,263 @@ el("btnReset").addEventListener("click",function(){
 });
 
 function decide(decision){
+  var sel=Q.sel;
   if(App.mode!=="live"){
-    var n=scene.tray; Scene.clearTray(); showApprove(false);
+    if(sel) dequeue(sel.id); else Scene.clearTray();
+    logAction(-1,(sel?sel.id+" ":"")+(decision==="approved"?"승인됨":"반려됨"),
+      decision==="approved"?"ok":"wait");
+    showApprove(Q.items.length>0);
     setState(decision==="approved"?"APPROVED":"REWORK");
     setProgress(decision==="approved"?1:0.5);
-    say(decision==="approved" ? ("승인 완료 — "+n+"건을 결재했습니다.") : "반려했습니다. 문서 작성자에게 돌아갑니다.");
-    return;
+    say(decision==="approved"
+      ? ("승인 완료 — "+(sel?sel.id:"전체")+" 을(를) 결재했습니다."+(Q.items.length?(" 남은 "+Q.items.length+"건."):""))
+      : "반려했습니다. 문서 작성자에게 돌아갑니다.");
+    return true;
   }
   var actor=el("actorId").value.trim();
-  if(!actor){ say("검토자 ID를 입력해야 결재를 기록할 수 있습니다."); el("actorId").focus(); return; }
-  el("btnApprove").disabled=true; el("btnReject").disabled=true;
-  fetch(App.base+"/api/jobs/"+App.jobId+"/approval",{ method:"POST",
+  if(!actor){ say("검토자 ID를 입력해야 결재를 기록할 수 있습니다."); el("actorId").focus(); return false; }
+  el("docApprove").disabled=true; el("docReject").disabled=true;
+  fetch(App.base+"/api/jobs/"+((sel&&sel.jobId)||App.jobId)+"/approval",{ method:"POST",
     headers:{"content-type":"application/json"},
-    body:JSON.stringify({decision:decision,actor_id:actor,comment:""}) })
+    body:JSON.stringify({decision:decision,actor_id:actor,comment:"",
+      artifact_id:(sel&&sel.artifactId)||null}) })
     .then(function(res){ return res.json().then(function(b){ if(!res.ok) throw new Error(b.error?b.error.message:("HTTP "+res.status)); return b; }); })
-    .then(function(){ showApprove(false); })
+    .then(function(){ if(sel) dequeue(sel.id); showApprove(Q.items.length>0); })
     .catch(function(err){ say("결재 기록 실패: "+err.message); })
-    .then(function(){ el("btnApprove").disabled=false; el("btnReject").disabled=false; });
+    .then(function(){ el("docApprove").disabled=false; el("docReject").disabled=false; });
+  return true;
 }
-el("btnApprove").addEventListener("click",function(){ decide("approved"); });
-el("btnReject").addEventListener("click",function(){ decide("rejected"); });
+
+// 결재함 — QA를 통과해 도착한 항목을 건별로 보관한다. 카운터가 아니라 목록이어야
+// 사용자가 무엇을 승인하는지 항목별로 열어 확인할 수 있다.
+var Q={ items:[], seq:0, sel:null };
+function queueTitle(){
+  var p=String(App.lastPrompt||"").split("\n")[0].trim();
+  return p ? (p.length>64?p.slice(0,64)+"…":p) : "제목 없는 문서";
+}
+function lastArtifactId(){
+  var l=App.artifactList;
+  for(var i=l.length-1;i>=0;i--){
+    var t=String(l[i].type||"").toLowerCase();
+    if(t.indexOf("doc")>=0||t.indexOf("draft")>=0||t.indexOf("markdown")>=0) return l[i].id;
+  }
+  return l.length? l[l.length-1].id : null;
+}
+function enqueue(){
+  Q.seq++;
+  var it={ id:"AP-"+("00"+Q.seq).slice(-3), title:queueTitle(), jobId:App.jobId,
+           artifactId:lastArtifactId(), prompt:App.lastPrompt, artifacts:App.artifacts };
+  Q.items.push(it); scene.tray=Q.items.length;
+  logAction(-1,"결재함 도착 — "+it.id+" "+it.title,"wait");
+  if(!docMask.hidden && !Q.sel) showQueueView();
+  return it;
+}
+function dequeue(id){
+  Q.items=Q.items.filter(function(x){ return x.id!==id; });
+  scene.tray=Q.items.length;
+}
+
+var docMask=el("docMask");
+function closeDoc(){ docMask.hidden=true; }
+function showQueueView(){
+  Q.sel=null;
+  el("docTitle").textContent="결재함";
+  el("docMeta").textContent=Q.items.length+"건 대기 · "+
+    (App.mode==="live"?("LIVE "+App.adapter):"데모 모드");
+  el("queueView").hidden=false; el("docBody").hidden=true;
+  el("docBack").hidden=true; el("docReject").hidden=true; el("docApprove").hidden=true;
+  el("docImgChk").textContent="";
+  el("docHint").textContent="확인할 항목을 선택하세요.";
+  paintQueue();
+}
+function paintQueue(){
+  var ul=el("qList");
+  ul.innerHTML="";
+  if(!Q.items.length){
+    ul.innerHTML='<li><p class="qempty">결재 대기 중인 항목이 없습니다.</p></li>';
+    return;
+  }
+  Q.items.forEach(function(it){
+    var li=document.createElement("li");
+    var b=document.createElement("button");
+    b.type="button"; b.className="qitem";
+    b.innerHTML='<span class="qx"><span class="qn"></span><span class="qm mono"></span></span>'+
+                '<span class="badge wait">QA PASS</span>';
+    b.querySelector(".qn").textContent=it.title;
+    b.querySelector(".qm").textContent=it.id+" · Job "+(it.jobId||"—")+
+      (it.artifactId?(" · "+it.artifactId):"")+" · 아티팩트 "+it.artifacts+"건";
+    b.addEventListener("click",function(){ openItem(it); });
+    li.appendChild(b); ul.appendChild(li);
+  });
+}
+function openItem(it){
+  Q.sel=it;
+  el("docTitle").textContent=it.title;
+  el("docMeta").textContent=it.id+" · Job "+(it.jobId||"—")+" · 아티팩트 "+it.artifacts+"건 · "+
+    (App.mode==="live"?("LIVE "+App.adapter):"데모 모드");
+  el("queueView").hidden=true; el("docBody").hidden=false;
+  el("docBack").hidden=false; el("docReject").hidden=false; el("docApprove").hidden=false;
+  el("docHint").textContent="내용을 확인한 뒤 결정하세요. 최종 승인은 사람이 합니다.";
+  setDocBody("문서를 불러오는 중…",true);
+  el("docBody").focus();
+  if(App.mode==="live") loadLiveDoc(it); else setDocBody(demoDoc(it));
+}
+function openQueue(){ docMask.hidden=false; showQueueView(); }
+// 문서 본문은 마크다운으로 들어온다. 이미지가 실제로 렌더되고 로드되는지까지 확인해야
+// Proofreader 단계의 "이미지 삽입 상태 검토"가 의미를 갖는다.
+// 원문은 신뢰하지 않는다 — 전부 이스케이프한 뒤 허용된 문법만 되살리고,
+// 이미지·링크는 안전한 스킴만 통과시킨다.
+var SAFE_IMG=/^(https?:\/\/|data:image\/)/i, SAFE_HREF=/^https?:\/\//i;
+function escH(s){ return String(s).replace(/[&<>"]/g,function(ch){
+  return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[ch]; }); }
+function inlineMD(s){
+  var t=escH(s);
+  t=t.replace(/`([^`]+)`/g,function(m,c){ return "<code>"+c+"</code>"; });
+  t=t.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>");
+  t=t.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g,function(m,a,u){
+    return SAFE_IMG.test(u) ? '<img alt="'+a+'" src="'+u+'" data-doc-img="1">'
+                            : '<span class="imgbad">[차단된 이미지]</span>'; });
+  t=t.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,function(m,a,u){
+    return SAFE_HREF.test(u) ? '<a href="'+u+'" target="_blank" rel="noopener noreferrer">'+a+'</a>' : a; });
+  return t;
+}
+function renderDoc(md){
+  var lines=String(md).replace(/\r/g,"").split("\n"), out=[], inList=false, inCode=false, code=[], i;
+  function closeList(){ if(inList){ out.push("</ul>"); inList=false; } }
+  for(i=0;i<lines.length;i++){
+    var ln=lines[i];
+    if(/^```/.test(ln)){
+      if(inCode){ out.push("<pre><code>"+escH(code.join("\n"))+"</code></pre>"); code=[]; inCode=false; }
+      else { closeList(); inCode=true; }
+      continue;
+    }
+    if(inCode){ code.push(ln); continue; }
+    var img=ln.match(/^\s*!\[([^\]]*)\]\(([^)\s]+)\)\s*$/);
+    if(img){
+      closeList();
+      out.push(SAFE_IMG.test(img[2])
+        ? '<figure><img alt="'+escH(img[1])+'" src="'+escH(img[2])+'" data-doc-img="1">'+
+          (img[1]?'<figcaption>'+escH(img[1])+'</figcaption>':'')+'</figure>'
+        : '<p class="imgbad">차단된 이미지 참조 — 허용되지 않은 스킴: '+escH(img[2].slice(0,80))+'</p>');
+      continue;
+    }
+    if(/^\s*$/.test(ln)){ closeList(); continue; }
+    var h=ln.match(/^(#{1,3})\s+(.*)$/);
+    if(h){ closeList(); out.push("<h"+h[1].length+">"+inlineMD(h[2])+"</h"+h[1].length+">"); continue; }
+    if(/^\s*(---|___)\s*$/.test(ln)){ closeList(); out.push("<hr>"); continue; }
+    var li=ln.match(/^\s*[-·*]\s+(.*)$/);
+    if(li){ if(!inList){ out.push("<ul>"); inList=true; } out.push("<li>"+inlineMD(li[1])+"</li>"); continue; }
+    closeList(); out.push("<p>"+inlineMD(ln)+"</p>");
+  }
+  if(inCode) out.push("<pre><code>"+escH(code.join("\n"))+"</code></pre>");
+  closeList();
+  return out.join("");
+}
+function checkDocImages(){
+  var imgs=el("docBody").querySelectorAll("img[data-doc-img]"), chk=el("docImgChk");
+  var total=imgs.length, loaded=0, failed=0;
+  var blocked=el("docBody").querySelectorAll(".imgbad").length;
+  function upd(){
+    chk.textContent = total? ("이미지 "+total+"개 · 로드 "+loaded+" · 실패 "+failed+(blocked?" · 차단 "+blocked:""))
+                           : (blocked? ("이미지 차단 "+blocked+"건") : "이미지 없음");
+    chk.className="imgchk "+((failed||blocked)?"bad":(total&&loaded===total?"ok":""));
+  }
+  upd();
+  Array.prototype.forEach.call(imgs,function(im){
+    if(im.complete){ if(im.naturalWidth>0) loaded++; else failed++; upd(); return; }
+    im.addEventListener("load",function(){ loaded++; upd(); });
+    im.addEventListener("error",function(){ failed++; im.classList.add("imgbad"); upd(); });
+  });
+}
+function setDocBody(text,raw){
+  var b=el("docBody");
+  b.classList.toggle("raw",!!raw);
+  if(raw) b.textContent=text; else b.innerHTML=renderDoc(text);
+  checkDocImages();
+}
+function extractDoc(txt){
+  try{
+    var j=JSON.parse(txt);
+    var v=j.content||j.body||j.text||j.markdown||(j.data&&(j.data.content||j.data.body));
+    return (typeof v==="string") ? v : JSON.stringify(j,null,2);
+  }catch(e){ return txt; }
+}
+function loadLiveDoc(it){
+  var list=App.artifactList, docId=(it&&it.artifactId)||lastArtifactId();
+  var jid=(it&&it.jobId)||App.jobId, urls=[];
+  if(docId) urls.push(App.base+"/api/jobs/"+jid+"/artifacts/"+encodeURIComponent(docId));
+  urls.push(App.base+"/api/jobs/"+jid+"/artifacts");
+  (function tryNext(k){
+    if(k>=urls.length){
+      setDocBody(
+        "런타임에서 문서 본문을 가져오지 못했습니다.\n\n확인된 아티팩트:\n"+
+        (list.map(function(a){ return "  · "+a.id+" ("+a.type+")"; }).join("\n")||"  (없음)")+
+        "\n\n시도한 경로:\n"+urls.map(function(u){ return "  · GET "+u; }).join("\n")+
+        "\n\n런타임의 실제 아티팩트 조회 경로가 다르면 loadLiveDoc()의 urls 배열을 맞춰 주세요.", true);
+      return;
+    }
+    fetch(urls[k]).then(function(res){ if(!res.ok) throw new Error("HTTP "+res.status); return res.text(); })
+      .then(function(txt){ setDocBody(extractDoc(txt)); })
+      .catch(function(){ tryNext(k+1); });
+  })(0);
+}
+// 이미지 검증이 실제로 동작하는지 보려면 데모 문서에도 진짜 이미지가 있어야 한다.
+// 외부 호스트에 의존하지 않도록 SVG data URI로 만든다.
+function flowDiagramURI(){
+  var box=function(x,label,sub,fill){
+    return '<rect x="'+x+'" y="26" width="118" height="46" rx="6" fill="'+fill+'" stroke="#2A2822" stroke-width="2"/>'+
+      '<text x="'+(x+59)+'" y="47" font-family="sans-serif" font-size="12" font-weight="600" fill="#24221D" text-anchor="middle">'+label+'</text>'+
+      '<text x="'+(x+59)+'" y="62" font-family="sans-serif" font-size="9.5" fill="#6B6558" text-anchor="middle">'+sub+'</text>';
+  };
+  var arrow=function(x){ return '<path d="M'+x+' 49 h20" stroke="#2A2822" stroke-width="2"/>'+
+    '<path d="M'+(x+20)+' 49 l-6 -4 v8 z" fill="#2A2822"/>'; };
+  var svg='<svg xmlns="http://www.w3.org/2000/svg" width="580" height="98" viewBox="0 0 580 98">'+
+    '<rect width="580" height="98" fill="#FFFDF5"/>'+
+    box(8,'API client','HR · CSV · SQL','#E2DACA')+arrow(126)+
+    box(154,'/bulkUpload','SCIM BulkRequest','#CDE7E4')+arrow(272)+
+    box(300,'Provisioning','attribute mapping','#CDE7E4')+arrow(418)+
+    box(446,'Target','Entra ID / on-prem AD','#E2DACA')+
+    '<text x="290" y="90" font-family="sans-serif" font-size="9.5" fill="#6B6558" text-anchor="middle">'+
+    '202 Accepted 이후는 비동기 처리 — 202는 완료가 아니라 접수를 뜻한다</text></svg>';
+  return "data:image/svg+xml;utf8,"+encodeURIComponent(svg);
+}
+function demoDoc(it){
+  var req=String((it&&it.prompt)||App.lastPrompt||"(요청 없음)").trim();
+  return [
+    "# "+(req.split("\n")[0].slice(0,70)||"제목 없음"),
+    "",
+    "※ 데모 모드 산출물입니다. 실제 모델 호출 없이 층의 동작만 재생하므로,",
+    "   아래 본문은 파이프라인이 만들어 낼 문서의 형태를 보여 주는 자리표시자입니다.",
+    "   런타임에 연결하면 이 자리에 실제 문서 본문이 표시됩니다.",
+    "",
+    "## 요청",
+    req,
+    "",
+    "## 데이터 흐름",
+    "![데이터 흐름 — API client에서 target directory까지]("+flowDiagramURI()+")",
+    "",
+    "> 이미지 검증용 참조 2건: 아래 하나는 로드에 실패해야 정상입니다.",
+    "",
+    "![로드 실패 확인용 참조](https://invalid.example.invalid/missing-diagram.png)",
+    "![차단 확인용 참조](javascript:alert(1))",
+    "",
+    "## 검수 결과",
+    "Technical QA: PASS — 남은 판단은 사람의 몫입니다.",
+    "",
+    "---",
+    "결재 항목 "+((it&&it.id)||"—")+" · Job "+((it&&it.jobId)||App.jobId||"—")+
+      " · 아티팩트 "+((it&&it.artifacts)!=null?it.artifacts:App.artifacts)+"건"
+  ].join("\n");
+}
+el("btnQueue").addEventListener("click",openQueue);
+el("docBack").addEventListener("click",showQueueView);
+el("tileTray").addEventListener("click",function(){ if(Q.items.length) openQueue(); });
+el("docClose").addEventListener("click",closeDoc);
+el("docApprove").addEventListener("click",function(){ if(decide("approved")) afterDecide(); });
+el("docReject").addEventListener("click",function(){ if(decide("rejected")) afterDecide(); });
+function afterDecide(){ if(Q.items.length) showQueueView(); else closeDoc(); }
+docMask.addEventListener("click",function(e){ if(e.target===docMask) closeDoc(); });
+document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&!docMask.hidden) closeDoc(); });
 
 var last=0, dashAcc=0;
 function loop(ts){
@@ -831,7 +1389,7 @@ function loop(ts){
   });
 
   agents.forEach(function(a){
-    if(scene.active===a.i){
+    if(scene.active===a.i && !a.task){
       var by=Math.round(a.y)-24+Math.round(Math.sin(scene.t/240)*1.2), bx=Math.round(a.x)-3;
       px(ctx,bx,by,7,7,a.def.m); px(ctx,bx+1,by+1,5,5,C.paper);
       px(ctx,bx+2,by+3,3,1,a.def.d); px(ctx,bx+2,by+2,1,3,a.def.d); px(ctx,bx+3,by+7,2,2,a.def.m);
@@ -846,12 +1404,15 @@ function loop(ts){
     px(ctx,tx+3,ty+3,3,3,C.gold); px(ctx,tx+8,ty+3,18,1,C.gold); px(ctx,tx+8,ty+5,13,1,C.gold);
   }
 
+  syncBubbles();
+
   dashAcc+=dt;
   if(dashAcc>250){ dashAcc=0; paintDash(); paintRoster(); }
   requestAnimationFrame(loop);
 }
 
 buildRoster();
+buildBubbles();
 fit();
 try{ var saved=localStorage.getItem("kpo.runtime"); if(saved) el("rtUrl").value=saved; }catch(e){}
 setMode("demo");
@@ -862,3 +1423,5 @@ paintDash(); paintRoster();
 requestAnimationFrame(loop);
 })();
 </script>
+</body>
+</html>
