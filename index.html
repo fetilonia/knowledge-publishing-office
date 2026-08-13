@@ -779,18 +779,34 @@ function createGithubIssue(title,body){
     say("GitHub 토큰이 설정돼 있지 않습니다 — 위 칸에 Issues 쓰기 권한이 있는 토큰을 저장하세요.");
     return Promise.reject(new Error("토큰 없음"));
   }
+  var ghHeaders={
+    "Authorization":"Bearer "+token,
+    "Accept":"application/vnd.github+json",
+    "Content-Type":"application/json"
+  };
+  // 라벨을 이슈 생성과 같은 요청에 넣으면 GitHub가 "labeled" 웹훅을 쏘지
+  // 않는다(opened만 발생) — subagent-execution-claude-code.yml은
+  // issues.labeled로만 트리거되므로, 생성 후 별도 요청으로 라벨을
+  // 붙여야 실제로 파이프라인이 시작된다.
   return fetch("https://api.github.com/repos/"+GH_REPO+"/issues",{
     method:"POST",
-    headers:{
-      "Authorization":"Bearer "+token,
-      "Accept":"application/vnd.github+json",
-      "Content-Type":"application/json"
-    },
-    body:JSON.stringify({title:title,body:body,labels:["kpo:ready"]})
+    headers:ghHeaders,
+    body:JSON.stringify({title:title,body:body})
   }).then(function(res){
     return res.json().then(function(b){
       if(!res.ok) throw new Error((b&&b.message)?b.message:("HTTP "+res.status));
       return b;
+    });
+  }).then(function(issue){
+    return fetch("https://api.github.com/repos/"+GH_REPO+"/issues/"+issue.number+"/labels",{
+      method:"POST",
+      headers:ghHeaders,
+      body:JSON.stringify({labels:["kpo:ready"]})
+    }).then(function(res){
+      return res.json().then(function(b){
+        if(!res.ok) throw new Error((b&&b.message)?b.message:("HTTP "+res.status));
+        return issue;
+      });
     });
   });
 }
