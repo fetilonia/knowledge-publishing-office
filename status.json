@@ -1,9 +1,9 @@
 {
   "schema_version": "0.1.0",
-  "job_id": "JOB-19",
+  "job_id": "JOB-21",
   "state": "RESEARCHING",
-  "updated_at": "2026-08-13T09:33:52Z",
-  "issue_number": 19,
+  "updated_at": "2026-08-13T11:32:52Z",
+  "issue_number": 21,
   "agents": {
     "research-worker": "RUNNING",
     "document-writer": "PENDING",
