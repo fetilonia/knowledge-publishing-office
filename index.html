@@ -1573,6 +1573,22 @@ function showPendingOwnJob(jobs){
   paintDash();
 }
 
+// job.agents 맵에서 새로 COMPLETED로 바뀐 backend만 골라낸다. 상태
+// 전이(RESEARCHING→DRAFTING 등)는 그 직전 단계의 게이트가 이미 통과했다는
+// 뜻이지만, 지금까지는 그 사실이 "상태 전이" 로그 한 줄에 묻혀 있었다 —
+// "누가 결과를 넘겼는지"가 안 보인다는 피드백(2026-08-14)에 따라 상태
+// 전이 로그보다 먼저, 워커 완료 사실 자체를 별도 줄로 남긴다.
+function newlyCompletedAgents(prevAgents,curAgents){
+  var before=prevAgents||{};
+  return LIVE_KNOWN_BACKENDS.filter(function(backend){
+    return curAgents[backend]==="COMPLETED" && before[backend]!=="COMPLETED";
+  });
+}
+function agentDisplayName(backend){
+  var found=AGENTS.filter(function(a){ return a.backend===backend; })[0];
+  return found?found.name:backend;
+}
+
 // "내가 접수한 job"의 상단 타일(상태·진행률·경과·아티팩트)과 티커만
 // 갱신한다 — 오피스 화면의 책상·말풍선은 이제 syncAgentDashboard()가
 // 전체 job을 훑어 독립적으로 그리므로(applyStatus에서 이 함수보다 먼저
@@ -1589,6 +1605,15 @@ function applyOwnJob(cur,baseline){
     App.artifacts=0; App.artifactList=[]; clearHistory();
     App.t0=Date.now(); App.tEnd=0; App.running=true;
     if(!quiet) logAction(-1,"접속 시점에 이미 진행 중이던 Job — "+cur.job_id+" ("+cur.state+")","wait");
+  }
+  if(!quiet){
+    // firstSighting이면 prev가 이 job의 것이 아닐 수 있으므로(다른 job을
+    // 보다가 갈아탄 경우) 비교 기준을 없앤다 — 위 quiet 게이트가 이미
+    // firstSighting을 걸러내므로 사실상 방어적 중복이다.
+    newlyCompletedAgents(prev&&prev.job_id===cur.job_id?prev.agents:null, cur.agents||{})
+      .forEach(function(backend){
+        logAction(-1, agentDisplayName(backend)+" — 결과 전달, 게이트 통과", "ok");
+      });
   }
   if(!prev || prev.state!==cur.state){
     setState(cur.state);
