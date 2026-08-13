@@ -92,8 +92,8 @@
     },
     {
       "job_id": "JOB-25",
-      "state": "QA_REVIEW",
-      "updated_at": "2026-08-13T13:51:06Z",
+      "state": "FAILED",
+      "updated_at": "2026-08-13T17:39:00Z",
       "issue_number": 25,
       "agents": {
         "research-worker": "COMPLETED",
