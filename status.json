@@ -2,7 +2,7 @@
   "schema_version": "0.1.0",
   "job_id": "JOB-TEST-CLI",
   "state": "QA_REVIEW",
-  "updated_at": "2026-08-13T08:46:26Z",
+  "updated_at": "2026-08-13T08:47:06Z",
   "issue_number": 999,
   "agents": {
     "research-worker": "COMPLETED",
