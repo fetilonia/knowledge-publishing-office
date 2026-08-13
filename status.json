@@ -1,17 +1,17 @@
 {
   "schema_version": "0.2.0",
-  "updated_at": "2026-08-13T13:58:58Z",
+  "updated_at": "2026-08-13T13:59:18Z",
   "jobs": [
     {
       "job_id": "JOB-24",
-      "state": "QA_REVIEW",
-      "updated_at": "2026-08-13T13:58:58Z",
+      "state": "FAILED",
+      "updated_at": "2026-08-13T13:59:18Z",
       "issue_number": 24,
       "agents": {
-        "research-worker": "COMPLETED",
-        "document-writer": "COMPLETED",
-        "proofreader": "COMPLETED",
-        "qa-critic": "RUNNING"
+        "research-worker": "PENDING",
+        "document-writer": "PENDING",
+        "proofreader": "PENDING",
+        "qa-critic": "PENDING"
       }
     },
     {
