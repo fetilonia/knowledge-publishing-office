@@ -17,12 +17,12 @@
     },
     {
       "job_id": "JOB-21",
-      "state": "DRAFTING",
-      "updated_at": "2026-08-13T11:41:09Z",
+      "state": "FAILED",
+      "updated_at": "2026-08-13T13:20:00Z",
       "issue_number": 21,
       "agents": {
-        "research-worker": "COMPLETED",
-        "document-writer": "RUNNING",
+        "research-worker": "PENDING",
+        "document-writer": "PENDING",
         "proofreader": "PENDING",
         "qa-critic": "PENDING"
       }
