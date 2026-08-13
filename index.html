@@ -149,6 +149,13 @@ canvas#office{ display:block; image-rendering:pixelated; border-radius:6px; max-
 .histboard .hb-wait .hb-x{ color:#7A5714; }
 .histboard .hb-bad .hb-x{ color:#8A2F28; }
 .histboard .hb-empty{ margin:0; color:#6E5940; }
+.histboard .hb-own .hb-n{ color:#8A2F28; }
+.histboard .tb-dots{ display:inline-flex; gap:2px; margin-left:4px; vertical-align:middle; }
+.histboard .tb-dots i{ width:5px; height:5px; border-radius:1px; background:#B4946E; display:inline-block; font-style:normal; }
+.histboard .tb-dots i.on{ background:#3F5C2E; }
+.histboard.flat .hb-own .hb-n{ color:var(--bad); }
+.histboard.flat .tb-dots i{ background:var(--line); }
+.histboard.flat .tb-dots i.on{ background:var(--ok); }
 /* 캔버스가 좁아지면 코르크 면이 판독 불가가 된다. 그때는 오버레이를 접고
    스테이지 아래 일반 카드로 떨어뜨린다. */
 .histboard.flat{ position:static; width:auto; height:auto; margin-top:10px;
@@ -248,7 +255,7 @@ button.bad:hover:not(:disabled){ background:var(--bad); color:#fff; }
   </div>
 
   <div class="stage">
-    <canvas id="office" role="img" aria-label="픽셀 아트 사무실 평면도. 여섯 책상에서 에이전트가 일하고, 아래쪽에는 Proofreader와 마주보는 Head Director 책상에 거만한 Final Reviewer가 앉아 있으며 그 옆에 결재함이 있습니다. 최종 승인은 결재함에서 사람이 합니다."></canvas>
+    <canvas id="office" role="img" aria-label="픽셀 아트 사무실 평면도. 여섯 책상에서 에이전트가 일하고, 아래쪽에는 Proofreader와 마주보는 Head Director 책상에 거만한 Final Reviewer가 앉아 있으며 그 옆에 결재함이 있습니다. 최종 승인은 결재함에서 사람이 합니다. 오른쪽 벽에는 진행 기록 게시판이, 그 왼쪽에는 진행 중인 모든 주제의 작성 진행률을 보여주는 주제 추적 게시판이 걸려 있습니다."></canvas>
   </div>
 
   <div class="rail" id="roster"></div>
@@ -402,6 +409,16 @@ var STAGE_STATE=["RESEARCHING","DRAFTING","PROOFREADING","QA_REVIEW"];
 // 진행 기록 게시판의 코르크 면 (논리 좌표). HTML 오버레이가 같은 사각형에 정렬된다.
 var BOARD={x:24*T-2, y:4*T, w:6*T+4, h:9*T};
 
+// 주제 추적 게시판(진행 기록 왼쪽) — Technical QA 자리(seat c15)와 진행 기록
+// 게시판(x≈24*T) 사이의 빈 바닥에 놓는다. 이 구간에는 데스크가 없고(가장
+// 오른쪽 데스크는 c14, 폭3이라 c17에서 끝난다) 위쪽 벽 창문도 없다(win()
+// 루프가 c<16과 c>=24만 그린다 — 16~23은 원래도 빈 칸이다). 다만 cooler
+// 비품(FURN "cooler", r:6,c:18)이 앵커 y-14~y+18(row 5.1~7.1) 범위에
+// 그려지므로, 이 게시판은 그보다 아래(row9~)에서 시작해 겹치지 않게 한다.
+// 진행 기록과 폭은 맞추되(같은 무게감) 높이는 짧게 잡아 Head Director
+// 책상(row14)과도 여유를 둔다.
+var BOARD2={x:17*T, y:9*T, w:6*T+4, h:4*T};
+
 var solid=[],r,c;
 for(r=0;r<ROWS;r++){ solid.push(new Array(COLS).fill(false)); }
 function block(rr,cc,w,h){ w=w||1; h=h||1; for(var y=rr;y<rr+h;y++) for(var x=cc;x<cc+w;x++) if(y>=0&&y<ROWS&&x>=0&&x<COLS) solid[y][x]=true; }
@@ -534,6 +551,17 @@ function buildBG(){
   px(g,BOARD.x+BOARD.w+5,BOARD.y-16,1,BOARD.h+22,C.ink);
   px(g,BOARD.x+4,BOARD.y-11,BOARD.w-8,7,C.woodD);
   px(g,BOARD.x+10,BOARD.y+4,3,3,C.gold); px(g,BOARD.x+BOARD.w-13,BOARD.y+4,3,3,C.gold);
+  // 주제 추적 게시판 — 같은 코르크 프레임을 BOARD2 사각형에 다시 그린다.
+  px(g,BOARD2.x-6,BOARD2.y-16,BOARD2.w+12,BOARD2.h+22,C.woodD);
+  px(g,BOARD2.x-4,BOARD2.y-14,BOARD2.w+8,BOARD2.h+18,C.wood);
+  px(g,BOARD2.x,BOARD2.y,BOARD2.w,BOARD2.h,"#CDAD86");
+  px(g,BOARD2.x,BOARD2.y,BOARD2.w,1,"#A98A66"); px(g,BOARD2.x,BOARD2.y+BOARD2.h-1,BOARD2.w,1,"#A98A66");
+  px(g,BOARD2.x-6,BOARD2.y-16,BOARD2.w+12,1,C.ink);
+  px(g,BOARD2.x-6,BOARD2.y+BOARD2.h+5,BOARD2.w+12,1,C.ink);
+  px(g,BOARD2.x-6,BOARD2.y-16,1,BOARD2.h+22,C.ink);
+  px(g,BOARD2.x+BOARD2.w+5,BOARD2.y-16,1,BOARD2.h+22,C.ink);
+  px(g,BOARD2.x+4,BOARD2.y-11,BOARD2.w-8,7,C.woodD);
+  px(g,BOARD2.x+10,BOARD2.y+4,3,3,C.gold); px(g,BOARD2.x+BOARD2.w-13,BOARD2.y+4,3,3,C.gold);
   // 출입문 — 나무 양여닫이
   px(g,10*T,(ROWS-1)*T,2*T,T,C.woodD); px(g,10*T+1,(ROWS-1)*T+2,2*T-2,T-2,C.wood);
   px(g,10*T,(ROWS-1)*T,2*T,2,C.ink); px(g,11*T-1,(ROWS-1)*T+2,2,T-2,C.woodD);
@@ -885,6 +913,20 @@ histBoard.innerHTML='<p class="hb-t">진행 기록</p><div class="hb-list"></div
 stageEl.appendChild(histBoard);
 var histList=histBoard.querySelector(".hb-list");
 
+// ── 주제 추적 게시판 ─────────────────────────────────────────────
+// 진행 기록은 "무슨 사건이 있었나"를 시간순으로 보여주고, 이 게시판은
+// "지금 어떤 주제가 어디까지 왔나"를 job 단위로 보여준다. 페이지를 새로
+// 열어도(=내가 접수하지 않은 job이라도) 폴링 중인 status.json에 있는 모든
+// job을 그대로 보여준다 — 토큰이 필요 없다(status.json 자체가 공개
+// 저장소의 정적 파일이다).
+var topicRev=0, topicDrawn=-1;
+var topicBoard=document.createElement("div");
+topicBoard.className="histboard";
+topicBoard.innerHTML='<p class="hb-t">주제 추적</p><div class="hb-list"></div>';
+stageEl.appendChild(topicBoard);
+var topicList=topicBoard.querySelector(".hb-list");
+function touchTopicBoard(){ topicRev++; }
+
 function logAction(i,text,kind){
   var last=histLog[histLog.length-1];
   if(last && last.i===i && last.text===text) return;
@@ -912,19 +954,56 @@ function paintHistory(){
 function esc(s){ return String(s).replace(/[&<>"]/g,function(ch){
   return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[ch]; }); }
 
+// job.state -> hb-* 색상 분류. QA_REVIEW는 사람 결정을 기다리는 것이므로
+// "완료"가 아니라 "대기"로 표시한다 — 결재함에 이미 올라와 있다는 뜻이다.
+var TOPIC_KIND={FAILED:"bad", APPROVED:"ok", PUBLISHED:"ok", QA_REVIEW:"wait"};
+var TOPIC_MAX_ROWS=4;   // BOARD2 높이(4타일)에 맞춘 상한 — 게시판 크기가 근거다
+function topicKind(state){ return TOPIC_KIND[state]||"run"; }
+
+function paintTopicBoard(){
+  if(topicDrawn===topicRev) return;
+  topicDrawn=topicRev;
+  var jobs=App.mode==="live" ? (App.allJobs||[]) : [];
+  if(!jobs.length){
+    topicList.innerHTML='<p class="hb-empty">'+
+      (App.mode==="live" ? "진행 중인 주제가 없습니다." : "데모 모드에서는 표시하지 않습니다.")+
+      '</p>';
+    return;
+  }
+  var shown=jobs.slice(0,TOPIC_MAX_ROWS), html="";
+  shown.forEach(function(j){
+    var own=j.job_id===App.ownJobId;
+    var completed=Object.keys(j.agents||{}).filter(function(k){ return j.agents[k]==="COMPLETED"; }).length;
+    var dots="";
+    for(var d=0;d<4;d++) dots+='<i class="'+(d<completed?"on":"")+'"></i>';
+    html+='<div class="hb-i hb-'+topicKind(j.state)+(own?" hb-own":"")+'">'+
+          '<span class="hb-d" style="background:'+(own?"#B5514A":"#6E5940")+'"></span>'+
+          '<span class="hb-x"><span class="hb-n">'+esc(j.job_id)+'</span> '+esc(j.state)+
+          '<span class="tb-dots">'+dots+'</span></span></div>';
+  });
+  if(jobs.length>shown.length){
+    html+='<p class="hb-empty">+'+(jobs.length-shown.length)+'건 더 — Job 관제에서 전체 확인</p>';
+  }
+  topicList.innerHTML=html;
+}
+
 var FLAT_BOARD_MIN=112;   // 이보다 좁아지면 코르크 면에 한글이 들어가지 않는다
-function syncBoard(sx,sy,ox,oy){
-  var w=BOARD.w*sx, flat=w<FLAT_BOARD_MIN;
-  if(flat!==histBoard.classList.contains("flat")){
-    histBoard.classList.toggle("flat",flat);
-    if(flat) histBoard.removeAttribute("style");
+function syncCorkBoard(rect,node,sx,sy,ox,oy){
+  var w=rect.w*sx, flat=w<FLAT_BOARD_MIN;
+  if(flat!==node.classList.contains("flat")){
+    node.classList.toggle("flat",flat);
+    if(flat) node.removeAttribute("style");
   }
   if(flat) return;
-  histBoard.style.left=Math.round(BOARD.x*sx+ox)+"px";
-  histBoard.style.top=Math.round(BOARD.y*sy+oy)+"px";
-  histBoard.style.width=Math.round(w)+"px";
-  histBoard.style.height=Math.round(BOARD.h*sy)+"px";
-  histBoard.style.fontSize=Math.max(8.5,+(6.6*sx).toFixed(1))+"px";
+  node.style.left=Math.round(rect.x*sx+ox)+"px";
+  node.style.top=Math.round(rect.y*sy+oy)+"px";
+  node.style.width=Math.round(w)+"px";
+  node.style.height=Math.round(rect.h*sy)+"px";
+  node.style.fontSize=Math.max(8.5,+(6.6*sx).toFixed(1))+"px";
+}
+function syncBoard(sx,sy,ox,oy){
+  syncCorkBoard(BOARD,histBoard,sx,sy,ox,oy);
+  syncCorkBoard(BOARD2,topicBoard,sx,sy,ox,oy);
 }
 
 // 캔버스는 max-width:100%로 축소될 수 있어 논리좌표→CSS 배율이 고정이 아니다.
@@ -933,7 +1012,7 @@ function syncBubbles(){
   var cr=cv.getBoundingClientRect(), sr=stageEl.getBoundingClientRect();
   if(!cr.width) return;
   var sx=cr.width/W, sy=cr.height/HH, ox=cr.left-sr.left, oy=cr.top-sr.top;
-  syncBoard(sx,sy,ox,oy); paintHistory();
+  syncBoard(sx,sy,ox,oy); paintHistory(); paintTopicBoard();
   if(sx!==bubScale){
     bubScale=sx;
     bubLayer.style.setProperty("--bw",Math.max(132,Math.round(5*T*sx))+"px");
@@ -1347,9 +1426,20 @@ function adoptNextNewJob(jobs){
   return false;
 }
 
+// 결재함은 "내가 접수한 job"으로 좁히지 않는다. 이 파이프라인에서 사람의
+// 결정이 필요한 지점은 QA_REVIEW(+pr_number)뿐이고(Final Reviewer는 실제
+// 게이트가 아니라 연출이다 — README "백엔드 매핑" 참고), 다른 방문자가
+// 접수한 job이라도 같은 저장소를 함께 쓰는 협업자라면 결재할 수 있어야
+// 통합 결재함의 의미가 있다. 층(사무실 애니메이션)을 움직이는 것과는
+// 별개다 — 그건 여전히 내 job 또는 Job 관제에서 직접 고른 job만 따라간다.
+function syncApprovalQueue(jobs){
+  jobs.forEach(function(j){ if(j.state==="QA_REVIEW" && j.pr_number) enqueueForJob(j); });
+}
+
 function applyStatus(doc,baseline){
   var jobs=normalizeStatus(doc);
-  App.allJobs=jobs; App.lastDoc=doc;
+  App.allJobs=jobs; App.lastDoc=doc; touchTopicBoard();
+  syncApprovalQueue(jobs);
   if(App.adoptAfter) adoptNextNewJob(jobs);
   var mine=null;
   for(var i=0;i<jobs.length;i++){ if(jobs[i].job_id===App.ownJobId){ mine=jobs[i]; break; } }
@@ -1415,9 +1505,8 @@ function applyOwnJob(cur,baseline){
       say("QA 통과 — 결재함에서 문서를 확인하고 승인하면 해당 PR이 merge됩니다.");
     }
   }
-  // PR이 열린 뒤의 게시에서만 pr_number가 붙는다. 그때는 state가 계속
-  // QA_REVIEW라 위의 전이 블록에 걸리지 않으므로 여기서 따로 본다.
-  if(cur.state==="QA_REVIEW" && cur.pr_number) enqueueForJob(cur);
+  // 결재함 반영은 applyStatus의 syncApprovalQueue가 전체 job을 훑어
+  // 처리한다 — 여기서 cur 하나만 다시 챙기면 이중 처리가 된다.
   App.artifacts=Object.keys(cur.agents||{}).filter(function(k){ return cur.agents[k]==="COMPLETED"; }).length;
   App.lastStatus=cur;
   paintDash();
@@ -1446,7 +1535,7 @@ function startPolling(url){
 }
 
 function setMode(mode){
-  App.mode=mode;
+  App.mode=mode; touchTopicBoard();
   var led=el("led"), label=el("rtLabel"), hint=el("promptHint");
   if(mode==="live"){
     led.className="led live";
@@ -1741,7 +1830,7 @@ el("btnReset").addEventListener("click",function(){
   // 접수 기록도 함께 지운다 — 초기화 후에는 새 요청을 낼 때까지
   // 어떤 job도 따라가지 않는다.
   setOwnJob(null); App.foreignJobId=null; App.foreignJobState=null; App.foreignSig=null;
-  App.allJobs=[];
+  App.allJobs=[]; touchTopicBoard();
   App.running=false; App.jobId=null; App.artifacts=0; App.t0=0; App.tEnd=0; App.demoStage=-1;
   setState("IDLE"); showApprove(false);
   Scene.reset(false); Scene.clearTray(); setProgress(0);
