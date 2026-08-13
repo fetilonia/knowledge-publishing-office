@@ -294,11 +294,14 @@ button.bad:hover:not(:disabled){ background:var(--bad); color:#fff; }
   </div>
   <p class="note">결재함·Job 관제에 쓰는 GitHub PAT입니다(요청 제출에는 필요 없음). <code>knowledge-publishing-agents</code> 하나로 범위를 좁히고 <strong>Pull requests</strong>, <strong>Contents</strong>, <strong>Issues</strong>, <strong>Actions</strong> 쓰기 권한을 주세요. 이 브라우저의 <code>localStorage</code>에만 저장됩니다.</p>
 
-  <div class="tiles">
-    <div class="tile"><div class="k mono">상태</div><div class="v sm"><span class="badge" id="tState">IDLE</span></div></div>
-    <div class="tile wide"><div class="k mono">진행률</div><div class="v" id="tPct">0%</div><div class="pbar"><i id="tBar"></i></div></div>
-    <div class="tile"><div class="k mono">경과</div><div class="v mono" id="tElapsed">0:00</div></div>
-    <div class="tile"><div class="k mono">아티팩트</div><div class="v mono" id="tArt">0</div></div>
+  <div class="tiles" id="tiles">
+    <!-- 상태·진행률·경과·아티팩트 타일은 뺐다 — 오피스 화면이 "내가 접수한
+         job 하나"가 아니라 전체 현황을 보여주는 대시보드가 되면서 그 넷은
+         더 이상 뜻이 없다(하나의 job을 전제한 지표였다). 대신 파이프라인
+         순서대로 에이전트별 "지금 병렬로 몇 건 처리 중인지" 타일을
+         buildAgentCountTiles()가 여기 채운다. 결재 대기·Job(내가 접수한
+         job의 ticket 표시)은 그대로 남긴다 — 둘 다 이 새 모델에서도
+         뜻이 있다. -->
     <div class="tile" id="tileTray"><div class="k mono">결재 대기</div><div class="v mono" id="tTray">0</div></div>
     <div class="tile wide"><div class="k mono">Job</div><div class="v sm mono" id="tJob">—</div></div>
   </div>
@@ -1200,11 +1203,6 @@ function syncBubbles(){
   }
 }
 
-// job-state 스키마의 10개 상태를 모두 덮는다. 빠진 상태가 있으면 배지와 진행률이
-// 그 구간에서 멈춘 것처럼 보인다. PROOFREADING 은 QA 앞의 필수 관문이다.
-var STATE_CLASS={ NEW:"run", RESEARCHING:"run", DRAFTING:"run", PROOFREADING:"run",
-  QA_REVIEW:"wait", REWORK:"wait", APPROVED:"ok", PUBLISHING:"run", PUBLISHED:"ok",
-  FAILED:"bad", IDLE:"" };
 var AGENT_LABEL={ PENDING:"대기", RUNNING:"작업 중", COMPLETED:"완료", WAITING_HUMAN:"사람 대기",
   REWORK_REQUIRED:"재작업", FAILED:"실패", UNWIRED:"미연결" };
 var AGENT_CLASS={ PENDING:"", RUNNING:"run", COMPLETED:"ok", WAITING_HUMAN:"wait",
@@ -1214,17 +1212,13 @@ function setState(s){ App.jobState=s; }
 function setProgress(p){ Scene.setProgress(p); }
 
 function paintDash(){
-  var b=el("tState"); b.textContent=App.jobState;
-  b.className="badge "+(STATE_CLASS[App.jobState]||"");
-  var pct=Math.round(scene.progress*100);
-  el("tPct").textContent=pct+"%"; el("tBar").style.width=pct+"%";
-  el("tArt").textContent=String(App.artifacts);
   el("tTray").textContent=String(scene.tray);
   el("tileTray").classList.toggle("clickable",Q.items.length>0);
   el("tJob").textContent=App.jobId||"—";
-  var end=App.running?Date.now():(App.tEnd||App.t0);
-  var secs=App.t0?Math.max(0,Math.floor((end-App.t0)/1000)):0;
-  el("tElapsed").textContent=Math.floor(secs/60)+":"+String(secs%60).padStart(2,"0");
+  agentCountTiles.forEach(function(t){
+    var n = App.mode==="live" ? agentJobs(t.backend).length : (scene.active===t.i?1:0);
+    t.el.textContent=String(n);
+  });
 }
 
 function paintRoster(){
@@ -1258,6 +1252,26 @@ function buildRoster(){
     box.querySelector(".nm").textContent=(i+1)+". "+d.name;
     box.querySelector(".rl").textContent=d.role;
     node.appendChild(box); rosterEl.appendChild(node);
+  });
+}
+
+// 파이프라인 순서(STAGE_ORDER: 연구→작성→교열→QA)대로 에이전트별 타일을
+// 만든다. AGENTS 배열 순서는 책상 배치 순서라 파이프라인 순서와 다르다.
+// count는 paintDash()가 매번 채운다 — 라이브 모드는 agentJobs(backend).length
+// (지금 이 단계에서 병렬로 도는 job 수), 데모 모드는 지금 활성화된 에이전트
+// 하나만 1이다(데모는 job이 하나뿐이므로).
+var agentCountTiles=[];
+function buildAgentCountTiles(){
+  var tray=el("tileTray");
+  STAGE_ORDER.forEach(function(i){
+    var d=AGENTS[i];
+    var node=document.createElement("div");
+    node.className="tile";
+    node.innerHTML='<div class="k mono"></div><div class="v mono">0</div>';
+    node.querySelector(".k").textContent=d.name;
+    var v=node.querySelector(".v");
+    tray.parentNode.insertBefore(node,tray);
+    agentCountTiles.push({i:i,backend:d.backend,el:v});
   });
 }
 
@@ -2483,6 +2497,7 @@ function loop(ts){
 
 buildRoster();
 buildBubbles();
+buildAgentCountTiles();
 fit();
 try{ var saved=localStorage.getItem("kpo.statusUrl"); if(saved) el("rtUrl").value=saved; }catch(e){}
 // 새로고침해도 접수한 요청은 계속 따라간다(브라우저에만 남는 기록).
