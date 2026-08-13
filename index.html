@@ -210,6 +210,17 @@ button.go:hover:not(:disabled){ opacity:.88; }
     <button type="button" id="rtConnect">상태 폴링 시작</button>
   </div>
 
+  <div class="rt">
+    <span class="led" id="ghTokenLed" aria-hidden="true"></span>
+    <span id="ghTokenLabel" class="mono">GitHub 토큰 미설정</span>
+    <span class="grow"></span>
+    <label class="sr-only" for="ghToken">GitHub 토큰 (Issue 생성용)</label>
+    <input id="ghToken" type="password" class="mono" placeholder="github_pat_… (이 브라우저에만 저장)" spellcheck="false" autocomplete="off">
+    <button type="button" id="ghTokenSave">저장</button>
+    <button type="button" id="ghTokenClear">지우기</button>
+  </div>
+  <p class="note">이 토큰은 어디에도 전송되지 않고 이 브라우저의 <code>localStorage</code>에만 남아, 요청을 제출할 때 GitHub Issue를 직접 생성하는 데만 쓰입니다. <code>knowledge-publishing-agents</code> 저장소 하나에 <strong>Issues: Read and write</strong> 권한만 준 fine-grained PAT를 권장합니다 — 다른 권한은 필요 없습니다.</p>
+
   <div class="tiles">
     <div class="tile"><div class="k mono">상태</div><div class="v sm"><span class="badge" id="tState">IDLE</span></div></div>
     <div class="tile wide"><div class="k mono">진행률</div><div class="v" id="tPct">0%</div><div class="pbar"><i id="tBar"></i></div></div>
@@ -709,6 +720,56 @@ var el=function(id){ return document.getElementById(id); };
 var tickerEl=el("ticker"), rosterEl=el("roster");
 function say(m){ tickerEl.textContent=m; }
 
+// GitHub 토큰 — Issue 자동 생성 전용. 이 브라우저의 localStorage에만 저장하고
+// api.github.com 외에는 어디에도 보내지 않는다. 저장소 소스코드에는 절대
+// 들어가지 않는다 — OFFICE_STATUS_TOKEN과 달리 이건 방문자 개인의 토큰이다.
+var GH_REPO="fetilonia/knowledge-publishing-agents";
+var GH_TOKEN_KEY="kpo.ghToken";
+
+function ghToken(){ try{ return localStorage.getItem(GH_TOKEN_KEY)||""; }catch(e){ return ""; } }
+function paintGhToken(){
+  var has=!!ghToken();
+  el("ghTokenLed").className="led"+(has?" live":"");
+  el("ghTokenLabel").textContent=has?"GitHub 토큰 설정됨":"GitHub 토큰 미설정";
+}
+el("ghTokenSave").addEventListener("click",function(){
+  var v=el("ghToken").value.trim();
+  if(!v){ say("토큰을 입력한 뒤 저장하세요."); el("ghToken").focus(); return; }
+  try{ localStorage.setItem(GH_TOKEN_KEY,v); }
+  catch(e){ say("이 브라우저에 저장할 수 없습니다(localStorage 비활성?)."); return; }
+  el("ghToken").value="";
+  paintGhToken();
+  say("GitHub 토큰을 저장했습니다 — 이 브라우저에만 남습니다.");
+});
+el("ghTokenClear").addEventListener("click",function(){
+  try{ localStorage.removeItem(GH_TOKEN_KEY); }catch(e){}
+  el("ghToken").value="";
+  paintGhToken();
+  say("GitHub 토큰을 지웠습니다.");
+});
+
+function createGithubIssue(title,body){
+  var token=ghToken();
+  if(!token){
+    say("GitHub 토큰이 설정돼 있지 않습니다 — 위 칸에 Issues 쓰기 권한이 있는 토큰을 저장하세요.");
+    return Promise.reject(new Error("토큰 없음"));
+  }
+  return fetch("https://api.github.com/repos/"+GH_REPO+"/issues",{
+    method:"POST",
+    headers:{
+      "Authorization":"Bearer "+token,
+      "Accept":"application/vnd.github+json",
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({title:title,body:body,labels:["kpo:ready"]})
+  }).then(function(res){
+    return res.json().then(function(b){
+      if(!res.ok) throw new Error((b&&b.message)?b.message:("HTTP "+res.status));
+      return b;
+    });
+  });
+}
+
 var stageEl=document.querySelector(".stage");
 var bubLayer=document.createElement("div");
 bubLayer.className="bubbles"; bubLayer.setAttribute("aria-hidden","true");
@@ -1113,7 +1174,9 @@ function setMode(mode){
   if(mode==="live"){
     led.className="led live";
     label.textContent="LIVE · status.json 폴링";
-    hint.textContent="라이브 모드 — 아래 요청 입력은 비활성입니다. 실행은 GitHub Issue에 kpo:ready 라벨을 붙이면 자동 시작됩니다.";
+    hint.textContent=ghToken()
+      ? "라이브 모드 — 요청을 입력하고 제출하면 GitHub Issue가 바로 생성돼 파이프라인이 자동 시작됩니다."
+      : "라이브 모드 — 위에 GitHub 토큰을 먼저 저장해야 요청 제출이 Issue 생성으로 이어집니다.";
   }else{
     led.className="led";
     label.textContent="데모 모드";
@@ -1152,12 +1215,24 @@ el("rtConnect").addEventListener("click",function(){
 
 el("promptForm").addEventListener("submit",function(e){
   e.preventDefault();
-  if(App.mode==="live"){
-    say("라이브 모드에서는 여기서 작업을 시작할 수 없습니다 — GitHub Issue에 kpo:ready 라벨을 붙이면 파이프라인이 자동 실행됩니다.");
-    return;
-  }
   var text=el("promptInput").value.trim();
   if(!text){ say("요청 내용을 입력해 주세요."); el("promptInput").focus(); return; }
+
+  if(App.mode==="live"){
+    App.lastPrompt=text;
+    var title=queueTitle();
+    el("btnRun").disabled=true;
+    say("GitHub Issue를 생성하는 중…");
+    createGithubIssue(title,text).then(function(issue){
+      say("Issue #"+issue.number+" 생성됨 — kpo:ready 라벨이 붙어 파이프라인이 자동 시작됩니다. 잠시 후에도 상태가 안 바뀌면 이슈에서 라벨을 한 번 떼었다 다시 붙여 보세요.");
+      logAction(-1,"Issue #"+issue.number+" 생성 — "+title,"run");
+      el("promptInput").value="";
+    }).catch(function(err){
+      say("Issue 생성 실패: "+err.message);
+    }).then(function(){ el("btnRun").disabled=false; });
+    return;
+  }
+
   App.lastPrompt=text; clearHistory();
   logAction(-1,"요청 접수 — "+text.slice(0,40)+(text.length>40?"…":""),"run");
   showApprove(false);
@@ -1168,6 +1243,13 @@ el("promptForm").addEventListener("submit",function(e){
   App.jobId="DEMO-"+String(Date.now()).slice(-8);
   demoStart();
   el("btnRun").disabled=false;
+});
+
+el("promptInput").addEventListener("keydown",function(e){
+  if(e.key==="Enter" && !e.shiftKey && !e.isComposing){
+    e.preventDefault();
+    el("promptForm").requestSubmit();
+  }
 });
 
 el("btnReset").addEventListener("click",function(){
@@ -1491,6 +1573,7 @@ buildRoster();
 buildBubbles();
 fit();
 try{ var saved=localStorage.getItem("kpo.statusUrl"); if(saved) el("rtUrl").value=saved; }catch(e){}
+paintGhToken();
 setMode("demo");
 Scene.reset(false);
 scene.alive=true;
