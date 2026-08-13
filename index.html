@@ -749,8 +749,19 @@ var Scene={
 var App={
   mode:"demo", base:"", adapter:"", jobId:null, pollTimer:null, pollUrl:"", lastStatus:null,
   t0:0, running:false, artifacts:0, artifactList:[], lastPrompt:"", lastRejectComment:"",
-  jobState:"IDLE", demoTimer:null, demoStage:-1, demoT:0
+  jobState:"IDLE", demoTimer:null, demoStage:-1, demoT:0,
+  // ownJobId: 이 콘솔이 실제로 접수한 요청(=생성한 Issue)의 job_id.
+  // status.json은 저장소 하나를 공유하는 파일이라 언제든 남의 job이나
+  // 직전 job의 잔존 상태가 들어 있다. 요청을 접수한 적이 없는데 층이
+  // 움직이면 안 되므로, 이 값과 일치하는 job만 따라간다.
+  ownJobId:null, foreignJobId:null, foreignJobState:null
 };
+
+var OWN_JOB_KEY="kpo.ownJobId";
+function setOwnJob(id){
+  App.ownJobId=id;
+  try{ id ? localStorage.setItem(OWN_JOB_KEY,id) : localStorage.removeItem(OWN_JOB_KEY); }catch(e){}
+}
 
 var el=function(id){ return document.getElementById(id); };
 var tickerEl=el("ticker"), rosterEl=el("roster");
@@ -1220,30 +1231,59 @@ function uncoveredAgents(cur){
 // 채택하는 경우다. status.json 은 이 콘솔이 시작하지 않은 job(직전 job의
 // 잔존 상태이거나, 지금 CI에서 돌고 있는 남의 job)을 담고 있을 수 있으므로,
 // 그걸 방금 일어난 사건처럼 애니메이션으로 재생하면 안 된다.
+// 이 콘솔이 접수하지 않은 job은 층을 전혀 움직이지 않는다. 상태만 조용히
+// 알리고 에이전트는 대기 상태로 둔다 — 요청한 적 없는데 Researcher가
+// 자료를 수집하기 시작하면 안 된다.
+function showForeignJob(cur){
+  if(App.foreignJobId===cur.job_id && App.foreignJobState===cur.state) return;
+  var firstSighting=App.foreignJobId!==cur.job_id;
+  App.foreignJobId=cur.job_id; App.foreignJobState=cur.state;
+  if(firstSighting){
+    App.jobId=null; App.running=false; App.artifacts=0; App.artifactList=[];
+    App.t0=0; App.tEnd=0;
+    setState("IDLE"); setProgress(0); showApprove(false);
+    // 미연결(poster/final reviewer) 표시는 job과 무관하게 이 상태 소스가
+    // 무엇을 보고하는지에 대한 사실이므로 그대로 유지한다.
+    Scene.reset(false); Scene.clearTray(); Scene.idle(); Scene.setUnwired(uncoveredAgents(cur));
+    agents.forEach(function(a){ a.status="PENDING"; a.setTask(null); });
+    logAction(-1,"다른 Job 진행 중 — "+cur.job_id+" (이 콘솔이 접수한 요청이 아니라 따라가지 않습니다)","wait");
+  }
+  say(App.ownJobId
+    ? "다른 Job("+cur.job_id+" · "+cur.state+")이 진행 중입니다 — 이 콘솔은 "+App.ownJobId+"를 기다립니다."
+    : "다른 Job("+cur.job_id+" · "+cur.state+")이 진행 중입니다 — 요청을 제출하면 그때부터 그 작업만 이 층에 표시됩니다.");
+  paintDash();
+}
+
 function applyStatus(cur,baseline){
+  // 접수한 요청의 job이 아니면 층을 움직이지 않는다.
+  if(!App.ownJobId || App.ownJobId!==cur.job_id){ showForeignJob(cur); return; }
+  App.foreignJobId=null; App.foreignJobState=null;
   var prev=App.lastStatus;
-  if(!prev || prev.job_id!==cur.job_id){
+  var firstSighting=!prev || prev.job_id!==cur.job_id;
+  // 처음 목격한 스냅샷은 "방금 일어난 사건"이 아니다(새로고침 등). 요청
+  // 제출 직후에는 아래 submit 핸들러가 stub lastStatus를 심어두므로
+  // firstSighting이 아니게 되고, 실제 진행은 정상적으로 애니메이션된다.
+  var quiet=baseline||firstSighting;
+  if(firstSighting){
     App.jobId=cur.job_id;
     App.artifacts=0; App.artifactList=[]; clearHistory();
     App.t0=Date.now(); App.tEnd=0; App.running=true;
     Scene.reset(false); Scene.clearTray(); showApprove(false);
     agents.forEach(function(a){ a.status="PENDING"; a.setTask(null); });
-    logAction(-1, baseline
-      ? "접속 시점에 이미 진행 중이던 Job — "+cur.job_id+" ("+cur.state+")"
-      : "Job 감지 — "+cur.job_id, baseline?"wait":"run");
+    logAction(-1,"접속 시점에 이미 진행 중이던 Job — "+cur.job_id+" ("+cur.state+")","wait");
   }
   AGENTS.forEach(function(d,i){
     if(!d.backend) return;
     var status=cur.agents && cur.agents[d.backend];
     if(status===undefined) return;
     if(!prev || !prev.agents || prev.agents[d.backend]!==status){
-      if(baseline) liveAgentStatus(d.backend,status,null,true);
+      if(quiet) liveAgentStatus(d.backend,status,null,true);
       else liveEvent("agent.status.changed",{data:{agent_id:d.backend,status:status}});
     }
   });
   Scene.setUnwired(uncoveredAgents(cur));
   if(!prev || prev.state!==cur.state){
-    if(baseline){
+    if(quiet){
       // 전이 애니메이션(책상 간 인계)과 "상태 전이 →" 히스토리 없이
       // 현재 상태만 반영한다.
       setState(cur.state);
@@ -1320,12 +1360,13 @@ el("rtConnect").addEventListener("click",function(){
     }
     setMode("live");
     try{ localStorage.setItem("kpo.statusUrl",path); }catch(e){}
-    // 첫 응답은 사건이 아니라 스냅샷이다 — baseline으로 채택한다.
     App.lastStatus=null;
-    applyStatus(cur,true);
     startPolling(url);
-    say("상태 폴링 시작 — "+(POLL_INTERVAL_MS/1000)+"초마다 갱신합니다. 지금 화면은 접속 시점의 "
-      +cur.job_id+" 상태이며, 이 접속이 시작한 작업이 아닙니다.");
+    say("상태 폴링 시작 — "+(POLL_INTERVAL_MS/1000)+"초마다 갱신합니다.");
+    // applyStatus를 마지막에 부른다 — 이 job이 남의 것인지/내 것인지에
+    // 대한 구체적인 안내가 위의 일반 메시지를 덮어써야 한다.
+    // 첫 응답은 사건이 아니라 스냅샷이므로 baseline으로 채택한다.
+    applyStatus(cur,true);
   }).catch(function(err){
     el("led").className="led err";
     setMode("demo");
@@ -1344,9 +1385,26 @@ el("promptForm").addEventListener("submit",function(e){
     el("btnRun").disabled=true;
     say("GitHub Issue를 생성하는 중…");
     createGithubIssue(title,text).then(function(issue){
-      say("Issue #"+issue.number+" 생성됨 — kpo:ready 라벨이 붙어 파이프라인이 자동 시작됩니다. 잠시 후에도 상태가 안 바뀌면 이슈에서 라벨을 한 번 떼었다 다시 붙여 보세요.");
-      logAction(-1,"Issue #"+issue.number+" 생성 — "+title,"run");
+      // 여기서부터가 "요청 접수"다. 이 시점 이후로만 층이 움직인다.
+      // job_id 관례는 워크플로(subagent-execution-claude-code.yml)가 정한
+      // `JOB-<issue number>`를 그대로 따른다.
+      var jobId="JOB-"+issue.number;
+      setOwnJob(jobId);
+      App.foreignJobId=null; App.foreignJobState=null;
+      clearHistory();
+      App.jobId=jobId; App.artifacts=0; App.artifactList=[];
+      App.t0=Date.now(); App.tEnd=0; App.running=true;
+      Scene.reset(false); Scene.clearTray(); showApprove(false);
+      agents.forEach(function(a){ a.status="PENDING"; a.setTask(null); });
+      setState("NEW"); setProgress(LIVE_PROGRESS.NEW);
+      // stub 스냅샷 — 다음 폴링에서 이 job을 "처음 목격"으로 취급하지
+      // 않게 해서, 실제 진행(RESEARCHING 등)이 조용히 넘어가지 않고
+      // 정상적으로 애니메이션되게 한다.
+      App.lastStatus={job_id:jobId,state:"NEW",agents:{}};
+      logAction(-1,"요청 접수 — Issue #"+issue.number+" ("+title+")","run");
+      say("Issue #"+issue.number+" 생성됨 — kpo:ready 라벨이 붙어 파이프라인이 자동 시작됩니다. 이 콘솔은 이제 "+jobId+"만 따라갑니다.");
       el("promptInput").value="";
+      paintDash();
     }).catch(function(err){
       say("Issue 생성 실패: "+err.message);
     }).then(function(){ el("btnRun").disabled=false; });
@@ -1374,6 +1432,9 @@ el("promptInput").addEventListener("keydown",function(e){
 
 el("btnReset").addEventListener("click",function(){
   stopPolling(); App.lastStatus=null;
+  // 접수 기록도 함께 지운다 — 초기화 후에는 새 요청을 낼 때까지
+  // 어떤 job도 따라가지 않는다.
+  setOwnJob(null); App.foreignJobId=null; App.foreignJobState=null;
   App.running=false; App.jobId=null; App.artifacts=0; App.t0=0; App.tEnd=0; App.demoStage=-1;
   setState("IDLE"); showApprove(false);
   Scene.reset(false); Scene.clearTray(); setProgress(0);
@@ -1757,6 +1818,8 @@ buildRoster();
 buildBubbles();
 fit();
 try{ var saved=localStorage.getItem("kpo.statusUrl"); if(saved) el("rtUrl").value=saved; }catch(e){}
+// 새로고침해도 접수한 요청은 계속 따라간다(브라우저에만 남는 기록).
+try{ App.ownJobId=localStorage.getItem(OWN_JOB_KEY)||null; }catch(e){}
 paintGhToken();
 setMode("demo");
 Scene.reset(false);
