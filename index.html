@@ -237,7 +237,7 @@ button.bad:hover:not(:disabled){ background:var(--bad); color:#fff; }
     <button type="button" id="ghTokenSave">저장</button>
     <button type="button" id="ghTokenClear">지우기</button>
   </div>
-  <p class="note">이 토큰은 <code>api.github.com</code> 외에는 어디에도 전송되지 않고 이 브라우저의 <code>localStorage</code>에만 남습니다. <code>knowledge-publishing-agents</code> 저장소 하나에만 범위를 좁힌 fine-grained PAT를 쓰세요. 필요한 권한은 넷이며, 없는 권한에 해당하는 동작만 실패하고 나머지는 그대로 동작합니다 — <strong>Issues: Read and write</strong>(요청 제출), <strong>Actions: Read and write</strong>(「초기화」의 실행 취소), <strong>Pull requests: Read and write</strong>(결재함 문서 열람·반려), <strong>Contents: Read and write</strong>(승인 = PR merge). <strong>Contents 쓰기 권한은 저장소에 커밋할 수 있는 권한</strong>이므로, 이 토큰을 저장한 브라우저는 남과 공유하지 마세요.</p>
+  <p class="note"><strong>요청 제출에는 토큰이 필요 없습니다</strong> — 「작업 시작」은 GitHub의 새 이슈 양식을 열어 주고, 인증은 이미 로그인된 GitHub 세션이 합니다. 토큰은 <strong>결재함과 Job 관제에서만</strong> 씁니다(private 저장소를 브라우저에서 직접 읽고 써야 하는 동작들입니다). <code>api.github.com</code> 외에는 어디에도 전송되지 않고 이 브라우저의 <code>localStorage</code>에만 남으며, <code>knowledge-publishing-agents</code> 하나로 범위를 좁힌 fine-grained PAT를 쓰세요. 없는 권한에 해당하는 동작만 실패합니다 — <strong>Pull requests: Read and write</strong>(문서 열람·반려), <strong>Contents: Read and write</strong>(승인 = PR merge), <strong>Issues: Read and write</strong>(반려 의견·재작업 라벨), <strong>Actions: Read and write</strong>(Job 관제의 실행 취소). <strong>Contents 쓰기는 저장소에 커밋할 수 있는 권한</strong>이므로 이 토큰을 저장한 브라우저는 남과 공유하지 마세요.</p>
 
   <div class="tiles">
     <div class="tile"><div class="k mono">상태</div><div class="v sm"><span class="badge" id="tState">IDLE</span></div></div>
@@ -785,7 +785,10 @@ var App={
   // allJobs: 마지막 폴링에서 본 job 목록 전체(내 것 + 남의 것). 초기화
   // 버튼이 무엇을 취소할지 고를 때의 참고용이다.
   ownJobId:null, ownJobSeen:false, foreignJobId:null, foreignJobState:null,
-  foreignSig:null, allJobs:[], lastDoc:null
+  foreignSig:null, allJobs:[], lastDoc:null,
+  // adoptAfter: 요청을 GitHub 양식으로 넘긴 시점에 이미 있던 job_id 집합.
+  // 이 뒤에 새로 나타나는 job을 방금 낸 요청으로 채택한다. null이면 대기 아님.
+  adoptAfter:null
 };
 
 var OWN_JOB_KEY="kpo.ownJobId";
@@ -830,38 +833,27 @@ el("ghTokenClear").addEventListener("click",function(){
   say("GitHub 토큰을 지웠습니다.");
 });
 
-function createGithubIssue(title,body){
-  var token=ghToken();
-  if(!token){
-    say("GitHub 토큰이 설정돼 있지 않습니다 — 위 칸에 Issues 쓰기 권한이 있는 토큰을 저장하세요.");
-    return Promise.reject(new Error("토큰 없음"));
-  }
-  var ghHeaders=ghHeadersFor(token);
-  // 라벨을 이슈 생성과 같은 요청에 넣으면 GitHub가 "labeled" 웹훅을 쏘지
-  // 않는다(opened만 발생) — subagent-execution-claude-code.yml은
-  // issues.labeled로만 트리거되므로, 생성 후 별도 요청으로 라벨을
-  // 붙여야 실제로 파이프라인이 시작된다.
-  return fetch("https://api.github.com/repos/"+GH_REPO+"/issues",{
-    method:"POST",
-    headers:ghHeaders,
-    body:JSON.stringify({title:title,body:body})
-  }).then(function(res){
-    return res.json().then(function(b){
-      if(!res.ok) throw new Error((b&&b.message)?b.message:("HTTP "+res.status));
-      return b;
-    });
-  }).then(function(issue){
-    return fetch("https://api.github.com/repos/"+GH_REPO+"/issues/"+issue.number+"/labels",{
-      method:"POST",
-      headers:ghHeaders,
-      body:JSON.stringify({labels:["kpo:ready"]})
-    }).then(function(res){
-      return res.json().then(function(b){
-        if(!res.ok) throw new Error((b&&b.message)?b.message:("HTTP "+res.status));
-        return issue;
-      });
-    });
-  });
+// 요청 제출은 토큰을 쓰지 않는다. GitHub의 새 이슈 페이지를 제목·본문·라벨이
+// 채워진 채로 열어 주고, 제출은 사용자가 GitHub에서 직접 누른다.
+//
+// 요청 하나 넣으려고 PAT를 발급해 브라우저에 붙여넣게 하는 것은 과한
+// 요구였다. 인증은 이미 브라우저에 있는 GitHub 세션이 하고, 누가 요청할 수
+// 있는지는 저장소 권한이 그대로 통제한다 — private 저장소이므로 협업자가
+// 아니면 이 페이지 자체가 열리지 않는다. 공개 페이지에 시크릿을 심지 않고도
+// 되는 유일한 방법이기도 하다.
+//
+// 라벨이 처음부터 붙은 채로 만들어지므로 GitHub은 labeled가 아니라 opened를
+// 쏜다. 워크플로가 두 이벤트를 모두 받도록 되어 있어야 한다
+// (subagent-execution-claude-code.yml).
+var NEW_ISSUE_MAX=6000;
+function openGithubIssueForm(title,body){
+  var url="https://github.com/"+GH_REPO+"/issues/new"+
+          "?title="+encodeURIComponent(title)+
+          "&labels="+encodeURIComponent("kpo:ready")+
+          "&body="+encodeURIComponent(body);
+  var win=window.open(url,"_blank","noopener");
+  if(!win) return { opened:false, url:url };
+  return { opened:true, url:url };
 }
 
 var stageEl=document.querySelector(".stage");
@@ -1321,9 +1313,43 @@ function showForeignJobs(jobs){
   paintDash();
 }
 
+// 요청을 GitHub 양식으로 넘긴 직후, 지금 파일에 있는 job_id를 기억해 둔다.
+// 그 뒤에 처음 나타나는 새 job이 방금 낸 요청이다.
+function armNewJobAdoption(){
+  setOwnJob(null);
+  App.adoptAfter={};
+  (App.allJobs||[]).forEach(function(j){ App.adoptAfter[j.job_id]=true; });
+  App.foreignSig=null;
+}
+
+// 남이 같은 순간에 요청을 넣었다면 그 job을 잘못 집을 수 있다. 그래서
+// 채택은 한 번만 하고(채택 즉시 해제), Job 관제에서 언제든 옮길 수 있게
+// 해 둔다 — 잘못 집었을 때 되돌릴 방법이 있는 편이 낫다.
+function adoptNextNewJob(jobs){
+  if(!App.adoptAfter) return false;  // 이미 채택했거나 대기 중이 아님
+  for(var i=0;i<jobs.length;i++){
+    if(!App.adoptAfter[jobs[i].job_id]){
+      var id=jobs[i].job_id;
+      App.adoptAfter=null;
+      setOwnJob(id);
+      App.lastStatus=null; App.foreignSig=null;
+      App.jobId=id; App.artifacts=0; App.artifactList=[];
+      App.t0=Date.now(); App.tEnd=0; App.running=true;
+      Scene.reset(false); Scene.clearTray(); showApprove(false);
+      agents.forEach(function(a){ a.status="PENDING"; a.setTask(null); });
+      setState("NEW"); setProgress(LIVE_PROGRESS.NEW);
+      logAction(-1,"요청 접수 확인 — "+id,"run");
+      say(id+" 이(가) 시작됐습니다 — 이 층은 이제 이 작업을 따라갑니다.");
+      return true;
+    }
+  }
+  return false;
+}
+
 function applyStatus(doc,baseline){
   var jobs=normalizeStatus(doc);
   App.allJobs=jobs; App.lastDoc=doc;
+  if(App.adoptAfter) adoptNextNewJob(jobs);
   var mine=null;
   for(var i=0;i<jobs.length;i++){ if(jobs[i].job_id===App.ownJobId){ mine=jobs[i]; break; } }
   if(mine){ App.ownJobSeen=true; applyOwnJob(mine,baseline); return; }
@@ -1425,8 +1451,8 @@ function setMode(mode){
     led.className="led live";
     label.textContent="LIVE · status.json 폴링";
     hint.textContent=ghToken()
-      ? "라이브 모드 — 요청을 입력하고 제출하면 GitHub Issue가 바로 생성돼 파이프라인이 자동 시작됩니다."
-      : "라이브 모드 — 위에 GitHub 토큰을 먼저 저장해야 요청 제출이 Issue 생성으로 이어집니다.";
+      ? "라이브 모드 — 요청을 제출하면 GitHub 새 이슈 양식이 열립니다. 거기서 제출하면 파이프라인이 시작됩니다."
+      : "라이브 모드 — 요청 제출에는 토큰이 필요 없습니다. 결재함과 Job 관제를 쓰려면 위에 토큰을 저장하세요.";
   }else{
     led.className="led";
     label.textContent="데모 모드";
@@ -1472,32 +1498,25 @@ el("promptForm").addEventListener("submit",function(e){
   if(App.mode==="live"){
     App.lastPrompt=text;
     var title=queueTitle();
-    el("btnRun").disabled=true;
-    say("GitHub Issue를 생성하는 중…");
-    createGithubIssue(title,text).then(function(issue){
-      // 여기서부터가 "요청 접수"다. 이 시점 이후로만 층이 움직인다.
-      // job_id 관례는 워크플로(subagent-execution-claude-code.yml)가 정한
-      // `JOB-<issue number>`를 그대로 따른다.
-      var jobId="JOB-"+issue.number;
-      setOwnJob(jobId);
-      App.foreignJobId=null; App.foreignJobState=null; App.foreignSig=null;
-      clearHistory();
-      App.jobId=jobId; App.artifacts=0; App.artifactList=[];
-      App.t0=Date.now(); App.tEnd=0; App.running=true;
-      Scene.reset(false); Scene.clearTray(); showApprove(false);
-      agents.forEach(function(a){ a.status="PENDING"; a.setTask(null); });
-      setState("NEW"); setProgress(LIVE_PROGRESS.NEW);
-      // stub 스냅샷 — 다음 폴링에서 이 job을 "처음 목격"으로 취급하지
-      // 않게 해서, 실제 진행(RESEARCHING 등)이 조용히 넘어가지 않고
-      // 정상적으로 애니메이션되게 한다.
-      App.lastStatus={job_id:jobId,state:"NEW",agents:{}};
-      logAction(-1,"요청 접수 — Issue #"+issue.number+" ("+title+")","run");
-      say("Issue #"+issue.number+" 생성됨 — kpo:ready 라벨이 붙어 파이프라인이 자동 시작됩니다. 이 콘솔은 이제 "+jobId+"만 따라갑니다.");
-      el("promptInput").value="";
-      paintDash();
-    }).catch(function(err){
-      say("Issue 생성 실패: "+err.message);
-    }).then(function(){ el("btnRun").disabled=false; });
+    if(text.length>NEW_ISSUE_MAX){
+      say("요청이 너무 깁니다("+text.length+"자) — "+NEW_ISSUE_MAX+"자 이내로 줄여 주세요. 주소 길이 제한 때문에 GitHub 양식에 다 실리지 않습니다.");
+      return;
+    }
+    var res=openGithubIssueForm(title,text);
+    if(!res.opened){
+      say("팝업이 차단됐습니다 — 이 사이트의 팝업을 허용한 뒤 다시 시도하세요.");
+      return;
+    }
+    // 이슈 번호는 GitHub에서 제출을 마쳐야 정해진다. 그래서 지금은 특정
+    // job을 지정하지 않고, 다음 폴링에서 "새로 나타난 job"을 이 요청의
+    // 결과로 받아들인다(adoptNextNewJob). 토큰이 없으니 이슈 번호를
+    // 물어볼 방법이 없고, 사용자가 번호를 옮겨 적게 하고 싶지도 않다.
+    armNewJobAdoption();
+    clearHistory();
+    logAction(-1,"요청 작성 — GitHub 새 이슈 양식을 열었습니다 ("+title+")","run");
+    say("GitHub 탭에서 «Submit new issue»를 누르면 파이프라인이 시작됩니다 — 시작되면 이 층이 자동으로 그 작업을 따라갑니다.");
+    el("promptInput").value="";
+    paintDash();
     return;
   }
 
@@ -1526,7 +1545,7 @@ el("promptInput").addEventListener("keydown",function(e){
 // 게시하기 전인 실행은 들어 있지도 않다. 지금 실제로 무엇이 돌고 있는지를
 // 아는 쪽은 Actions API이므로 취소 대상은 여기서 가져온다.
 //
-// 이 호출은 방문자 본인의 PAT를 쓴다(createGithubIssue와 같은 토큰).
+// 이 호출은 방문자 본인의 PAT를 쓴다(결재함이 쓰는 것과 같은 토큰).
 // 저장소 소스코드에 들어가는 토큰이 아니므로, "public 페이지에 토큰을 두지
 // 않는다"는 console-status-polling.md의 결정과 어긋나지 않는다. 다만 실행
 // 취소에는 Issues 권한만으로는 부족하고 Actions: Read and write가 필요하다.

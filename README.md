@@ -40,20 +40,32 @@
 
 **초기화**는 이 콘솔의 화면 상태만 되돌린다. 실행을 멈추는 것은 별개의 일이라 Job 관제로 분리했다 — 화면만 정리하려던 사람이 남의 실행까지 취소하게 두지 않기 위해서다.
 
-### GitHub 토큰
+### 요청 제출에는 토큰이 필요 없다
 
-요청 제출(= Issue 생성)과 「초기화」의 실행 취소는 **방문자 본인의** fine-grained PAT로 이루어진다. 이 토큰은 브라우저 `localStorage`에만 저장되고 `api.github.com` 외에는 전송되지 않으며, 저장소 소스코드에는 들어가지 않는다.
+**작업 시작**은 GitHub API를 호출하지 않는다. 제목·본문·`kpo:ready` 라벨이 채워진 GitHub 새 이슈 양식을 새 탭으로 열어 줄 뿐이고, 제출은 사용자가 그 탭에서 직접 누른다. 인증은 이미 로그인된 GitHub 세션이 하고, 누가 요청을 넣을 수 있는지는 저장소 협업자 권한이 그대로 통제한다 — 요청 하나 넣으려고 PAT를 발급해 브라우저에 붙여넣게 하는 것은 과한 요구였다.
 
-`knowledge-publishing-agents` 저장소 하나로 범위를 좁히고 다음 두 권한만 준다.
+라벨이 이슈 생성과 동시에 붙으므로 GitHub은 `labeled`가 아니라 `opened`를 쏜다. `subagent-execution-claude-code.yml`은 두 이벤트를 모두 받는다.
+
+제출한 이슈 번호는 그 탭에서 정해지고 이 탭은 알 수 없으므로, 콘솔은 요청을 넘긴 시점에 있던 job 목록을 기억해 두었다가 다음 폴링에서 **처음 나타나는 새 job**을 자동으로 따라간다(`armNewJobAdoption`/`adoptNextNewJob`). 같은 순간 다른 사람이 요청을 넣었다면 잘못 집을 수 있는데, 그럴 때는 「Job 관제」에서 올바른 job으로 옮기면 된다.
+
+### GitHub 토큰 — 결재함과 Job 관제에서만 쓴다
+
+문서를 읽거나, 승인·반려하거나, 실행을 취소하는 동작은 private 저장소를 브라우저에서 직접 읽고 써야 하므로 **방문자 본인의** fine-grained PAT가 필요하다. 이 토큰은 브라우저 `localStorage`에만 저장되고 `api.github.com` 외에는 전송되지 않으며, 저장소 소스코드에는 들어가지 않는다.
+
+`knowledge-publishing-agents` 저장소 하나로 범위를 좁히고 다음 권한을 준다.
 
 | 권한 | 쓰이는 곳 | 없으면 |
 | --- | --- | --- |
-| **Issues: Read and write** | 요청 제출 — Issue를 만들고 `kpo:ready` 라벨을 붙인다 | 요청 제출 불가 |
-| **Actions: Read and write** | 「Job 관제」 — 진행 중인 실행 목록 조회와 취소 | Job 목록·전환은 되고 취소만 실패 |
 | **Pull requests: Read and write** | 결재함 — PR의 문서 본문 열람, 반려 시 의견 등록과 PR 닫기 | 결재함 열람·반려 불가 |
 | **Contents: Read and write** | 승인 — PR merge | 승인 불가 |
+| **Issues: Read and write** | 반려 시 `kpo:rework` 라벨 재부착 | 반려 후 재작업 미시작 |
+| **Actions: Read and write** | 「Job 관제」 — 진행 중인 실행 목록 조회와 취소 | Job 목록·전환은 되고 취소만 실패 |
 
 권한이 없어도 나머지 동작은 그대로 되므로 필요한 만큼만 주면 된다. 다만 **Contents 쓰기는 저장소에 커밋할 수 있는 권한**이라는 점은 알고 주어야 한다 — merge 엔드포인트가 Pull requests가 아니라 Contents 권한으로 분류되기 때문이지, 이 콘솔이 커밋을 하기 때문은 아니다.
+
+### 왜 서버 없이 이렇게 하는가
+
+토큰을 한 곳(예: GitHub Actions secret으로 빌드에 주입)에 두고 방문자마다 입력하지 않게 할 수는 없을까? **없다.** 이 저장소(`knowledge-publishing-office`)와 배포된 Pages는 모두 **public**이다. 빌드 시 주입한 값은 배포된 `index.html`에 그대로 남아 페이지 소스로 누구나 읽을 수 있다 — `knowledge-publishing-agents`(private)에 대한 Issues·Contents·Pull requests·Actions 쓰기 권한을 가진 토큰을 인터넷에 공개하는 것과 같다. 이 문제를 서버 없이 피하는 유일한 방법이 각자의 토큰을 각자의 브라우저에만 두는 것이다.
 
 파이프라인이 `status.json`을 쓸 때 쓰는 `OFFICE_STATUS_TOKEN`은 이것과 전혀 다른 토큰이다 — CI 시크릿이고, 이 저장소에만 쓰기 권한이 있으며, 브라우저로 내려가지 않는다.
 
