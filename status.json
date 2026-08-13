@@ -1,16 +1,16 @@
 {
   "schema_version": "0.2.0",
-  "updated_at": "2026-08-13T17:47:35Z",
+  "updated_at": "2026-08-13T17:57:09Z",
   "jobs": [
     {
       "job_id": "JOB-31",
-      "state": "DRAFTING",
-      "updated_at": "2026-08-13T17:47:35Z",
+      "state": "PROOFREADING",
+      "updated_at": "2026-08-13T17:57:09Z",
       "issue_number": 31,
       "agents": {
         "research-worker": "COMPLETED",
-        "document-writer": "RUNNING",
-        "proofreader": "PENDING",
+        "document-writer": "COMPLETED",
+        "proofreader": "RUNNING",
         "qa-critic": "PENDING"
       },
       "title": "PowerAutomate Default Security"
