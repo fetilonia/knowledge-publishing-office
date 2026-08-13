@@ -1,17 +1,17 @@
 {
   "schema_version": "0.2.0",
-  "updated_at": "2026-08-13T16:59:17Z",
+  "updated_at": "2026-08-13T16:59:47Z",
   "jobs": [
     {
       "job_id": "JOB-30",
-      "state": "QA_REVIEW",
-      "updated_at": "2026-08-13T16:59:17Z",
+      "state": "FAILED",
+      "updated_at": "2026-08-13T16:59:47Z",
       "issue_number": 30,
       "agents": {
-        "research-worker": "COMPLETED",
-        "document-writer": "COMPLETED",
-        "proofreader": "COMPLETED",
-        "qa-critic": "RUNNING"
+        "research-worker": "PENDING",
+        "document-writer": "PENDING",
+        "proofreader": "PENDING",
+        "qa-critic": "PENDING"
       },
       "title": "PowerAutomate Solution Packaging 관련"
     },
