@@ -188,8 +188,16 @@ button:disabled{ color:var(--muted); opacity:.55; cursor:default; }
 button:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
 button.go{ background:var(--ink); color:var(--page-bg); border-color:var(--ink); }
 button.go:hover:not(:disabled){ opacity:.88; }
+button.bad{ border-color:var(--bad); color:var(--bad); }
+button.bad:hover:not(:disabled){ background:var(--bad); color:#fff; }
 .note{ margin:0; font-size:11.5px; color:var(--muted); line-height:1.65; }
 .note code{ font-family:ui-monospace,Menlo,monospace; font-size:11px; }
+
+.reject-form{ padding:.9rem 1.1rem; border-top:1px solid var(--line); display:flex; flex-direction:column; gap:8px; }
+.reject-form[hidden]{ display:none; }
+.reject-form label{ font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--muted); }
+.reject-form textarea{ min-height:70px; }
+.reject-actions{ display:flex; gap:9px; justify-content:flex-end; }
 </style>
 </head>
 <body>
@@ -254,6 +262,14 @@ button.go:hover:not(:disabled){ opacity:.88; }
       </header>
       <div class="body" id="queueView"><ul class="qlist" id="qList"></ul></div>
       <div class="body" id="docBody" tabindex="0" hidden>불러오는 중…</div>
+      <div class="reject-form" id="rejectForm" hidden>
+        <label for="rejectComment">반려 의견 — Documentor에게 전달할 내용</label>
+        <textarea id="rejectComment" placeholder="예) 3번째 claim의 출처가 부족합니다. MFA 예외 조건을 공식 문서 기준으로 다시 서술해 주세요."></textarea>
+        <div class="reject-actions">
+          <button type="button" id="rejectCancel">취소</button>
+          <button type="button" class="bad" id="rejectConfirm">반려 확정</button>
+        </div>
+      </div>
       <footer>
         <span class="hint" id="docHint">내용을 확인한 뒤 결정하세요. 최종 승인은 사람이 합니다.</span>
         <span class="imgchk" id="docImgChk">—</span>
@@ -336,6 +352,15 @@ var AGENTS=[
 ];
 var BACKEND_TO_IDX={};
 AGENTS.forEach(function(a,i){ if(a.backend) BACKEND_TO_IDX[a.backend]=i; });
+
+// 파이프라인 순서의 단일 정의 — 데모 엔진과 라이브 이벤트 핸들러 둘 다 이
+// 상수만 본다. 실제 순서는 Research → Draft → Proofread → QA → (사람 승인)
+// → Publish다(README의 상태 기계와 동일). Poster(STAGE_PUBLISH)는
+// STAGE_ORDER에 없다 — 승인 신호가 오기 전엔 데모도 라이브도 자동으로
+// Poster를 돌리면 안 된다.
+var STAGE_RESEARCH=0, STAGE_DRAFT=1, STAGE_PROOFREAD=4, STAGE_QA=2, STAGE_PUBLISH=3;
+var STAGE_ORDER=[STAGE_RESEARCH,STAGE_DRAFT,STAGE_PROOFREAD,STAGE_QA];
+var STAGE_STATE=["RESEARCHING","DRAFTING","PROOFREADING","QA_REVIEW"];
 
 // 진행 기록 게시판의 코르크 면 (논리 좌표). HTML 오버레이가 같은 사각형에 정렬된다.
 var BOARD={x:24*T-2, y:4*T, w:6*T+4, h:9*T};
@@ -712,7 +737,7 @@ var Scene={
 
 var App={
   mode:"demo", base:"", adapter:"", jobId:null, pollTimer:null, pollUrl:"", lastStatus:null,
-  t0:0, running:false, artifacts:0, artifactList:[], lastPrompt:"",
+  t0:0, running:false, artifacts:0, artifactList:[], lastPrompt:"", lastRejectComment:"",
   jobState:"IDLE", demoTimer:null, demoStage:-1, demoT:0
 };
 
@@ -956,56 +981,89 @@ function showApprove(on){
   el("btnQueue").textContent="결재함 열기 ("+Q.items.length+"건)";
 }
 
-var DEMO_DUR=[5200,3400,3400,5200,3400];
+var DEMO_DUR=[5200,3400,3400,5200,3400]; // agent별 고유 소요시간(AGENTS 인덱스 기준)
+// STAGE_ORDER/STAGE_STATE는 위(BACKEND_TO_IDX 옆)에서 전역으로 정의한다 —
+// 라이브 job.transition 핸들러도 같은 상수를 쓴다. 예전 코드는 AGENTS
+// 배열 순서(0..4)를 그대로 실행 순서로 썼는데, 그러면 Poster가 QA
+// 다음·사람 승인 전에 돌아버렸다(실제 버그, 데모에만 있었다).
+
 function demoStart(){
-  App.demoStage=-1; App.demoT=0;
+  App.demoStage=-1; App.demoT=0; App.lastRejectComment="";
   setState("RESEARCHING");
   setTimeout(function(){ demoAdvance(0); }, REDUCED?0:3200);
   say("출근 — 다섯 에이전트가 각자 자리로 향합니다.");
 }
-function demoAdvance(i){
+// pos = STAGE_ORDER 안에서의 위치(agent 인덱스가 아니다).
+function demoAdvance(pos){
   if(App.mode!=="demo"||!App.running) return;
-  App.demoStage=i; App.demoT=0;
+  App.demoStage=pos; App.demoT=0;
+  var i=STAGE_ORDER[pos];
   agents.forEach(function(a,j){
-    a.status = j===i?"RUNNING":(j<i?"COMPLETED":"PENDING");
-    if(j>i) a.setTask(null);
+    var jpos=STAGE_ORDER.indexOf(j);
+    if(j===i) a.status="RUNNING";
+    else if(jpos>=0 && jpos<pos) a.status="COMPLETED";
+    else{ a.status="PENDING"; a.setTask(null); } // Poster(3)는 항상 여기 — 승인 전엔 PENDING
   });
   setTask(i,AGENTS[i].verb,"run");
   logAction(i,AGENTS[i].verb+".","run");
   Scene.activate(i);
-  setState(i===0?"RESEARCHING":(i===1?"DRAFTING":(i===2?"QA_REVIEW":"PUBLISHING")));
-  setProgress(0.08+i*0.16);
+  setState(STAGE_STATE[pos]);
+  setProgress(0.08+pos*0.16);
   say(AGENTS[i].name+"이(가) "+AGENTS[i].verb+".");
 }
 function demoTick(dt){
   if(App.mode!=="demo"||!App.running||App.demoStage<0) return;
   App.demoT+=dt;
-  var i=App.demoStage;
+  var pos=App.demoStage, i=STAGE_ORDER[pos];
   if(i===2) scene.qaTicks=Math.min(4,Math.floor(App.demoT/700));
   if(App.demoT>DEMO_DUR[i]){
     App.demoStage=-1;
     agents[i].status="COMPLETED";
-    var handoff = i<AGENTS.length-1 ? (AGENTS[i+1].name+"에게 산출물을 넘깁니다.")
-                                    : "Head Director 책상으로 보고하러 갑니다.";
+    var isLast=pos>=STAGE_ORDER.length-1, nextI=isLast?null:STAGE_ORDER[pos+1];
+    var handoff = isLast ? "Head Director 책상으로 보고하러 갑니다."
+                          : (AGENTS[nextI].name+"에게 산출물을 넘깁니다.");
     setTask(i, handoff, "ok", 3400);
     logAction(i, handoff, "ok");
     App.artifacts++;
-    setProgress(0.08+i*0.16+0.10);
-    if(i<AGENTS.length-1){
-      say(AGENTS[i].name+" → "+AGENTS[i+1].name+" 산출물 전달 중");
-      Scene.handoff(i,i+1,function(){ demoAdvance(i+1); });
+    setProgress(0.08+pos*0.16+0.10);
+    if(!isLast){
+      say(AGENTS[i].name+" → "+AGENTS[nextI].name+" 산출물 전달 중");
+      Scene.handoff(i,nextI,function(){ demoAdvance(pos+1); });
     }else{
       say(AGENTS[i].name+" → Head Director 책상으로 보고하러 가는 중");
       Scene.deliver(i,function(){
         App.running=false; App.tEnd=Date.now();
         setState("QA_REVIEW"); setProgress(0.9);
-        agents.forEach(function(a){ a.status="COMPLETED"; a.setTask(null); });
+        // Poster(3)는 승인 전이라 여전히 PENDING이어야 한다 — 나머지만 COMPLETED로.
+        agents.forEach(function(a,j){ if(j!==3){ a.status="COMPLETED"; a.setTask(null); } });
         enqueue();
         say("Head Director 책상에 보고가 도착 — 최종 승인은 사용자가 직접 합니다.");
         showApprove(true);
       });
     }
   }
+}
+// 승인 이후에만 호출된다 — Poster가 자동 워크플로 밖에서 별도로 도는 유일한 단계다.
+function demoPublish(){
+  App.running=true; App.tEnd=0;
+  setState("PUBLISHING"); setProgress(0.94);
+  say("Head Director 승인 — Poster에게 게시를 넘깁니다.");
+  Scene.handoff(STAGE_QA,STAGE_PUBLISH,function(){
+    agents[STAGE_PUBLISH].status="RUNNING";
+    setTask(STAGE_PUBLISH,AGENTS[STAGE_PUBLISH].verb,"run");
+    logAction(STAGE_PUBLISH,AGENTS[STAGE_PUBLISH].verb+".","run");
+    Scene.activate(STAGE_PUBLISH);
+    say(AGENTS[STAGE_PUBLISH].name+"이(가) "+AGENTS[STAGE_PUBLISH].verb+".");
+    setTimeout(function(){
+      agents[STAGE_PUBLISH].status="COMPLETED";
+      setTask(STAGE_PUBLISH,"Notion 게시를 마쳤습니다.","ok",3600);
+      logAction(STAGE_PUBLISH,"Notion 게시를 마쳤습니다.","ok");
+      Scene.idle();
+      setState("PUBLISHED"); setProgress(1);
+      App.running=false; App.tEnd=Date.now();
+      say("게시 완료 — Job "+App.jobId+" 이 PUBLISHED 상태입니다.");
+    }, REDUCED?0:DEMO_DUR[STAGE_PUBLISH]);
+  });
 }
 
 function liveAgentStatus(agentId,status,detail){
@@ -1049,18 +1107,20 @@ function liveEvent(type,ev){
     setState(d.to); logAction(-1,"상태 전이 → "+d.to,
       d.to==="FAILED"?"bad":(d.to==="APPROVED"?"ok":(d.to==="REWORK"?"wait":"run")));
     if(LIVE_PROGRESS[d.to]!=null) setProgress(LIVE_PROGRESS[d.to]);
-    if(d.to==="DRAFTING") Scene.handoff(0,1,function(){});
-    if(d.to==="PROOFREADING") Scene.handoff(1,4,function(){});   // Documentor → Proofreader
-    if(d.to==="QA_REVIEW") Scene.handoff(4,2,function(){});      // Proofreader → Technical QA
-    if(d.to==="PUBLISHING"){ Scene.handoff(2,3,function(){}); say("승인 완료 — Poster 가 게시합니다."); }
+    // STAGE_ORDER/STAGE_STATE가 유일한 순서 정의다 — 여기서 숫자를 다시
+    // 나열하지 않는다(데모 엔진과 어긋나는 걸 예전에 데모 쪽에서 한 번
+    // 겪었다).
+    var toPos=STAGE_STATE.indexOf(d.to);
+    if(toPos>0) Scene.handoff(STAGE_ORDER[toPos-1],STAGE_ORDER[toPos],function(){});
+    if(d.to==="PUBLISHING"){ Scene.handoff(STAGE_QA,STAGE_PUBLISH,function(){}); say("승인 완료 — Poster 가 게시합니다."); }
     if(d.to==="PUBLISHED"){
       setProgress(1); App.running=false; App.tEnd=Date.now();
       agents.forEach(function(a){ a.setTask(null); });
       say("게시 완료 — Job "+App.jobId+" 이 PUBLISHED 상태입니다.");
     }
     if(d.to==="REWORK"){
-      say("QA 게이트 실패 — 문서 작성자에게 반송되었습니다."); Scene.rework(2,1,function(){});
-      setTask(2,null); setTask(1,"QA 지적사항을 반영해 다시 씁니다.","wait");
+      say("QA 게이트 실패 — 문서 작성자에게 반송되었습니다."); Scene.rework(STAGE_QA,STAGE_DRAFT,function(){});
+      setTask(STAGE_QA,null); setTask(STAGE_DRAFT,"QA 지적사항을 반영해 다시 씁니다.","wait");
     }
     if(d.to==="FAILED"){ Scene.fail(); say("작업 실패: "+(d.reason||"")); App.running=false; App.tEnd=Date.now(); }
     if(d.to==="APPROVED"){
@@ -1261,18 +1321,32 @@ el("btnReset").addEventListener("click",function(){
   say("초기화했습니다. 요청을 입력하면 다시 시작합니다.");
 });
 
-function decide(decision){
+function decide(decision,comment){
   var sel=Q.sel;
   if(App.mode!=="live"){
     if(sel) dequeue(sel.id); else Scene.clearTray();
     logAction(-1,(sel?sel.id+" ":"")+(decision==="approved"?"승인됨":"반려됨"),
       decision==="approved"?"ok":"wait");
     showApprove(Q.items.length>0);
-    setState(decision==="approved"?"APPROVED":"REWORK");
-    setProgress(decision==="approved"?1:0.5);
-    say(decision==="approved"
-      ? ("승인 완료 — "+(sel?sel.id:"전체")+" 을(를) 결재했습니다."+(Q.items.length?(" 남은 "+Q.items.length+"건."):""))
-      : "반려했습니다. 문서 작성자에게 돌아갑니다.");
+    if(decision==="approved"){
+      setState("APPROVED"); setProgress(0.86);
+      say("승인 완료 — "+(sel?sel.id:"전체")+" 을(를) 결재했습니다."+(Q.items.length?(" 남은 "+Q.items.length+"건."):""));
+      demoPublish(); // Poster는 여기서만 시작한다 — 승인 전에는 절대 돌지 않는다
+    }else{
+      // 반려는 상태 배지만 바꾸고 끝나면 안 된다 — 데모 엔진 자체를
+      // Documentor 단계에서 다시 돌려야 재작업이 실제로 보인다(게시판
+      // 기록·과제 말풍선·에이전트 상태 전부 demoAdvance가 갱신한다).
+      App.running=true;
+      App.lastRejectComment=String(comment||"").trim();
+      setState("REWORK"); setProgress(0.5);
+      logAction(-1,"QA 게이트 실패 — 문서 작성자에게 반송되었습니다"+
+        (App.lastRejectComment?(": "+App.lastRejectComment):"")+".","wait");
+      say("반려했습니다 — 산출물이 Documentor에게 돌아갑니다.");
+      Scene.rework(STAGE_QA,STAGE_DRAFT,function(){
+        demoAdvance(STAGE_ORDER.indexOf(STAGE_DRAFT)); // Documentor의 STAGE_ORDER 위치에서 재개
+        if(App.lastRejectComment) setTask(STAGE_DRAFT,"반려 의견 반영 중: "+App.lastRejectComment,"wait");
+      });
+    }
     return true;
   }
   var actor=el("actorId").value.trim();
@@ -1319,7 +1393,7 @@ function dequeue(id){
 }
 
 var docMask=el("docMask");
-function closeDoc(){ docMask.hidden=true; }
+function closeDoc(){ docMask.hidden=true; hideRejectForm(); }
 function showQueueView(){
   Q.sel=null;
   el("docTitle").textContent="결재함";
@@ -1327,6 +1401,7 @@ function showQueueView(){
     (App.mode==="live"?("LIVE "+App.adapter):"데모 모드");
   el("queueView").hidden=false; el("docBody").hidden=true;
   el("docBack").hidden=true; el("docReject").hidden=true; el("docApprove").hidden=true;
+  el("rejectForm").hidden=true;
   el("docImgChk").textContent="";
   el("docHint").textContent="확인할 항목을 선택하세요.";
   paintQueue();
@@ -1358,6 +1433,7 @@ function openItem(it){
     (App.mode==="live"?("LIVE "+App.adapter):"데모 모드");
   el("queueView").hidden=true; el("docBody").hidden=false;
   el("docBack").hidden=false; el("docReject").hidden=false; el("docApprove").hidden=false;
+  el("rejectForm").hidden=true;
   el("docHint").textContent="내용을 확인한 뒤 결정하세요. 최종 승인은 사람이 합니다.";
   setDocBody("문서를 불러오는 중…",true);
   el("docBody").focus();
@@ -1474,49 +1550,97 @@ function flowDiagramURI(){
     '<path d="M'+(x+20)+' 49 l-6 -4 v8 z" fill="#2A2822"/>'; };
   var svg='<svg xmlns="http://www.w3.org/2000/svg" width="580" height="98" viewBox="0 0 580 98">'+
     '<rect width="580" height="98" fill="#FFFDF5"/>'+
-    box(8,'API client','HR · CSV · SQL','#E2DACA')+arrow(126)+
-    box(154,'/bulkUpload','SCIM BulkRequest','#CDE7E4')+arrow(272)+
-    box(300,'Provisioning','attribute mapping','#CDE7E4')+arrow(418)+
-    box(446,'Target','Entra ID / on-prem AD','#E2DACA')+
+    box(8,'Research','근거·source 수집','#E2DACA')+arrow(126)+
+    box(154,'Draft','claim 기반 초안','#CDE7E4')+arrow(272)+
+    box(300,'QA','스키마·게이트 검증','#CDE7E4')+arrow(418)+
+    box(446,'Human','최종 승인','#E2DACA')+
     '<text x="290" y="90" font-family="sans-serif" font-size="9.5" fill="#6B6558" text-anchor="middle">'+
-    '202 Accepted 이후는 비동기 처리 — 202는 완료가 아니라 접수를 뜻한다</text></svg>';
+    '이 파이프라인의 4단계 — 요청 내용과 무관하게 항상 같다(데모에서는 실제로 돌지 않는다)</text></svg>';
   return "data:image/svg+xml;utf8,"+encodeURIComponent(svg);
+}
+// 요청 문장을 절 단위로 대충 쪼갠다 — 실제 분석이 아니라, 데모 모드가 입력을
+// 완전히 무시하지 않고 있다는 걸 보여주기 위한 기계적 추출이다. 진짜 claim
+// 분해는 research-worker(Track A/B 어느 쪽이든)만 할 수 있다.
+function splitRequestClauses(req){
+  return req.split(/[.?!\n]|,\s+|그리고|및|(?:와|과)\s+/)
+    .map(function(s){ return s.trim(); })
+    .filter(function(s){ return s.length>3; })
+    .slice(0,5);
 }
 function demoDoc(it){
   var req=String((it&&it.prompt)||App.lastPrompt||"(요청 없음)").trim();
+  var firstLine=req.split("\n")[0].slice(0,70)||"제목 없음";
+  var clauses=splitRequestClauses(req);
+  var clauseList=clauses.length
+    ? clauses.map(function(c){ return "- "+c; }).join("\n")
+    : "- (추출할 절이 없습니다 — 요청이 너무 짧거나 비어 있습니다)";
   return [
-    "# "+(req.split("\n")[0].slice(0,70)||"제목 없음"),
+    "# "+firstLine,
     "",
-    "※ 데모 모드 산출물입니다. 실제 모델 호출 없이 층의 동작만 재생하므로,",
-    "   아래 본문은 파이프라인이 만들어 낼 문서의 형태를 보여 주는 자리표시자입니다.",
-    "   런타임에 연결하면 이 자리에 실제 문서 본문이 표시됩니다.",
+    "> **데모 모드 산출물입니다.** 실제 모델을 호출하지 않고 층의 동작만 재생합니다.",
+    "> 아래 두 섹션은 입력하신 요청 문장을 그대로 인용하고 기계적으로 나눈 것일 뿐,",
+    "> 실제 리서치나 판단은 들어 있지 않습니다 — 그래서 매번 같은 틀이지만 내용은",
+    "> 요청마다 달라집니다. 진짜 문서를 보려면 라이브 모드에서 이슈를 등록해",
+    "> 실제 파이프라인을 돌려야 합니다.",
     "",
-    "## 요청",
-    req,
+    "## 요청 원문",
+    "> "+req.replace(/\n/g,"\n> "),
     "",
-    "## 데이터 흐름",
-    "![데이터 흐름 — API client에서 target directory까지]("+flowDiagramURI()+")",
+    "## 요청에서 기계적으로 나눈 항목 (분석 아님)",
+    clauseList,
+    "",
+  ].concat(App.lastRejectComment ? [
+    "## 반영해야 할 반려 의견",
+    "> "+App.lastRejectComment.replace(/\n/g,"\n> "),
+    "",
+  ] : []).concat([
+    "## 파이프라인 구조 (참고용 — 요청 내용과 무관하게 항상 같은 그림)",
+    "![Research → Draft → QA → Human 4단계]("+flowDiagramURI()+")",
     "",
     "> 이미지 검증용 참조 2건: 아래 하나는 로드에 실패해야 정상입니다.",
     "",
     "![로드 실패 확인용 참조](https://invalid.example.invalid/missing-diagram.png)",
     "![차단 확인용 참조](javascript:alert(1))",
     "",
-    "## 검수 결과",
-    "Technical QA: PASS — 남은 판단은 사람의 몫입니다.",
+    "## 검수 결과 (데모)",
+    "Technical QA: PASS(재생) — 실제 QA 판단이 아니라 데모 시퀀스가 여기까지 왔다는 표시입니다.",
     "",
     "---",
     "결재 항목 "+((it&&it.id)||"—")+" · Job "+((it&&it.jobId)||App.jobId||"—")+
       " · 아티팩트 "+((it&&it.artifacts)!=null?it.artifacts:App.artifacts)+"건"
-  ].join("\n");
+  ]).join("\n");
 }
 el("btnQueue").addEventListener("click",openQueue);
 el("docBack").addEventListener("click",showQueueView);
 el("tileTray").addEventListener("click",function(){ if(Q.items.length) openQueue(); });
 el("docClose").addEventListener("click",closeDoc);
 el("docApprove").addEventListener("click",function(){ if(decide("approved")) afterDecide(); });
-el("docReject").addEventListener("click",function(){ if(decide("rejected")) afterDecide(); });
-function afterDecide(){ if(Q.items.length) showQueueView(); else closeDoc(); }
+
+// 반려는 클릭 한 번으로 바로 확정하지 않는다 — 의견을 받아야 Documentor가
+// 무엇을 고칠지 안다. 확정 전까지는 아무 상태도 바뀌지 않는다.
+function showRejectForm(){
+  el("docReject").hidden=true; el("docApprove").hidden=true; el("docBack").hidden=true;
+  el("rejectForm").hidden=false;
+  el("rejectComment").value="";
+  el("rejectComment").focus();
+}
+function hideRejectForm(){
+  el("rejectForm").hidden=true;
+  el("docReject").hidden=false; el("docApprove").hidden=false; el("docBack").hidden=false;
+}
+el("docReject").addEventListener("click",showRejectForm);
+el("rejectCancel").addEventListener("click",hideRejectForm);
+el("rejectConfirm").addEventListener("click",function(){
+  var comment=el("rejectComment").value.trim();
+  if(!comment){ say("반려 의견을 입력해야 Documentor에게 전달할 수 있습니다."); el("rejectComment").focus(); return; }
+  hideRejectForm();
+  if(decide("rejected",comment)) afterDecide();
+});
+
+function afterDecide(){
+  hideRejectForm();
+  if(Q.items.length) showQueueView(); else closeDoc();
+}
 docMask.addEventListener("click",function(e){ if(e.target===docMask) closeDoc(); });
 document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&!docMask.hidden) closeDoc(); });
 
