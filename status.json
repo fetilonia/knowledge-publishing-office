@@ -1,16 +1,16 @@
 {
   "schema_version": "0.2.0",
-  "updated_at": "2026-08-13T16:22:20Z",
+  "updated_at": "2026-08-13T16:30:13Z",
   "jobs": [
     {
       "job_id": "JOB-29",
-      "state": "DRAFTING",
-      "updated_at": "2026-08-13T16:22:20Z",
+      "state": "PROOFREADING",
+      "updated_at": "2026-08-13T16:30:13Z",
       "issue_number": 29,
       "agents": {
         "research-worker": "COMPLETED",
-        "document-writer": "RUNNING",
-        "proofreader": "PENDING",
+        "document-writer": "COMPLETED",
+        "proofreader": "RUNNING",
         "qa-critic": "PENDING"
       },
       "title": "okta OIDC 연결을 통한 Entra IdP 허브 프로비저닝"
