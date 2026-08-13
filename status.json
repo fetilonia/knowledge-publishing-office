@@ -1,7 +1,20 @@
 {
   "schema_version": "0.2.0",
-  "updated_at": "2026-08-13T16:33:06Z",
+  "updated_at": "2026-08-13T16:37:34Z",
   "jobs": [
+    {
+      "job_id": "JOB-30",
+      "state": "DRAFTING",
+      "updated_at": "2026-08-13T16:37:34Z",
+      "issue_number": 30,
+      "agents": {
+        "research-worker": "COMPLETED",
+        "document-writer": "RUNNING",
+        "proofreader": "PENDING",
+        "qa-critic": "PENDING"
+      },
+      "title": "PowerAutomate Solution Packaging 관련"
+    },
     {
       "job_id": "JOB-29",
       "state": "DRAFTING",
@@ -14,19 +27,6 @@
         "qa-critic": "PENDING"
       },
       "title": "okta OIDC 연결을 통한 Entra IdP 허브 프로비저닝"
-    },
-    {
-      "job_id": "JOB-30",
-      "state": "RESEARCHING",
-      "updated_at": "2026-08-13T16:31:11Z",
-      "issue_number": 30,
-      "agents": {
-        "research-worker": "RUNNING",
-        "document-writer": "PENDING",
-        "proofreader": "PENDING",
-        "qa-critic": "PENDING"
-      },
-      "title": "PowerAutomate Solution Packaging 관련"
     },
     {
       "job_id": "JOB-28",
