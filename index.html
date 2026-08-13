@@ -1542,15 +1542,23 @@ function ghHeadersFor(token){
   };
 }
 
-function ghErrorMessage(res,body){
+// needed: 이 호출이 실제로 요구하는 권한. 반드시 호출부마다 넘긴다 —
+// fine-grained PAT는 권한이 없을 때 403이 아니라 404로도 답하므로 "권한
+// 부족"과 "그런 리소스 없음"을 사용자가 구분할 수 없고, 그래서 어떤 권한을
+// 켜야 하는지 메시지가 직접 알려 줘야 한다. 예전에는 이 함수가 어떤 호출에
+// 대해서든 Actions 권한을 안내했는데, 결재함의 문서 열람이 실패했을 때도
+// Actions를 켜라고 잘못 안내했다(정작 필요한 건 Pull requests/Contents다).
+function ghErrorMessage(res,body,needed){
   var msg=(body&&body.message)?body.message:("HTTP "+res.status);
   if(res.status===403||res.status===404){
-    // fine-grained PAT에 Actions 권한이 없으면 404로도 돌아온다 — 권한
-    // 부족과 "그런 워크플로 없음"을 사용자가 구분할 수 없으므로 함께 알린다.
-    msg+=" — 토큰에 Actions: Read and write 권한이 있는지 확인하세요.";
+    msg+=" — 토큰에 "+(needed||"해당 리소스에 대한")+" 권한이 있는지 확인하세요.";
   }
   return msg;
 }
+var PERM_ACTIONS="Actions: Read and write";
+var PERM_PR="Pull requests: Read and write";
+var PERM_CONTENTS="Contents: Read and write";
+var PERM_ISSUES="Issues: Read and write";
 
 function listActiveRuns(){
   var token=ghToken();
@@ -1559,7 +1567,7 @@ function listActiveRuns(){
           GH_WORKFLOW_FILE+"/runs?per_page=50";
   return fetch(url,{headers:ghHeadersFor(token),cache:"no-store"}).then(function(res){
     return res.json().then(function(b){
-      if(!res.ok) throw new Error(ghErrorMessage(res,b));
+      if(!res.ok) throw new Error(ghErrorMessage(res,b,PERM_ACTIONS));
       return (b.workflow_runs||[]).filter(function(r){
         return ACTIVE_RUN_STATUSES.indexOf(r.status)>=0;
       });
@@ -1576,7 +1584,7 @@ function cancelRun(id){
     // 것이므로 "취소 실패"로 볼 이유가 없다 — 목적은 이미 달성됐다.
     if(res.status===202||res.status===409) return;
     return res.json().catch(function(){ return null; }).then(function(b){
-      throw new Error(ghErrorMessage(res,b));
+      throw new Error(ghErrorMessage(res,b,PERM_ACTIONS));
     });
   });
 }
@@ -1780,7 +1788,9 @@ function decide(decision,comment){
   var check=function(res){
     if(res.status===204) return null;
     return res.json().then(function(b){
-      if(!res.ok) throw new Error(ghErrorMessage(res,b));
+      // 승인은 merge(Contents), 반려는 코멘트(Issues) + PR 닫기(Pull requests).
+      if(!res.ok) throw new Error(ghErrorMessage(res,b,
+        decision==="approved" ? PERM_CONTENTS : (PERM_ISSUES+" / "+PERM_PR)));
       return b;
     });
   };
@@ -1851,7 +1861,7 @@ function startRework(sel,h){
     .then(function(res){
       if(!res.ok){
         return res.json().catch(function(){ return null; }).then(function(b){
-          throw new Error(ghErrorMessage(res,b));
+          throw new Error(ghErrorMessage(res,b,PERM_ISSUES));
         });
       }
       return true;
@@ -2062,7 +2072,8 @@ function loadLiveDoc(it){
   var h=ghHeadersFor(token);
   var check=function(res){
     return res.json().then(function(b){
-      if(!res.ok) throw new Error(ghErrorMessage(res,b));
+      // PR 파일 목록은 Pull requests, 파일 본문(contents_url)은 Contents다.
+      if(!res.ok) throw new Error(ghErrorMessage(res,b,PERM_PR+" / "+PERM_CONTENTS));
       return b;
     });
   };
