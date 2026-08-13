@@ -1,7 +1,20 @@
 {
   "schema_version": "0.2.0",
-  "updated_at": "2026-08-13T16:44:20Z",
+  "updated_at": "2026-08-13T16:57:45Z",
   "jobs": [
+    {
+      "job_id": "JOB-22",
+      "state": "APPROVED",
+      "updated_at": "2026-08-13T16:57:45Z",
+      "issue_number": 22,
+      "agents": {
+        "research-worker": "COMPLETED",
+        "document-writer": "COMPLETED",
+        "proofreader": "COMPLETED",
+        "qa-critic": "COMPLETED"
+      },
+      "pr_number": 23
+    },
     {
       "job_id": "JOB-30",
       "state": "PROOFREADING",
@@ -88,19 +101,6 @@
         "proofreader": "PENDING",
         "qa-critic": "PENDING"
       }
-    },
-    {
-      "job_id": "JOB-22",
-      "state": "QA_REVIEW",
-      "updated_at": "2026-08-13T13:16:37Z",
-      "issue_number": 22,
-      "agents": {
-        "research-worker": "COMPLETED",
-        "document-writer": "COMPLETED",
-        "proofreader": "COMPLETED",
-        "qa-critic": "COMPLETED"
-      },
-      "pr_number": 23
     }
   ]
 }
