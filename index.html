@@ -183,6 +183,25 @@ canvas#office{ display:block; image-rendering:pixelated; border-radius:6px; max-
 .histboard.flat .hb-wait .hb-x{ color:var(--warn); }
 .histboard.flat .hb-bad .hb-x{ color:var(--bad); }
 
+/* 주제 추적 팝업의 전체 목록 — 코르크 미리보기(.hb-i, 위)와 달리 Job과
+   제목을 별도 칸으로 나눈다. 모달 안(.doc .body)에 그려지므로 캔버스
+   고정색이 아니라 테마 토큰을 쓴다 — .histboard.flat과 같은 이유. */
+.topicTable{ width:100%; border-collapse:collapse; font-size:13px; }
+.topicTable th,.topicTable td{ text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:middle; }
+.topicTable th{ font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:600; }
+.topicTable td.tt-job{ font-family:ui-monospace,Menlo,monospace; white-space:nowrap; color:var(--ink); }
+.topicTable tr.own td.tt-job{ color:var(--bad); font-weight:700; }
+.topicTable .tt-pr{ font-size:11px; color:var(--muted); }
+.topicTable td.tt-title{ max-width:0; width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.topicTable td.tt-state{ white-space:nowrap; }
+.topicTable td.tt-state.hb-bad{ color:var(--bad); }
+.topicTable td.tt-state.hb-wait{ color:var(--warn); }
+.topicTable td.tt-state.hb-ok{ color:var(--ok); }
+.topicTable td.tt-dots{ white-space:nowrap; }
+/* .tb-dots i의 색은 .histboard.flat .tb-dots i(위)가 이미 처리한다 —
+   #boardModalList가 그 .histboard.flat 조상 안에 있으므로 여기서
+   다시 정의할 필요가 없다. */
+
 /* 게시판 위 나무 명패 — 실제 텍스트는 여기, 명판 자체의 나무 그림은
    캔버스가 그린다(BOARD.y-11 자리). flat 카드로 접히면 명패 그림이
    사라지므로 이 라벨도 함께 숨긴다(.hb-t가 카드 헤딩으로 대신한다). */
@@ -1031,14 +1050,20 @@ function paintHistory(){
 var TOPIC_KIND={FAILED:"bad", APPROVED:"ok", PUBLISHED:"ok", QA_REVIEW:"wait"};
 var TOPIC_MAX_ROWS=3;   // BOARD2 축소(4타일)에 맞춘 미리보기 상한 — 전체는 확장 팝업에서
 function topicKind(state){ return TOPIC_KIND[state]||"run"; }
-function topicRowHtml(j){
-  var own=j.job_id===App.ownJobId;
+function progressDots(j){
   var completed=Object.keys(j.agents||{}).filter(function(k){ return j.agents[k]==="COMPLETED"; }).length;
   var dots=""; for(var d=0;d<4;d++) dots+='<i class="'+(d<completed?"on":"")+'"></i>';
+  return dots;
+}
+// 코르크 면 미리보기는 job_id만 보여준다(title까지 넣으면 좁은 줄에서
+// 지저분해진다) — 전체 목록은 renderTopicTable()의 팝업 표에서 Job과
+// 제목을 별도 칸으로 나눠 보여준다.
+function topicRowHtml(j){
+  var own=j.job_id===App.ownJobId;
   return '<div class="hb-i hb-'+topicKind(j.state)+(own?" hb-own":"")+'">'+
         '<span class="hb-d" style="background:'+(own?"#B5514A":"#6E5940")+'"></span>'+
         '<span class="hb-x"><span class="hb-n">'+esc(j.job_id)+'</span> '+esc(j.state)+
-        '<span class="tb-dots">'+dots+'</span></span></div>';
+        '<span class="tb-dots">'+progressDots(j)+'</span></span></div>';
 }
 function currentTopicJobs(){ return App.mode==="live" ? (App.allJobs||[]) : []; }
 function renderTopicRows(jobs){
@@ -1046,6 +1071,23 @@ function renderTopicRows(jobs){
     (App.mode==="live" ? "진행 중인 주제가 없습니다." : "데모 모드에서는 표시하지 않습니다.")+'</p>';
   var html=""; jobs.forEach(function(j){ html+=topicRowHtml(j); });
   return html;
+}
+// 팝업 전용 — Job(식별자)과 제목을 별도 칸으로 나눈 표. 코르크 미리보기는
+// 계속 job_id만 쓰므로(위 topicRowHtml) 여기서만 title을 노출한다.
+function renderTopicTable(jobs){
+  if(!jobs.length) return '<p class="hb-empty">'+
+    (App.mode==="live" ? "진행 중인 주제가 없습니다." : "데모 모드에서는 표시하지 않습니다.")+'</p>';
+  var rows=jobs.map(function(j){
+    var own=j.job_id===App.ownJobId;
+    return '<tr'+(own?' class="own"':'')+'>'+
+      '<td class="tt-job">'+esc(j.job_id)+(j.pr_number?(' <span class="tt-pr">PR #'+esc(j.pr_number)+'</span>'):'')+'</td>'+
+      '<td class="tt-title">'+esc(j.title||"—")+'</td>'+
+      '<td class="tt-state hb-'+topicKind(j.state)+'">'+esc(j.state)+'</td>'+
+      '<td class="tt-dots"><span class="tb-dots">'+progressDots(j)+'</span></td>'+
+      '</tr>';
+  }).join("");
+  return '<table class="topicTable"><thead><tr><th>Job</th><th>제목</th><th>상태</th><th>진행</th></tr></thead>'+
+    '<tbody>'+rows+'</tbody></table>';
 }
 function paintTopicBoard(){
   if(topicDrawn===topicRev) return;
@@ -1920,8 +1962,8 @@ function refreshBoardModal(){
     var jobs=currentTopicJobs();
     el("boardTitle").textContent="주제 추적";
     el("boardMeta").textContent=jobs.length+"건 · "+(App.mode==="live"?"LIVE":"데모");
-    el("boardModalList").innerHTML=renderTopicRows(jobs);
-    el("boardHint").textContent="이름이 강조된 항목이 지금 이 콘솔이 따라가는 job입니다.";
+    el("boardModalList").innerHTML=renderTopicTable(jobs);
+    el("boardHint").textContent="굵게 강조된 행이 지금 이 콘솔이 따라가는 job입니다.";
   }
 }
 
