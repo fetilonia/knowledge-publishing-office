@@ -13,25 +13,26 @@
 | 모드 | 동작 | 필요 조건 |
 | --- | --- | --- |
 | **Demo** | 실제 모델 호출 없이 5단계 파이프라인 전체를 재생한다. | 없음. 페이지를 열면 바로 동작한다. |
-| **Live** | 런타임에 붙어 실제 Job을 만들고 SSE 이벤트로 사무실을 움직인다. | 로컬에서 실행 중인 Knowledge Publishing Runtime. |
+| **Live** | 이 저장소의 `status.json`을 폴링해 실제 파이프라인 진행을 사무실에 반영한다. | 없음(읽기 전용). 요청 제출과 실행 취소에만 개인 PAT가 필요하다. |
 
 ## Live 모드 연결
 
-런타임을 띄운다.
+로컬 런타임은 더 이상 없다. `knowledge-publishing-agents`의 GitHub Actions가 각 단계를 마칠 때마다 이 저장소에 `status.json`을 커밋하고, 콘솔은 그 정적 파일을 같은 origin에서 폴링한다. 상단 바의 경로(`status.json`)를 두고 **상태 폴링 시작**을 누르면 된다. 설계 근거는 `knowledge-publishing-agents/docs/architecture/console-status-polling.md`.
 
-```bash
-node runtime/backend/server.mjs
-```
+`status.json`은 job **목록**을 담는다(`schema_version` 0.2.0). 서로 다른 이슈는 병렬로 실행되므로 파일 하나에 여러 job이 동시에 들어 있을 수 있다. 콘솔은 그중 자기가 접수한 job만 따라가고 나머지는 목록으로만 알린다.
 
-이 페이지의 origin을 런타임 허용 목록에 추가해야 한다.
+### GitHub 토큰
 
-```bash
-RUNTIME_ALLOWED_ORIGINS=https://fetilonia.github.io node runtime/backend/server.mjs
-```
+요청 제출(= Issue 생성)과 「초기화」의 실행 취소는 **방문자 본인의** fine-grained PAT로 이루어진다. 이 토큰은 브라우저 `localStorage`에만 저장되고 `api.github.com` 외에는 전송되지 않으며, 저장소 소스코드에는 들어가지 않는다.
 
-그다음 상단 바에 런타임 주소(`http://127.0.0.1:8787`)를 넣고 **런타임 연결**을 누른다. 주소는 브라우저 localStorage에 저장된다.
+`knowledge-publishing-agents` 저장소 하나로 범위를 좁히고 다음 두 권한만 준다.
 
-HTTPS로 서빙되는 이 페이지에서 `http://127.0.0.1`로 요청하는 것은 mixed content 예외에 해당해 Chrome과 Firefox에서 차단되지 않는다. Chrome의 Private Network Access 프리플라이트는 런타임이 `Access-Control-Allow-Private-Network` 헤더로 응답해 처리한다. **Safari는 이 예외를 더 엄격하게 다루므로 동작을 보장하지 않는다.**
+| 권한 | 쓰이는 곳 | 없으면 |
+| --- | --- | --- |
+| **Issues: Read and write** | 요청 제출 — Issue를 만들고 `kpo:ready` 라벨을 붙인다 | 요청 제출 불가 |
+| **Actions: Read and write** | 「초기화」 — 진행 중인 실행 목록 조회와 취소 | 취소만 실패하고 나머지는 정상 |
+
+파이프라인이 `status.json`을 쓸 때 쓰는 `OFFICE_STATUS_TOKEN`은 이것과 전혀 다른 토큰이다 — CI 시크릿이고, 이 저장소에만 쓰기 권한이 있으며, 브라우저로 내려가지 않는다.
 
 ## 결재
 
@@ -43,29 +44,27 @@ Live 모드의 아티팩트 조회 경로는 런타임 계약이 확정되지 �
 
 ## 백엔드 매핑
 
-런타임 워커는 셋이다.
+`status.json`의 `agents` 맵에 상태를 보고하는 워커는 넷이다.
 
-| 화면의 자리 | 런타임 에이전트 |
+| 화면의 자리 | 보고하는 키 |
 | --- | --- |
 | Researcher | `research-worker` |
 | Documentor | `document-writer` |
+| Proofreader | `proofreader` |
 | Technical QA | `qa-critic` |
 | Poster | *(없음 — Live에서 미연결로 표시)* |
-| Proofreader | *(없음 — Live에서 미연결로 표시)* |
 | Final Reviewer | *(없음 — 데모 전용 연출, Live에서 미연결로 표시)* |
-| Head Director 책상(결재함) | Human Approval (`POST /api/jobs/{id}/approval`) |
+| Head Director 책상(결재함) | Human Approval — 해당 PR을 GitHub에서 merge |
 
-Poster, Proofreader, Final Reviewer는 아직 런타임에 구현되지 않았다. Live 모드에서는 흐리게 표시되며 Demo 모드에서만 동작한다. Final Reviewer는 애초에 실제 게이트가 아니다 — 아무리 거만하게 굴어도 최종 승인 권한은 없고, 결재함으로 올려 보내는 연출만 한다.
-
-소비하는 SSE 이벤트: `job.created`, `job.transition`, `agent.status.changed`, `artifact.created`, `approval.required`, `approval.decided`, `job.failed`.
+`status.json`에 키가 없는 자리는 "실패"가 아니라 **이 상태 소스가 아직 보고하지 않음**으로 흐리게 표시된다. Poster의 게시 단계와 사람의 최종 승인은 아직 이 파일에 반영되지 않으므로, QA 통과 이후는 GitHub의 해당 PR에서 확인해야 한다. Final Reviewer는 애초에 실제 게이트가 아니다 — 아무리 거만하게 굴어도 최종 승인 권한은 없고, 결재함으로 올려 보내는 연출만 한다.
 
 ## 보안 주의
 
-**런타임에는 인증이 없다.** 방어 수단은 CORS origin 검사뿐이고, CORS는 브라우저에만 적용되므로 `curl` 한 줄이면 우회된다. 런타임을 공개 주소로 노출하지 말 것 — URL을 아는 누구나 임의 프롬프트를 실행해 구독 할당량을 소진하고 생성된 아티팩트를 읽을 수 있다.
+이 페이지는 정적 파일이고 자체 백엔드가 없다. 상태 표시는 공개된 `status.json`을 읽기만 하며, 그 파일에는 오케스트레이션 메타데이터(상태, 어떤 워커가 도는지, 타임스탬프)만 담긴다 — claim, 문서 본문, evidence, source는 들어가지 않는다.
 
-외부에서 접근해야 한다면 런타임에 먼저 인증을 붙이고, 그다음 Cloudflare Tunnel + Access처럼 신원 기반 게이트 뒤에 두어야 한다.
+쓰기 동작(요청 제출, 실행 취소)은 전부 방문자 본인의 PAT로 이루어진다. 그러므로 **토큰을 저장한 브라우저를 남과 공유하지 말 것** — 저장된 토큰으로 누구나 요청을 제출해 구독 할당량을 소진하거나 진행 중인 실행을 취소할 수 있다. 「지우기」로 언제든 제거할 수 있다.
 
-승인은 자동으로 이루어지지 않는다. 검토자 ID를 직접 입력해야 결재 요청이 전송되며, 비워두면 클라이언트에서 막는다.
+최종 승인은 이 페이지에서 이루어지지 않는다. QA를 통과한 문서는 `knowledge-publishing-agents`에 PR로 올라오고, 그 PR을 사람이 merge하는 것이 승인이다.
 
 ## 그림에 대하여
 
