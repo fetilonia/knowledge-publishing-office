@@ -1,8 +1,13 @@
 {
   "schema_version": "0.1.0",
-  "job_id": "diagnostic-token-check",
-  "state": "DIAGNOSTIC",
-  "updated_at": "2026-08-13T06:41:58Z",
-  "issue_number": 0,
-  "agents": {}
+  "job_id": "JOB-14",
+  "state": "RESEARCHING",
+  "updated_at": "2026-08-13T09:07:45Z",
+  "issue_number": 14,
+  "agents": {
+    "research-worker": "RUNNING",
+    "document-writer": "PENDING",
+    "proofreader": "PENDING",
+    "qa-critic": "PENDING"
+  }
 }
