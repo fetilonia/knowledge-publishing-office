@@ -1717,8 +1717,9 @@ function decide(decision,comment){
         commit_message:"승인: "+(sel.jobId||"")+(actor?(" (결재자 "+actor+")"):"")
       })
     }).then(check).then(function(){
+      decidedPRs[pr]=true;
       dequeue(sel.id); showApprove(Q.items.length>0); Scene.clearTray();
-      setState("APPROVED"); setProgress(0.86);
+      setState("APPROVED"); setProgress(LIVE_PROGRESS.APPROVED);
       logAction(-1,"승인 — PR #"+pr+" merge됨"+(actor?(" ("+actor+")"):""),"ok");
       say("승인 완료 — PR #"+pr+"을 merge했습니다."+(Q.items.length?(" 남은 "+Q.items.length+"건."):""));
       closeDoc();
@@ -1741,6 +1742,7 @@ function decide(decision,comment){
   }).then(function(){
     return startRework(sel,h);
   }).then(function(reworkStarted){
+    decidedPRs[pr]=true;
     dequeue(sel.id); showApprove(Q.items.length>0);
     setState("REWORK"); setProgress(LIVE_PROGRESS.REWORK);
     logAction(-1,"반려 — PR #"+pr+" 닫힘"+(reason?(": "+reason):""),"wait");
@@ -1805,7 +1807,13 @@ function enqueue(){
 // 라이브 모드의 결재 항목은 PR 하나에 대응한다. status.json이 pr_number를
 // 실어 보낸 job만 여기 올라온다 — 브랜치 이름에서 PR을 되짚는 것은
 // 추측이고, merge 대상을 추측으로 정하면 안 된다.
+// 이미 결재한 PR은 다시 올리지 않는다. status.json은 merge 직후 바로
+// QA_REVIEW에서 벗어나지 않고(그 갱신은 console-status-on-merge.yml이
+// 몇 초 뒤에 한다), 반려 후 재작업 실행이 REWORK를 게시하기까지도 시간이
+// 걸린다. 그 사이의 폴링이 방금 처리한 항목을 결재함에 되살리면 안 된다.
+var decidedPRs={};
 function enqueueForJob(job){
+  if(decidedPRs[job.pr_number]) return null;
   for(var i=0;i<Q.items.length;i++){ if(Q.items[i].prNumber===job.pr_number) return null; }
   Q.seq++;
   var completed=Object.keys(job.agents||{}).filter(function(k){
