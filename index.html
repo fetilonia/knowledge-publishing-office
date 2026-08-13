@@ -412,12 +412,10 @@ var BOARD={x:24*T-2, y:4*T, w:6*T+4, h:9*T};
 // 주제 추적 게시판(진행 기록 왼쪽) — Technical QA 자리(seat c15)와 진행 기록
 // 게시판(x≈24*T) 사이의 빈 바닥에 놓는다. 이 구간에는 데스크가 없고(가장
 // 오른쪽 데스크는 c14, 폭3이라 c17에서 끝난다) 위쪽 벽 창문도 없다(win()
-// 루프가 c<16과 c>=24만 그린다 — 16~23은 원래도 빈 칸이다). 다만 cooler
-// 비품(FURN "cooler", r:6,c:18)이 앵커 y-14~y+18(row 5.1~7.1) 범위에
-// 그려지므로, 이 게시판은 그보다 아래(row9~)에서 시작해 겹치지 않게 한다.
-// 진행 기록과 폭은 맞추되(같은 무게감) 높이는 짧게 잡아 Head Director
-// 책상(row14)과도 여유를 둔다.
-var BOARD2={x:17*T, y:9*T, w:6*T+4, h:4*T};
+// 루프가 c<16과 c>=24만 그린다 — 16~23은 원래도 빈 칸이다). 예전엔 이 자리에
+// cooler 비품이 있어 게시판을 그 아래로 밀고 높이를 줄였는데, cooler를
+// 치우면서 그 제약이 사라졌다 — 이제 진행 기록과 y/h를 그대로 맞춘다.
+var BOARD2={x:17*T, y:4*T, w:6*T+4, h:9*T};
 
 var solid=[],r,c;
 for(r=0;r<ROWS;r++){ solid.push(new Array(COLS).fill(false)); }
@@ -428,7 +426,7 @@ block(0,0,COLS,2); block(2,0,1,ROWS-2); block(2,COLS-1,1,ROWS-2);
 block(ROWS-1,0,COLS,1); unblock(ROWS-1,10,2,1);
 
 var FURN=[
-  {k:"window",r:2,c:2,w:3},{k:"notes",r:2,c:8,w:3},{k:"qaboard",r:2,c:14,w:3},{k:"cooler",r:6,c:18,w:2},
+  {k:"window",r:2,c:2,w:3},{k:"notes",r:2,c:8,w:3},{k:"qaboard",r:2,c:14,w:3},
   {k:"desk",r:4,c:2,w:3,a:0},{k:"desk",r:4,c:8,w:3,a:1},{k:"desk",r:4,c:14,w:3,a:2},
   {k:"desk",r:11,c:2,w:3,a:3},{k:"desk",r:11,c:8,w:3,a:4},
   {k:"archive",r:16,c:2,w:3},{k:"printer",r:16,c:8,w:3},{k:"uplink",r:16,c:14,w:3},
@@ -633,11 +631,6 @@ function drawFurn(g,f){
       px(g,x+4,y+4+t*3,3,2, t<scene.qaTicks?AGENTS[2].m:C.paperD);
       px(g,x+9,y+4+t*3,w-13,2,C.paperD);
     }
-  } else if(f.k==="cooler"){
-    px(g,x+6,y-14,13,10,C.glass); px(g,x+6,y-14,13,2,C.glassD);
-    px(g,x+9,y-5,7,2,C.metalD); px(g,x+5,y-3,15,18,"#DDE4E7");
-    px(g,x+5,y-3,15,2,"#F0F4F5"); px(g,x+8,y+3,9,4,C.metalD);
-    px(g,x+10,y+7,5,2,C.glassD); px(g,x+5,y-3,15,1,C.ink); px(g,x+6,y-14,13,1,C.ink);
   } else if(f.k==="archive"){
     px(g,x,y-8,w,23,C.woodD); px(g,x+1,y-7,w-2,21,"#6E4E2E");
     for(var s=0;s<3;s++){
@@ -957,7 +950,9 @@ function esc(s){ return String(s).replace(/[&<>"]/g,function(ch){
 // job.state -> hb-* 색상 분류. QA_REVIEW는 사람 결정을 기다리는 것이므로
 // "완료"가 아니라 "대기"로 표시한다 — 결재함에 이미 올라와 있다는 뜻이다.
 var TOPIC_KIND={FAILED:"bad", APPROVED:"ok", PUBLISHED:"ok", QA_REVIEW:"wait"};
-var TOPIC_MAX_ROWS=4;   // BOARD2 높이(4타일)에 맞춘 상한 — 게시판 크기가 근거다
+// BOARD2가 진행 기록과 같은 높이(9타일)이므로 상한도 맞춘다 — paintHistory()의
+// histLog.slice(-7)과 같은 근거(코르크 면에 실제로 들어가는 줄 수).
+var TOPIC_MAX_ROWS=7;
 function topicKind(state){ return TOPIC_KIND[state]||"run"; }
 
 function paintTopicBoard(){
