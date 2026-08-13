@@ -139,8 +139,18 @@ canvas#office{ display:block; image-rendering:pixelated; border-radius:6px; max-
 /* 게시판은 캔버스의 코르크 면 위에 겹치므로 테마 토큰이 아니라 고정색을 쓴다. */
 .histboard{ position:absolute; left:0; top:0; pointer-events:none; overflow:hidden;
   padding:3px 5px 0; color:#33281D; line-height:1.34; }
-.histboard .hb-t{ margin:0 0 3px; font-size:.92em; font-weight:700;
-  letter-spacing:.08em; color:#6E5940; border-bottom:1px solid #B4946E; padding-bottom:2px; }
+/* 코르크 면 위(비-flat)에서는 게시판 이름을 위쪽 나무 명패(.boardLabel)가
+   보여주므로 여기서는 숨긴다. flat 카드로 접히면 명패 그림 자체가 없어지므로
+   이 제목이 대신 카드 맨 위 헤딩 역할을 한다(아래 .flat 규칙). */
+.histboard .hb-t{ display:none; }
+.histboard .hb-head{ display:flex; align-items:center; justify-content:flex-end; gap:4px; margin-bottom:2px; }
+.histboard .hb-expand{ pointer-events:auto; flex:none; font:inherit; font-size:9px; font-weight:700;
+  line-height:1; color:#4A3820; background:#CDAD86; border:1px solid #8A6038; border-radius:3px;
+  padding:2px 4px; cursor:pointer; }
+.histboard .hb-expand:hover{ background:#DDBFA0; }
+.histboard.flat .hb-head{ justify-content:space-between; }
+.histboard.flat .hb-expand{ color:var(--ink); background:var(--card); border-color:var(--line); font-size:11px; }
+.histboard.flat .hb-expand:hover{ border-color:var(--accent); }
 .histboard .hb-i{ display:flex; gap:4px; align-items:flex-start; margin-bottom:3px; }
 .histboard .hb-d{ width:5px; height:5px; border-radius:1px; flex:none; margin-top:.42em; }
 .histboard .hb-x{ flex:1; min-width:0; }
@@ -161,11 +171,26 @@ canvas#office{ display:block; image-rendering:pixelated; border-radius:6px; max-
 .histboard.flat{ position:static; width:auto; height:auto; margin-top:10px;
   padding:10px 12px; background:var(--card); border:1px solid var(--line);
   border-radius:8px; color:var(--ink); font-size:12px; overflow:visible; }
-.histboard.flat .hb-t{ color:var(--muted); border-bottom-color:var(--line); }
+/* 게시판 전체 보기 팝업(#boardMask) 안에서는 .doc가 이미 카드 테두리를
+   그려 준다 — 안에 또 카드를 겹치면 이중 테두리가 된다. 행 색상 규칙
+   (.hb-ok/.hb-wait/.hb-bad 등)은 여기서 건드리지 않으므로 그대로 적용된다. */
+#boardFlatWrap.histboard.flat{ margin-top:0; padding:0; background:none;
+  border:0; border-radius:0; box-shadow:none; font-size:13px; }
+.histboard.flat .hb-t{ display:block; margin:0 0 3px; font-size:.92em; font-weight:700;
+  letter-spacing:.08em; color:var(--muted); border-bottom:1px solid var(--line); padding-bottom:2px; }
 .histboard.flat .hb-empty{ color:var(--muted); }
 .histboard.flat .hb-ok .hb-x{ color:var(--ok); }
 .histboard.flat .hb-wait .hb-x{ color:var(--warn); }
 .histboard.flat .hb-bad .hb-x{ color:var(--bad); }
+
+/* 게시판 위 나무 명패 — 실제 텍스트는 여기, 명판 자체의 나무 그림은
+   캔버스가 그린다(BOARD.y-11 자리). flat 카드로 접히면 명패 그림이
+   사라지므로 이 라벨도 함께 숨긴다(.hb-t가 카드 헤딩으로 대신한다). */
+.boardLabel{ position:absolute; left:0; top:0; pointer-events:none; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; letter-spacing:.05em; color:#F0DE9E;
+  text-shadow:0 1px 0 rgba(0,0,0,.4); white-space:nowrap; }
+.boardLabel.flat{ display:none; }
 
 .rail{ display:grid; grid-template-columns:repeat(auto-fit,minmax(172px,1fr)); gap:9px; }
 .seat{ display:flex; gap:10px; align-items:flex-start; padding:10px 11px; background:var(--card);
@@ -255,7 +280,7 @@ button.bad:hover:not(:disabled){ background:var(--bad); color:#fff; }
   </div>
 
   <div class="stage">
-    <canvas id="office" role="img" aria-label="픽셀 아트 사무실 평면도. 여섯 책상에서 에이전트가 일하고, 아래쪽에는 Proofreader와 마주보는 Head Director 책상에 거만한 Final Reviewer가 앉아 있으며 그 옆에 결재함이 있습니다. 최종 승인은 결재함에서 사람이 합니다. 오른쪽 벽에는 진행 기록 게시판이, 그 왼쪽에는 진행 중인 모든 주제의 작성 진행률을 보여주는 주제 추적 게시판이 걸려 있습니다."></canvas>
+    <canvas id="office" role="img" aria-label="픽셀 아트 사무실 평면도. 여섯 책상에서 에이전트가 일하고, 아래쪽에는 Proofreader와 마주보는 Head Director 책상에 거만한 Final Reviewer가 앉아 있으며 그 옆에 결재함이 있습니다. 최종 승인은 결재함에서 사람이 합니다. 오른쪽 벽에는 진행 기록 게시판이, 그 아래에는 진행 중인 모든 주제의 작성 진행률을 보여주는 주제 추적 게시판이 세로로 나란히 걸려 있습니다. 각 게시판의 확장 버튼을 누르면 전체 목록을 스크롤로 볼 수 있는 팝업이 열립니다."></canvas>
   </div>
 
   <div class="rail" id="roster"></div>
@@ -294,6 +319,23 @@ button.bad:hover:not(:disabled){ background:var(--bad); color:#fff; }
         <button type="button" id="docClose">닫기</button>
         <button type="button" id="docReject" hidden>반려</button>
         <button type="button" class="go" id="docApprove" hidden>최종 승인</button>
+      </footer>
+    </div>
+  </div>
+
+  <div class="docmask" id="boardMask" hidden role="dialog" aria-modal="true" aria-labelledby="boardTitle">
+    <div class="doc">
+      <header>
+        <h2 id="boardTitle">진행 기록</h2>
+        <p class="meta mono" id="boardMeta">—</p>
+      </header>
+      <div class="body">
+        <div class="histboard flat" id="boardFlatWrap"><div class="hb-list" id="boardModalList"></div></div>
+      </div>
+      <footer>
+        <span class="hint" id="boardHint"></span>
+        <span class="grow"></span>
+        <button type="button" id="boardClose">닫기</button>
       </footer>
     </div>
   </div>
@@ -407,15 +449,18 @@ var STAGE_ORDER=[STAGE_RESEARCH,STAGE_DRAFT,STAGE_PROOFREAD,STAGE_QA];
 var STAGE_STATE=["RESEARCHING","DRAFTING","PROOFREADING","QA_REVIEW"];
 
 // 진행 기록 게시판의 코르크 면 (논리 좌표). HTML 오버레이가 같은 사각형에 정렬된다.
-var BOARD={x:24*T-2, y:4*T, w:6*T+4, h:9*T};
+// 높이를 4타일로 줄였다 — 최근 몇 줄만 코르크 면에 보이고, 전체 목록은
+// 게시판의 확장(⤢) 버튼이 여는 팝업에서 스크롤로 본다(#boardMask).
+var BOARD={x:24*T-2, y:4*T, w:6*T+4, h:4*T};
 
-// 주제 추적 게시판(진행 기록 왼쪽) — Technical QA 자리(seat c15)와 진행 기록
-// 게시판(x≈24*T) 사이의 빈 바닥에 놓는다. 이 구간에는 데스크가 없고(가장
-// 오른쪽 데스크는 c14, 폭3이라 c17에서 끝난다) 위쪽 벽 창문도 없다(win()
-// 루프가 c<16과 c>=24만 그린다 — 16~23은 원래도 빈 칸이다). 예전엔 이 자리에
-// cooler 비품이 있어 게시판을 그 아래로 밀고 높이를 줄였는데, cooler를
-// 치우면서 그 제약이 사라졌다 — 이제 진행 기록과 y/h를 그대로 맞춘다.
-var BOARD2={x:17*T, y:4*T, w:6*T+4, h:9*T};
+// 주제 추적 게시판(진행 기록 아래) — 가로가 아니라 세로로 나란히 쌓는다.
+// x는 BOARD와 같고 y만 아래로 내린다. 두 게시판의 나무 프레임은 코르크
+// 면 바깥으로도 튀어나오므로(위 -16, 아래 +6, 위 px() 호출부 참고) 그냥
+// 붙이면 위 게시판의 아래 프레임(y+h+6)과 아래 게시판의 위 프레임(y-16)이
+// 겹친다 — 6타일 간격(BOARD.y+BOARD.h에서 +2타일)을 둬 여유를 확보했다.
+// 원래 이 x,y16 자리에 있던 책장(archive)은 진행 기록 왼쪽의 빈 바닥
+// (c17~23)으로 옮겼다(FURN 목록 참고).
+var BOARD2={x:BOARD.x, y:10*T, w:6*T+4, h:4*T};
 
 var solid=[],r,c;
 for(r=0;r<ROWS;r++){ solid.push(new Array(COLS).fill(false)); }
@@ -434,7 +479,12 @@ var FURN=[
   // Final Reviewer가 앉아 위쪽 Proofreader와 마주본다. 결재함은 책상 오른쪽 —
   // 이 캐릭터가 훑어본 뒤에도 실제 최종 승인은 여전히 사람 몫이다.
   {k:"bigdesk",r:14,c:8,w:3,a:FINAL_REVIEWER_IDX},{k:"tray",r:14,c:11,w:1},
-  {k:"cabinet",r:2,c:24,w:3},{k:"archive",r:16,c:24,w:3}
+  {k:"cabinet",r:2,c:24,w:3},
+  // 원래 c24(진행 기록 게시판 바로 아래)에 있었다. 두 게시판을 세로로
+  // 쌓으면서(BOARD/BOARD2가 이제 같은 x, 다른 y) 그 자리가 필요해져
+  // Technical QA와 uplink 사이의 빈 바닥(c17~23)으로 옮겼다 — uplink가
+  // c14~16을 쓰므로 c18에서 시작해 1칸 여유를 둔다.
+  {k:"archive",r:16,c:18,w:3}
 ];
 FURN.forEach(function(f){ block(f.r,f.c,f.w,1); });
 function walkable(rr,cc){ return rr>=0&&rr<ROWS&&cc>=0&&cc<COLS&&!solid[rr][cc]; }
@@ -898,13 +948,35 @@ function buildBubbles(){
 
 function setTask(i,text,kind,ttl){ if(agents[i]) agents[i].setTask(text,kind,ttl); }
 
+// 게시판 이름표 — 코르크 면 위쪽의 나무 명패(캔버스가 그린 그림)에 겹치는
+// 별도 오버레이다. 명패 그림 자체는 각 보드의 x+4,y-11,w-8,7 자리에
+// 그려진다(px(g,BOARD.x+4,BOARD.y-11,...) 호출부 참고) — 텍스트는 DOM이
+// 맡고 그림은 canvas가 맡는 것은 hb-list/histBoard와 같은 분업이다.
+function makeBoardLabel(text){
+  var n=document.createElement("div");
+  n.className="boardLabel"; n.textContent=text;
+  stageEl.appendChild(n);
+  return n;
+}
+
+// 게시판이 작아서(4타일) 코르크 면에는 최근 몇 줄만 보인다. hb-expand는
+// 그 전체를 스크롤로 보는 팝업(#boardMask)을 연다 — pointer-events:auto로
+// 부모(.histboard)의 pointer-events:none을 국소적으로 되돌린다(코르크
+// 내용 자체는 여전히 클릭을 무시해야 뒤 캔버스 조작을 막지 않는다).
+function boardHeadHtml(title){
+  return '<div class="hb-head"><p class="hb-t">'+esc(title)+'</p>'+
+         '<button type="button" class="hb-expand" aria-label="'+esc(title)+' 전체 보기">⤢</button></div>';
+}
+
 // ── 진행 기록 게시판 ─────────────────────────────────────────────
 var histLog=[], histRev=0, histDrawn=-1;
 var histBoard=document.createElement("div");
 histBoard.className="histboard";
-histBoard.innerHTML='<p class="hb-t">진행 기록</p><div class="hb-list"></div>';
+histBoard.innerHTML=boardHeadHtml("진행 기록")+'<div class="hb-list"></div>';
 stageEl.appendChild(histBoard);
 var histList=histBoard.querySelector(".hb-list");
+var histLabel=makeBoardLabel("진행 기록");
+histBoard.querySelector(".hb-expand").addEventListener("click",function(){ openBoardModal("hist"); });
 
 // ── 주제 추적 게시판 ─────────────────────────────────────────────
 // 진행 기록은 "무슨 사건이 있었나"를 시간순으로 보여주고, 이 게시판은
@@ -915,9 +987,11 @@ var histList=histBoard.querySelector(".hb-list");
 var topicRev=0, topicDrawn=-1;
 var topicBoard=document.createElement("div");
 topicBoard.className="histboard";
-topicBoard.innerHTML='<p class="hb-t">주제 추적</p><div class="hb-list"></div>';
+topicBoard.innerHTML=boardHeadHtml("주제 추적")+'<div class="hb-list"></div>';
 stageEl.appendChild(topicBoard);
+var topicLabel=makeBoardLabel("주제 추적");
 var topicList=topicBoard.querySelector(".hb-list");
+topicBoard.querySelector(".hb-expand").addEventListener("click",function(){ openBoardModal("topic"); });
 function touchTopicBoard(){ topicRev++; }
 
 function logAction(i,text,kind){
@@ -929,55 +1003,57 @@ function logAction(i,text,kind){
 }
 function clearHistory(){ histLog=[]; histRev++; }
 
+function esc(s){ return String(s).replace(/[&<>"]/g,function(ch){
+  return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[ch]; }); }
+
+// 게시판이 작아서(4타일) 코르크 면에는 최근 몇 줄만 보인다. 전체는 확장
+// 버튼의 팝업(#boardMask)이 같은 row-html 빌더로 스크롤 목록을 그린다 —
+// 미리보기와 팝업이 서로 다른 렌더러를 갖고 있으면 둘이 어긋난다.
+var HIST_MAX_ROWS=3;
+function histRowHtml(h){
+  var nm=h.i>=0?AGENTS[h.i].name:"System", col=h.i>=0?AGENTS[h.i].m:"#6B573F";
+  return '<div class="hb-i hb-'+h.kind+'"><span class="hb-d" style="background:'+col+'"></span>'+
+        '<span class="hb-x"><span class="hb-n">'+esc(nm)+'</span> '+esc(h.text)+'</span></div>';
+}
+function renderHistRows(list){
+  if(!list.length) return '<p class="hb-empty">아직 기록이 없습니다.</p>';
+  var html=""; for(var k=list.length-1;k>=0;k--) html+=histRowHtml(list[k]);
+  return html;
+}
 function paintHistory(){
   if(histDrawn===histRev) return;
   histDrawn=histRev;
-  if(!histLog.length){
-    histList.innerHTML='<p class="hb-empty">아직 기록이 없습니다.</p>';
-    return;
-  }
-  var rows=histLog.slice(-7), html="";
-  for(var k=rows.length-1;k>=0;k--){
-    var h=rows[k], nm=h.i>=0?AGENTS[h.i].name:"System", col=h.i>=0?AGENTS[h.i].m:"#6B573F";
-    html+='<div class="hb-i hb-'+h.kind+'"><span class="hb-d" style="background:'+col+'"></span>'+
-          '<span class="hb-x"><span class="hb-n">'+esc(nm)+'</span> '+esc(h.text)+'</span></div>';
-  }
-  histList.innerHTML=html;
+  histList.innerHTML=renderHistRows(histLog.slice(-HIST_MAX_ROWS));
 }
-function esc(s){ return String(s).replace(/[&<>"]/g,function(ch){
-  return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[ch]; }); }
 
 // job.state -> hb-* 색상 분류. QA_REVIEW는 사람 결정을 기다리는 것이므로
 // "완료"가 아니라 "대기"로 표시한다 — 결재함에 이미 올라와 있다는 뜻이다.
 var TOPIC_KIND={FAILED:"bad", APPROVED:"ok", PUBLISHED:"ok", QA_REVIEW:"wait"};
-// BOARD2가 진행 기록과 같은 높이(9타일)이므로 상한도 맞춘다 — paintHistory()의
-// histLog.slice(-7)과 같은 근거(코르크 면에 실제로 들어가는 줄 수).
-var TOPIC_MAX_ROWS=7;
+var TOPIC_MAX_ROWS=3;   // BOARD2 축소(4타일)에 맞춘 미리보기 상한 — 전체는 확장 팝업에서
 function topicKind(state){ return TOPIC_KIND[state]||"run"; }
-
+function topicRowHtml(j){
+  var own=j.job_id===App.ownJobId;
+  var completed=Object.keys(j.agents||{}).filter(function(k){ return j.agents[k]==="COMPLETED"; }).length;
+  var dots=""; for(var d=0;d<4;d++) dots+='<i class="'+(d<completed?"on":"")+'"></i>';
+  return '<div class="hb-i hb-'+topicKind(j.state)+(own?" hb-own":"")+'">'+
+        '<span class="hb-d" style="background:'+(own?"#B5514A":"#6E5940")+'"></span>'+
+        '<span class="hb-x"><span class="hb-n">'+esc(j.job_id)+'</span> '+esc(j.state)+
+        '<span class="tb-dots">'+dots+'</span></span></div>';
+}
+function currentTopicJobs(){ return App.mode==="live" ? (App.allJobs||[]) : []; }
+function renderTopicRows(jobs){
+  if(!jobs.length) return '<p class="hb-empty">'+
+    (App.mode==="live" ? "진행 중인 주제가 없습니다." : "데모 모드에서는 표시하지 않습니다.")+'</p>';
+  var html=""; jobs.forEach(function(j){ html+=topicRowHtml(j); });
+  return html;
+}
 function paintTopicBoard(){
   if(topicDrawn===topicRev) return;
   topicDrawn=topicRev;
-  var jobs=App.mode==="live" ? (App.allJobs||[]) : [];
-  if(!jobs.length){
-    topicList.innerHTML='<p class="hb-empty">'+
-      (App.mode==="live" ? "진행 중인 주제가 없습니다." : "데모 모드에서는 표시하지 않습니다.")+
-      '</p>';
-    return;
-  }
-  var shown=jobs.slice(0,TOPIC_MAX_ROWS), html="";
-  shown.forEach(function(j){
-    var own=j.job_id===App.ownJobId;
-    var completed=Object.keys(j.agents||{}).filter(function(k){ return j.agents[k]==="COMPLETED"; }).length;
-    var dots="";
-    for(var d=0;d<4;d++) dots+='<i class="'+(d<completed?"on":"")+'"></i>';
-    html+='<div class="hb-i hb-'+topicKind(j.state)+(own?" hb-own":"")+'">'+
-          '<span class="hb-d" style="background:'+(own?"#B5514A":"#6E5940")+'"></span>'+
-          '<span class="hb-x"><span class="hb-n">'+esc(j.job_id)+'</span> '+esc(j.state)+
-          '<span class="tb-dots">'+dots+'</span></span></div>';
-  });
+  var jobs=currentTopicJobs(), shown=jobs.slice(0,TOPIC_MAX_ROWS);
+  var html=renderTopicRows(shown);
   if(jobs.length>shown.length){
-    html+='<p class="hb-empty">+'+(jobs.length-shown.length)+'건 더 — Job 관제에서 전체 확인</p>';
+    html+='<p class="hb-empty">+'+(jobs.length-shown.length)+'건 더 — 확장(⤢)에서 전체 확인</p>';
   }
   topicList.innerHTML=html;
 }
@@ -989,16 +1065,35 @@ function syncCorkBoard(rect,node,sx,sy,ox,oy){
     node.classList.toggle("flat",flat);
     if(flat) node.removeAttribute("style");
   }
-  if(flat) return;
+  if(flat) return flat;
   node.style.left=Math.round(rect.x*sx+ox)+"px";
   node.style.top=Math.round(rect.y*sy+oy)+"px";
   node.style.width=Math.round(w)+"px";
   node.style.height=Math.round(rect.h*sy)+"px";
   node.style.fontSize=Math.max(8.5,+(6.6*sx).toFixed(1))+"px";
+  return flat;
+}
+// 명패 그림(px(g,BOARD.x+4,BOARD.y-11,BOARD.w-8,7,...))과 같은 사각형에
+// 이름표 텍스트를 정렬한다. 코르크 면이 접혀 flat 카드가 되면 명패 그림
+// 자체가 없으므로 라벨도 같이 숨긴다 — 그때는 카드 안의 hb-t가 제목 역할을
+// 대신한다(CSS .histboard.flat .hb-t).
+function plaqueRect(b){ return {x:b.x+4, y:b.y-11, w:b.w-8, h:7}; }
+function syncBoardLabel(rect,node,sx,sy,ox,oy,flat){
+  node.classList.toggle("flat",flat);
+  if(flat) return;
+  node.style.left=Math.round(rect.x*sx+ox)+"px";
+  node.style.top=Math.round(rect.y*sy+oy)+"px";
+  node.style.width=Math.round(rect.w*sx)+"px";
+  node.style.height=Math.round(rect.h*sy)+"px";
+  // 명패는 코르크 면(7~144 로직 px)보다 훨씬 얕아서(7 로직 px) 본문과
+  // 같은 배율식(6.6*sx)을 쓰면 글자가 명패 밖으로 넘친다 — 절반 이하로 줄인다.
+  node.style.fontSize=Math.max(6.5,+(3.6*sx).toFixed(1))+"px";
 }
 function syncBoard(sx,sy,ox,oy){
-  syncCorkBoard(BOARD,histBoard,sx,sy,ox,oy);
-  syncCorkBoard(BOARD2,topicBoard,sx,sy,ox,oy);
+  var flat1=syncCorkBoard(BOARD,histBoard,sx,sy,ox,oy);
+  syncBoardLabel(plaqueRect(BOARD),histLabel,sx,sy,ox,oy,flat1);
+  var flat2=syncCorkBoard(BOARD2,topicBoard,sx,sy,ox,oy);
+  syncBoardLabel(plaqueRect(BOARD2),topicLabel,sx,sy,ox,oy,flat2);
 }
 
 // 캔버스는 max-width:100%로 축소될 수 있어 논리좌표→CSS 배율이 고정이 아니다.
@@ -1007,7 +1102,7 @@ function syncBubbles(){
   var cr=cv.getBoundingClientRect(), sr=stageEl.getBoundingClientRect();
   if(!cr.width) return;
   var sx=cr.width/W, sy=cr.height/HH, ox=cr.left-sr.left, oy=cr.top-sr.top;
-  syncBoard(sx,sy,ox,oy); paintHistory(); paintTopicBoard();
+  syncBoard(sx,sy,ox,oy); paintHistory(); paintTopicBoard(); refreshBoardModal();
   if(sx!==bubScale){
     bubScale=sx;
     bubLayer.style.setProperty("--bw",Math.max(132,Math.round(5*T*sx))+"px");
@@ -1792,6 +1887,46 @@ function followJob(id){
   if(App.lastDoc) applyStatus(App.lastDoc,true);
   say(id+" 을(를) 따라갑니다.");
 }
+
+// ── 게시판 전체 보기 팝업 ────────────────────────────────────────────
+// 코르크 면 미리보기(HIST_MAX_ROWS/TOPIC_MAX_ROWS로 잘린)와 이 팝업은
+// 같은 row-html 빌더(histRowHtml/topicRowHtml)를 쓴다 — 렌더러가
+// 둘이면 표시 내용이 어긋날 수 있다. 열려 있는 동안은 폴링·로그가
+// 갱신될 때마다(각자의 rev 카운터가 바뀔 때만, 매 프레임 재도색하지
+// 않는다) 함께 새로고침한다.
+var openBoardKind=null, boardModalHistDrawn=-1, boardModalTopicDrawn=-1;
+
+function closeBoardModal(){ el("boardMask").hidden=true; openBoardKind=null; }
+
+function openBoardModal(kind){
+  openBoardKind=kind;
+  el("boardMask").hidden=false;
+  boardModalHistDrawn=-1; boardModalTopicDrawn=-1;   // 강제로 다시 그린다
+  refreshBoardModal();
+}
+
+function refreshBoardModal(){
+  if(!openBoardKind || el("boardMask").hidden) return;
+  if(openBoardKind==="hist"){
+    if(boardModalHistDrawn===histRev) return;
+    boardModalHistDrawn=histRev;
+    el("boardTitle").textContent="진행 기록";
+    el("boardMeta").textContent=histLog.length+"건";
+    el("boardModalList").innerHTML=renderHistRows(histLog);
+    el("boardHint").textContent="최근 사건이 맨 위입니다.";
+  }else{
+    if(boardModalTopicDrawn===topicRev) return;
+    boardModalTopicDrawn=topicRev;
+    var jobs=currentTopicJobs();
+    el("boardTitle").textContent="주제 추적";
+    el("boardMeta").textContent=jobs.length+"건 · "+(App.mode==="live"?"LIVE":"데모");
+    el("boardModalList").innerHTML=renderTopicRows(jobs);
+    el("boardHint").textContent="이름이 강조된 항목이 지금 이 콘솔이 따라가는 job입니다.";
+  }
+}
+
+el("boardClose").addEventListener("click",closeBoardModal);
+el("boardMask").addEventListener("click",function(e){ if(e.target===el("boardMask")) closeBoardModal(); });
 
 function closeJobDialog(){ el("jobMask").hidden=true; }
 
