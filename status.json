@@ -1,13 +1,8 @@
 {
   "schema_version": "0.1.0",
-  "job_id": "JOB-TEST-CLI",
-  "state": "FAILED",
-  "updated_at": "2026-08-13T08:47:24Z",
-  "issue_number": 999,
-  "agents": {
-    "research-worker": "FAILED",
-    "document-writer": "PENDING",
-    "proofreader": "PENDING",
-    "qa-critic": "PENDING"
-  }
+  "job_id": "diagnostic-token-check",
+  "state": "DIAGNOSTIC",
+  "updated_at": "2026-08-13T06:41:58Z",
+  "issue_number": 0,
+  "agents": {}
 }
