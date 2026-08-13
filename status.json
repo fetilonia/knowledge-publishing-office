@@ -1,13 +1,13 @@
 {
   "schema_version": "0.1.0",
   "job_id": "JOB-TEST-CLI",
-  "state": "QA_REVIEW",
-  "updated_at": "2026-08-13T08:47:06Z",
+  "state": "FAILED",
+  "updated_at": "2026-08-13T08:47:24Z",
   "issue_number": 999,
   "agents": {
-    "research-worker": "COMPLETED",
-    "document-writer": "COMPLETED",
+    "research-worker": "FAILED",
+    "document-writer": "PENDING",
     "proofreader": "PENDING",
-    "qa-critic": "RUNNING"
+    "qa-critic": "PENDING"
   }
 }
