@@ -160,7 +160,6 @@ canvas#office{ display:block; image-rendering:pixelated; border-radius:6px; max-
 .seat.on .nm{ color:var(--k); }
 .seat .rl{ font-size:11px; color:var(--muted); margin-top:2px; }
 .seat .st{ margin-top:5px; }
-.seat.head{ background:var(--soft); border-left-color:var(--k); }
 
 .ticker{ display:flex; gap:11px; align-items:baseline; font-size:13px; min-height:1.5em;
   padding:10px 13px; background:var(--card); border:1px solid var(--line); border-radius:10px; margin:0; }
@@ -206,7 +205,7 @@ button.bad:hover:not(:disabled){ background:var(--bad); color:#fff; }
   <header>
     <p class="eyebrow mono">Knowledge publishing runtime &middot; agent floor</p>
     <h1>지식 퍼블리싱 오피스 콘솔</h1>
-    <p class="lede">아래 프롬프트에 요청을 넣으면 층 전체가 움직입니다. 에이전트가 자리에서 일하고, 산출물이 책상 사이를 건너다니며, 마지막엔 Proofreader 맞은편 Head Director 책상으로 보고가 올라갑니다. 그 의자는 비어 있습니다 &mdash; 최종 승인은 사람이 합니다.</p>
+    <p class="lede">아래 프롬프트에 요청을 넣으면 층 전체가 움직입니다. 에이전트가 자리에서 일하고, 산출물이 책상 사이를 건너다니며, 마지막엔 Proofreader 맞은편 Head Director 책상의 Final Reviewer에게 보고가 올라갑니다. 거만하게 한 번 훑어본 뒤에도, 진짜 최종 승인은 결재함에서 사람이 직접 합니다.</p>
   </header>
 
   <div class="rt">
@@ -239,7 +238,7 @@ button.bad:hover:not(:disabled){ background:var(--bad); color:#fff; }
   </div>
 
   <div class="stage">
-    <canvas id="office" role="img" aria-label="픽셀 아트 사무실 평면도. 다섯 책상에서 에이전트가 일하고, 아래쪽에는 Proofreader와 마주보는 Head Director 책상과 결재함이 있습니다. 그 의자는 비어 있습니다."></canvas>
+    <canvas id="office" role="img" aria-label="픽셀 아트 사무실 평면도. 여섯 책상에서 에이전트가 일하고, 아래쪽에는 Proofreader와 마주보는 Head Director 책상에 거만한 Final Reviewer가 앉아 있으며 그 옆에 결재함이 있습니다. 최종 승인은 결재함에서 사람이 합니다."></canvas>
   </div>
 
   <div class="rail" id="roster"></div>
@@ -329,6 +328,10 @@ var HEAD_PLN=["...........","...KKKKK...","..KDDDDDK..",".KDDMMMDDK.","KDDDDDDDD
               "KKKKKKKKKKK","KMSSSSSSSMK","KMWESSSEWMK","KMBSSSSSBMK",".KSSSESSSK.","..KKKKKKK.."];
 var HEAD_GLS=["...........","...KKKKK...","..KMMMMMK..",".KMMLLLMMK.","KMMMMMMMMMK",
               "KMMMMMMMMMK","KMSSSSSSSMK","KMKEEKEEKMK","KMBSSSSSBMK",".KSSSESSSK.","..KKKKKKK.."];
+// Final Reviewer 전용 — 은발 뒤로 넘긴 머리, 짙은 일자 눈썹, 오른쪽 눈엔 금테 단안경,
+// 콧수염, 홍조 없는 창백한 뺨. 거만하고 권위적인 인상을 위한 조합이다.
+var HEAD_DIR=[".....K.....","...KKKKK...","..KMMMMMK..",".KMMLLLMMK.","KMMMMMMMMMK",
+              "KMMMMMMMMMK","KMSKKKKKSMK","KMWESSGEGMK","KMSSSSSSSMK",".KSKKEKKSK.","..KKKKKKK.."];
 var BODY=["..KDDDDDK..",".KDDWWWDDK.","SKDDDDDDDKS",".KDDDDDDDK.",".KDDDDDDDK."];
 var FEET=[["...DD.DD...","...KK......"],["...DD.DD...","...KK.KK..."],
           ["...DD.DD...","......KK..."],["...DD.DD...","...KK.KK..."]];
@@ -348,8 +351,17 @@ var AGENTS=[
    verb:"검수를 통과한 문서를 Notion에 올립니다"},
   {key:"proofreader",name:"Proofreader",role:"포맷·이미지 검토",head:HEAD_GLS,m:"#B5514A",d:"#853934",l:"#D4756D",
    deskR:11,deskC:8,seat:{r:10,c:9},errand:null,backend:"proofreader",
-   verb:"문장 구조와 이미지 삽입 상태를 훑습니다"}
+   verb:"문장 구조와 이미지 삽입 상태를 훑습니다"},
+  // Head Director 책상(옛 빈 의자) 담당. backend는 실제로 존재하지 않는 자리표시자다 —
+  // status.json에 절대 나타나지 않으므로 uncoveredAgents()가 Live 모드에서 항상 UNWIRED로
+  // 흐리게 표시한다(Poster/Proofreader와 같은 패턴). 데모에서만 등장하는 연출용 캐릭터.
+  {key:"finalreviewer",name:"Final Reviewer",role:"최종 검수 · 스스로 최고 권위자로 여김",head:HEAD_DIR,
+   m:"#9AA2AF",d:"#20232B",l:"#C9CEDA",
+   deskR:14,deskC:8,seat:{r:15,c:9},errand:null,backend:"final-reviewer",
+   verb:"팔짱을 끼고 문서를 노려봅니다"}
 ];
+var FINAL_REVIEWER_IDX=AGENTS.findIndex(function(a){ return a.key==="finalreviewer"; });
+var FINAL_REVIEWER_REMARK="흠, 제 기준을 겨우 통과했군요. 결재함으로 넘기죠.";
 var BACKEND_TO_IDX={};
 AGENTS.forEach(function(a,i){ if(a.backend) BACKEND_TO_IDX[a.backend]=i; });
 
@@ -378,9 +390,10 @@ var FURN=[
   {k:"desk",r:4,c:2,w:3,a:0},{k:"desk",r:4,c:8,w:3,a:1},{k:"desk",r:4,c:14,w:3,a:2},
   {k:"desk",r:11,c:2,w:3,a:3},{k:"desk",r:11,c:8,w:3,a:4},
   {k:"archive",r:16,c:2,w:3},{k:"printer",r:16,c:8,w:3},{k:"uplink",r:16,c:14,w:3},
-  // Head Director — Proofreader(seat r10) 맞은편. 책상 아래(r15)에 빈 의자를 두어
-  // 위쪽 Proofreader와 서로 마주보게 한다. 결재함은 책상 오른쪽.
-  {k:"bigdesk",r:14,c:8,w:3},{k:"exchair",r:15,c:9,w:2},{k:"tray",r:14,c:11,w:1},
+  // Head Director 책상 — Proofreader(seat r10) 맞은편. 책상 아래(r15)엔 이제
+  // Final Reviewer가 앉아 위쪽 Proofreader와 마주본다. 결재함은 책상 오른쪽 —
+  // 이 캐릭터가 훑어본 뒤에도 실제 최종 승인은 여전히 사람 몫이다.
+  {k:"bigdesk",r:14,c:8,w:3,a:FINAL_REVIEWER_IDX},{k:"tray",r:14,c:11,w:1},
   {k:"cabinet",r:2,c:24,w:3},{k:"archive",r:16,c:24,w:3}
 ];
 FURN.forEach(function(f){ block(f.r,f.c,f.w,1); });
@@ -543,15 +556,13 @@ function drawFurn(g,f){
              px(g,ix+6,iy-2,2,7,a.d); px(g,ix+6,iy+5,2,2,a.m); }
     }
     if(f.k==="bigdesk"){
+      var dirLit = f.a!=null && scene.active===f.a;
       px(g,x+w-24,y-3,14,4,C.gold); px(g,x+w-23,y-2,12,2,"#3A2F14");
       px(g,x+6,y-4,10,7,C.paper); px(g,x+6,y-4,10,1,C.paperD);
       px(g,x+7,y-2,7,1,C.paperD); px(g,x+7,y,5,1,C.paperD);
-      px(g,x+20,y-5,7,8,C.screenOff); px(g,x+21,y-4,5,6,C.glassD);
+      px(g,x+20,y-5,7,8, dirLit?C.screen:C.screenOff);
+      px(g,x+21,y-4,5,6, dirLit?AGENTS[f.a].m:C.glassD);
     }
-  } else if(f.k==="exchair"){
-    px(g,x+3,y-2,w-6,14,"#3B4C5A"); px(g,x+3,y-2,w-6,2,"#4E6373");
-    px(g,x+5,y+12,3,4,C.ink2); px(g,x+w-8,y+12,3,4,C.ink2);
-    px(g,x+3,y-2,w-6,1,C.ink);
   } else if(f.k==="tray"){
     px(g,x+1,y-2,T-2,10,C.metalD); px(g,x+1,y-2,T-2,2,C.metal);
     var n=Math.min(scene.tray,5);
@@ -605,7 +616,7 @@ function drawFurn(g,f){
 
 function drawChar(g,a,x,y,dir,frame,seated,dim){
   if(dim) g.globalAlpha=.42;
-  var pal={K:C.ink,M:a.m,D:a.d,L:a.l,W:C.paper,S:C.skin,E:C.eye,B:C.blush};
+  var pal={K:C.ink,M:a.m,D:a.d,L:a.l,W:C.paper,S:C.skin,E:C.eye,B:C.blush,G:C.gold};
   var lift=seated?4:0;
   var sx=Math.round(x)-5, sy=Math.round(y)-18-lift;
   if(seated){
@@ -973,7 +984,7 @@ function buildRoster(){
     node.className="seat"; node.style.setProperty("--k",d.m);
     var ic=document.createElement("canvas"); ic.width=33; ic.height=33; ic.setAttribute("aria-hidden","true");
     var g=ic.getContext("2d"); g.imageSmoothingEnabled=false; g.setTransform(3,0,0,3,0,0);
-    stamp(g,d.head,0,0,{K:C.ink,M:d.m,D:d.d,L:d.l,W:C.paper,S:C.skin,E:C.eye,B:C.blush});
+    stamp(g,d.head,0,0,{K:C.ink,M:d.m,D:d.d,L:d.l,W:C.paper,S:C.skin,E:C.eye,B:C.blush,G:C.gold});
     node.appendChild(ic);
     var box=document.createElement("div");
     box.innerHTML='<div class="nm"></div><div class="rl"></div><div class="st"><span class="badge"></span></div>';
@@ -981,15 +992,6 @@ function buildRoster(){
     box.querySelector(".rl").textContent=d.role;
     node.appendChild(box); rosterEl.appendChild(node);
   });
-  var h=document.createElement("div");
-  h.className="seat head"; h.style.setProperty("--k",C.gold);
-  var hc=document.createElement("canvas"); hc.width=33; hc.height=33; hc.setAttribute("aria-hidden","true");
-  var hg=hc.getContext("2d"); hg.imageSmoothingEnabled=false; hg.setTransform(3,0,0,3,0,0);
-  px(hg,1,3,9,5,C.metalD); px(hg,1,3,9,1,C.metal); px(hg,2,1,7,2,C.paper); px(hg,1,8,9,2,C.ink);
-  h.appendChild(hc);
-  var hb=document.createElement("div");
-  hb.innerHTML='<div class="nm">Head Director</div><div class="rl">최종 승인 · 사용자 본인 (빈 자리)</div><div class="st"><span class="badge"></span></div>';
-  h.appendChild(hb); rosterEl.appendChild(h);
 }
 
 function showApprove(on){
@@ -1007,7 +1009,7 @@ function demoStart(){
   App.demoStage=-1; App.demoT=0; App.lastRejectComment="";
   setState("RESEARCHING");
   setTimeout(function(){ demoAdvance(0); }, REDUCED?0:3200);
-  say("출근 — 다섯 에이전트가 각자 자리로 향합니다.");
+  say("출근 — 여섯 에이전트가 각자 자리로 향합니다.");
 }
 // pos = STAGE_ORDER 안에서의 위치(agent 인덱스가 아니다).
 function demoAdvance(pos){
@@ -1048,13 +1050,26 @@ function demoTick(dt){
     }else{
       say(AGENTS[i].name+" → Head Director 책상으로 보고하러 가는 중");
       Scene.deliver(i,function(){
-        App.running=false; App.tEnd=Date.now();
         setState("QA_REVIEW"); setProgress(0.9);
-        // Poster(3)는 승인 전이라 여전히 PENDING이어야 한다 — 나머지만 COMPLETED로.
-        agents.forEach(function(a,j){ if(j!==3){ a.status="COMPLETED"; a.setTask(null); } });
-        enqueue();
-        say("Head Director 책상에 보고가 도착 — 최종 승인은 사용자가 직접 합니다.");
-        showApprove(true);
+        // Poster(3)와 Final Reviewer는 아직 자기 차례가 아니므로(또는 지금이 차례이므로)
+        // 여기서 COMPLETED로 미리 덮지 않는다.
+        agents.forEach(function(a,j){ if(j!==3&&j!==FINAL_REVIEWER_IDX){ a.status="COMPLETED"; a.setTask(null); } });
+        var fr=AGENTS[FINAL_REVIEWER_IDX];
+        agents[FINAL_REVIEWER_IDX].status="RUNNING";
+        setTask(FINAL_REVIEWER_IDX, fr.verb, "run");
+        logAction(FINAL_REVIEWER_IDX, fr.verb+".", "run");
+        Scene.activate(FINAL_REVIEWER_IDX);
+        say(fr.name+"이(가) "+fr.verb+".");
+        setTimeout(function(){
+          App.running=false; App.tEnd=Date.now();
+          agents[FINAL_REVIEWER_IDX].status="COMPLETED";
+          setTask(FINAL_REVIEWER_IDX, FINAL_REVIEWER_REMARK, "ok", 5000);
+          logAction(FINAL_REVIEWER_IDX, FINAL_REVIEWER_REMARK, "ok");
+          Scene.idle();
+          enqueue();
+          say("Final Reviewer가 결재함으로 넘겼습니다 — 최종 승인은 사용자가 직접 합니다.");
+          showApprove(true);
+        }, REDUCED?0:1900);
       });
     }
   }
@@ -1063,7 +1078,7 @@ function demoTick(dt){
 function demoPublish(){
   App.running=true; App.tEnd=0;
   setState("PUBLISHING"); setProgress(0.94);
-  say("Head Director 승인 — Poster에게 게시를 넘깁니다.");
+  say("사람의 최종 승인 완료 — Poster에게 게시를 넘깁니다.");
   Scene.handoff(STAGE_QA,STAGE_PUBLISH,function(){
     agents[STAGE_PUBLISH].status="RUNNING";
     setTask(STAGE_PUBLISH,AGENTS[STAGE_PUBLISH].verb,"run");

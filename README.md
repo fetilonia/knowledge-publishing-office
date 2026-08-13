@@ -4,7 +4,7 @@
 
 에이전트 파이프라인의 진행 상태를 픽셀 사무실로 보여주는 정적 프론트엔드다. 의존성이 없는 단일 HTML 파일이며, 빌드 단계가 없다.
 
-요청을 입력하면 에이전트가 자리에서 일하고, 각자 지금 하는 일이 말풍선으로 뜨며, 산출물이 책상 사이를 건너다니다가 Proofreader 맞은편 Head Director 책상으로 보고가 올라간다. 그 의자는 비어 있다 — 최종 승인은 사람이 한다.
+요청을 입력하면 에이전트가 자리에서 일하고, 각자 지금 하는 일이 말풍선으로 뜨며, 산출물이 책상 사이를 건너다니다가 Proofreader 맞은편 Head Director 책상으로 보고가 올라간다. 그 자리엔 은발에 금테 단안경을 낀 **Final Reviewer**가 앉아 팔짱을 끼고 마지막으로 트집을 잡은 뒤 결재함으로 넘긴다 — 다만 그 검수는 연출일 뿐, 실제 최종 승인은 여전히 결재함에서 사람이 직접 한다.
 
 오른쪽 게시판에는 에이전트별 액션 히스토리가 쌓인다. 화면이 좁아지면 게시판은 사무실 아래 카드로 떨어진다.
 
@@ -52,9 +52,10 @@ Live 모드의 아티팩트 조회 경로는 런타임 계약이 확정되지 �
 | Technical QA | `qa-critic` |
 | Poster | *(없음 — Live에서 미연결로 표시)* |
 | Proofreader | *(없음 — Live에서 미연결로 표시)* |
-| Head Director | Human Approval (`POST /api/jobs/{id}/approval`) |
+| Final Reviewer | *(없음 — 데모 전용 연출, Live에서 미연결로 표시)* |
+| Head Director 책상(결재함) | Human Approval (`POST /api/jobs/{id}/approval`) |
 
-Poster와 Proofreader는 아직 런타임에 구현되지 않았다. Live 모드에서는 흐리게 표시되며 Demo 모드에서만 동작한다.
+Poster, Proofreader, Final Reviewer는 아직 런타임에 구현되지 않았다. Live 모드에서는 흐리게 표시되며 Demo 모드에서만 동작한다. Final Reviewer는 애초에 실제 게이트가 아니다 — 아무리 거만하게 굴어도 최종 승인 권한은 없고, 결재함으로 올려 보내는 연출만 한다.
 
 소비하는 SSE 이벤트: `job.created`, `job.transition`, `agent.status.changed`, `artifact.created`, `approval.required`, `approval.decided`, `job.failed`.
 
