@@ -86,8 +86,6 @@ canvas#office{ display:block; image-rendering:pixelated; border-radius:6px; max-
 .docmask{ position:fixed; inset:0; z-index:50; background:rgba(0,0,0,.58);
   display:flex; align-items:center; justify-content:center; padding:1.2rem; }
 .docmask[hidden]{ display:none; }
-/* display를 지정한 요소는 hidden 속성만으로 숨겨지지 않는다. */
-.approve[hidden]{ display:none; }
 .doc{ background:var(--card); border:1px solid var(--line); border-radius:12px;
   width:min(800px,100%); max-height:86vh; display:flex; flex-direction:column;
   box-shadow:0 18px 48px rgba(0,0,0,.45); }
@@ -232,17 +230,11 @@ canvas#office{ display:block; image-rendering:pixelated; border-radius:6px; max-
   padding:10px 13px; background:var(--card); border:1px solid var(--line); border-radius:10px; margin:0; }
 .ticker .tag{ font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--muted); flex:none; }
 
-.approve{ display:flex; flex-wrap:wrap; gap:9px; align-items:center; padding:11px 13px;
-  background:var(--card); border:1px solid var(--warn); border-radius:10px; font-size:12.5px; }
-.approve .hdr{ font-weight:500; }
-.approve input{ font:inherit; font-size:12px; padding:6px 9px; border:1px solid var(--line);
-  border-radius:6px; background:var(--page-bg); color:var(--ink); min-width:150px; }
-
 .prompt{ display:flex; flex-direction:column; gap:8px; padding:12px 13px;
   background:var(--card); border:1px solid var(--line); border-radius:12px; }
 textarea{ font:inherit; font-size:14px; line-height:1.6; padding:9px 11px; border:1px solid var(--line);
   border-radius:8px; background:var(--page-bg); color:var(--ink); resize:vertical; min-height:74px; width:100%; }
-textarea:focus-visible,.rt input:focus-visible,.approve input:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+textarea:focus-visible,.rt input:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
 .prow{ display:flex; flex-wrap:wrap; gap:9px; align-items:center; justify-content:flex-end; }
 .prow .hint{ margin-right:auto; font-size:11.5px; color:var(--muted); }
 
@@ -313,14 +305,6 @@ button.bad:hover:not(:disabled){ background:var(--bad); color:#fff; }
   <div class="rail" id="roster"></div>
 
   <p class="ticker" aria-live="polite"><span class="tag mono">Status</span><span id="ticker">요청을 기다리는 중입니다.</span></p>
-
-  <div class="approve" id="approveBar" hidden>
-    <span class="hdr">QA를 통과했습니다. 최종 승인은 직접 하셔야 합니다.</span>
-    <span class="grow"></span>
-    <label class="sr-only" for="actorId">검토자 ID</label>
-    <input id="actorId" placeholder="검토자 ID (선택)" spellcheck="false">
-    <button type="button" class="go" id="btnQueue">결재함 열기</button>
-  </div>
 
   <div class="docmask" id="docMask" hidden role="dialog" aria-modal="true" aria-labelledby="docTitle">
     <div class="doc">
@@ -1294,9 +1278,13 @@ function buildAgentCountTiles(){
   });
 }
 
+// approveBar를 제거했다 — "결재 대기" 타일이 이미 같은 일을 한다(개수를
+// 보여주고, 클릭하면 결재함이 열린다: paintDash()의 tileTray clickable
+// 토글과 tileTray의 click 리스너 참고). 호출부가 여러 곳이라 이 함수
+// 자체는 남겨 두고 아무 것도 하지 않게 한다 — 다들 "지금 결재함 상태가
+// 바뀌었다"는 신호로만 이 함수를 부르므로 굳이 각 호출부를 다 지울
+// 필요가 없다.
 function showApprove(on){
-  el("approveBar").hidden=!on;
-  el("btnQueue").textContent="결재함 열기 ("+Q.items.length+"건)";
 }
 
 var DEMO_DUR=[5200,3400,3400,5200,3400]; // agent별 고유 소요시간(AGENTS 인덱스 기준)
@@ -2046,7 +2034,10 @@ function decide(decision,comment){
   var token=ghToken();
   if(!token){ say("GitHub 토큰이 없습니다 — 결재하려면 위에 저장하세요."); return false; }
   if(!sel||!sel.prNumber){ say("이 항목에 연결된 PR이 없어 결재할 수 없습니다."); return false; }
-  var actor=el("actorId").value.trim();  // 선택 사항 — 실제 행위자는 토큰 소유자로 GitHub에 기록된다
+  // 검토자 ID 입력칸을 없앴다 — 실제 행위자는 어차피 토큰 소유자로 GitHub에
+  // 남으므로 이 값은 부가 주석일 뿐이었다. 빈 문자열로 두면 아래 세 곳의
+  // (actor?...:"") 분기가 자연히 빠진다.
+  var actor="";
   var h=ghHeadersFor(token);
   var pr=sel.prNumber;
   var check=function(res){
@@ -2431,7 +2422,6 @@ function demoDoc(it){
       " · 아티팩트 "+((it&&it.artifacts)!=null?it.artifacts:App.artifacts)+"건"
   ]).join("\n");
 }
-el("btnQueue").addEventListener("click",openQueue);
 el("docBack").addEventListener("click",showQueueView);
 el("tileTray").addEventListener("click",function(){ if(Q.items.length) openQueue(); });
 el("docClose").addEventListener("click",closeDoc);
