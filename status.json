@@ -1,11 +1,11 @@
 {
   "schema_version": "0.2.0",
-  "updated_at": "2026-08-13T18:08:19Z",
+  "updated_at": "2026-08-13T22:25:49Z",
   "jobs": [
     {
       "job_id": "JOB-31",
-      "state": "QA_REVIEW",
-      "updated_at": "2026-08-13T18:08:19Z",
+      "state": "APPROVED",
+      "updated_at": "2026-08-13T22:25:49Z",
       "issue_number": 31,
       "agents": {
         "research-worker": "COMPLETED",
@@ -67,54 +67,6 @@
         "qa-critic": "PENDING"
       },
       "title": "okta OIDC 연결을 통한 Entra IdP 허브 프로비저닝"
-    },
-    {
-      "job_id": "JOB-28",
-      "state": "FAILED",
-      "updated_at": "2026-08-13T14:54:01Z",
-      "issue_number": 28,
-      "agents": {
-        "research-worker": "PENDING",
-        "document-writer": "PENDING",
-        "proofreader": "PENDING",
-        "qa-critic": "PENDING"
-      }
-    },
-    {
-      "job_id": "JOB-27",
-      "state": "FAILED",
-      "updated_at": "2026-08-13T14:39:35Z",
-      "issue_number": 27,
-      "agents": {
-        "research-worker": "PENDING",
-        "document-writer": "PENDING",
-        "proofreader": "PENDING",
-        "qa-critic": "PENDING"
-      }
-    },
-    {
-      "job_id": "JOB-24",
-      "state": "FAILED",
-      "updated_at": "2026-08-13T13:59:18Z",
-      "issue_number": 24,
-      "agents": {
-        "research-worker": "PENDING",
-        "document-writer": "PENDING",
-        "proofreader": "PENDING",
-        "qa-critic": "PENDING"
-      }
-    },
-    {
-      "job_id": "JOB-21",
-      "state": "FAILED",
-      "updated_at": "2026-08-13T13:20:00Z",
-      "issue_number": 21,
-      "agents": {
-        "research-worker": "PENDING",
-        "document-writer": "PENDING",
-        "proofreader": "PENDING",
-        "qa-critic": "PENDING"
-      }
     }
   ]
 }
