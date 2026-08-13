@@ -117,15 +117,17 @@ canvas#office{ display:block; image-rendering:pixelated; border-radius:6px; max-
 .qitem .qn{ display:block; font-size:13px; font-weight:500; line-height:1.45; }
 .qitem .qm{ display:block; font-size:11px; color:var(--muted); margin-top:3px; }
 .qempty{ color:var(--muted); font-size:12.5px; margin:0; }
-.ritem{ display:flex; gap:10px; align-items:flex-start; padding:11px 12px;
+.jitem{ display:flex; gap:10px; align-items:flex-start; padding:11px 12px;
   background:var(--page-bg); border:1px solid var(--line);
-  border-left:3px solid var(--warn); border-radius:8px; }
-.ritem input{ margin:.25em 0 0; flex:none; }
-.ritem .rx{ flex:1; min-width:0; }
-.ritem .rn{ display:block; font-size:13px; font-weight:500; line-height:1.45; }
-.ritem .rm{ display:block; font-size:11px; color:var(--muted); margin-top:3px; }
-.ritem.done{ border-left-color:var(--ok); opacity:.6; }
-.ritem.err{ border-left-color:var(--bad); }
+  border-left:3px solid var(--line); border-radius:8px; flex-wrap:wrap; }
+.jitem.own{ border-left-color:var(--accent); }
+.jitem.live{ border-left-color:var(--warn); }
+.jitem.gone{ border-left-color:var(--bad); }
+.jitem .jx{ flex:1; min-width:180px; }
+.jitem .jn{ display:block; font-size:13px; font-weight:500; line-height:1.45; }
+.jitem .jm{ display:block; font-size:11px; color:var(--muted); margin-top:3px; }
+.jitem .jb{ display:flex; gap:.4rem; flex-wrap:wrap; align-items:center; }
+.jitem button{ font-size:11.5px; padding:.3rem .55rem; }
 #tileTray.clickable{ cursor:pointer; }
 #tileTray.clickable:hover{ border-color:var(--accent); }
 .doc .imgchk.ok{ color:var(--ok); } .doc .imgchk.bad{ color:var(--bad); }
@@ -290,19 +292,18 @@ button.bad:hover:not(:disabled){ background:var(--bad); color:#fff; }
     </div>
   </div>
 
-  <div class="docmask" id="runMask" hidden role="dialog" aria-modal="true" aria-labelledby="runTitle">
+  <div class="docmask" id="jobMask" hidden role="dialog" aria-modal="true" aria-labelledby="jobTitle">
     <div class="doc">
       <header>
-        <h2 id="runTitle">진행 중인 Job 취소</h2>
-        <p class="meta mono" id="runMeta">—</p>
+        <h2 id="jobTitle">Job 관제</h2>
+        <p class="meta mono" id="jobMeta">—</p>
       </header>
-      <div class="body"><ul class="qlist" id="runList"></ul></div>
+      <div class="body"><ul class="qlist" id="jobList"></ul></div>
       <footer>
-        <span class="hint" id="runHint">취소할 실행을 고르세요. 실행만 취소되고 GitHub Issue는 남습니다.</span>
+        <span class="hint" id="jobHint">따라갈 Job을 고르면 이 층이 그 작업을 표시합니다.</span>
         <span class="grow"></span>
-        <button type="button" id="runAll">전체 선택</button>
-        <button type="button" id="runClose">닫기</button>
-        <button type="button" class="bad" id="runCancelSel">선택 취소 실행</button>
+        <button type="button" id="jobRefresh">새로고침</button>
+        <button type="button" id="jobClose">닫기</button>
       </footer>
     </div>
   </div>
@@ -312,6 +313,7 @@ button.bad:hover:not(:disabled){ background:var(--bad); color:#fff; }
     <textarea id="promptInput" placeholder="예) Microsoft Entra Pass-through Authentication의 Alternate ID와 Email as an Alternate Login ID 차이를 근거 중심 기술 문서로 정리해줘."></textarea>
     <div class="prow">
       <span class="hint" id="promptHint">데모 모드 — 실제 모델 호출 없이 층의 동작만 재생합니다.</span>
+      <button type="button" id="btnJobs">Job 관제</button>
       <button type="button" id="btnReset">초기화</button>
       <button type="submit" class="go" id="btnRun">작업 시작</button>
     </div>
@@ -782,12 +784,17 @@ var App={
   // 움직이면 안 되므로, 이 값과 일치하는 job만 따라간다.
   // allJobs: 마지막 폴링에서 본 job 목록 전체(내 것 + 남의 것). 초기화
   // 버튼이 무엇을 취소할지 고를 때의 참고용이다.
-  ownJobId:null, foreignJobId:null, foreignJobState:null, foreignSig:null, allJobs:[]
+  ownJobId:null, ownJobSeen:false, foreignJobId:null, foreignJobState:null,
+  foreignSig:null, allJobs:[], lastDoc:null
 };
 
 var OWN_JOB_KEY="kpo.ownJobId";
 function setOwnJob(id){
   App.ownJobId=id;
+  // 새로 지정한 job은 아직 status.json에서 본 적이 없다. 이 플래그가
+  // "실행이 시작되기를 기다리는 중"과 "따라가던 job이 목록에서 사라졌다"를
+  // 가른다 — 둘을 같이 취급하면 접수 직후의 공백에서 층이 IDLE로 되돌아간다.
+  App.ownJobSeen=false;
   try{ id ? localStorage.setItem(OWN_JOB_KEY,id) : localStorage.removeItem(OWN_JOB_KEY); }catch(e){}
 }
 
@@ -1316,12 +1323,29 @@ function showForeignJobs(jobs){
 
 function applyStatus(doc,baseline){
   var jobs=normalizeStatus(doc);
-  App.allJobs=jobs;
+  App.allJobs=jobs; App.lastDoc=doc;
   var mine=null;
   for(var i=0;i<jobs.length;i++){ if(jobs[i].job_id===App.ownJobId){ mine=jobs[i]; break; } }
-  // 접수한 요청의 job이 목록에 없으면 층을 움직이지 않는다.
-  if(!mine){ showForeignJobs(jobs); return; }
-  applyOwnJob(mine,baseline);
+  if(mine){ App.ownJobSeen=true; applyOwnJob(mine,baseline); return; }
+  // 접수는 했는데 아직 목록에 없는 경우다. GitHub Actions가 실행을 띄우고
+  // 오케스트레이터가 첫 상태를 게시하기까지 수십 초가 걸리며, 그동안
+  // status.json에는 남의 job만 들어 있다. 여기서 showForeignJobs로 흘리면
+  // 방금 접수한 상태를 지우고 층을 IDLE로 되돌린다 — 요청이 넘어가지
+  // 않은 것처럼 보이는 원인이었다.
+  if(App.ownJobId && !App.ownJobSeen){ showPendingOwnJob(jobs); return; }
+  showForeignJobs(jobs);
+}
+
+// 접수한 job이 아직 status.json에 나타나지 않은 동안. 층은 건드리지 않고
+// (submit 핸들러가 세워 둔 NEW 상태를 그대로 유지한다) 안내만 갱신한다.
+function showPendingOwnJob(jobs){
+  var others=jobs.filter(function(j){ return j.job_id!==App.ownJobId; });
+  var sig="pending:"+App.ownJobId+":"+others.length;
+  if(App.foreignSig===sig) return;
+  App.foreignSig=sig;
+  say(App.ownJobId+" 접수됨 — 실행이 시작되기를 기다리는 중입니다"+
+      (others.length?(" (다른 Job "+others.length+"건 진행 중)"):"")+".");
+  paintDash();
 }
 
 function applyOwnJob(cur,baseline){
@@ -1496,11 +1520,11 @@ el("promptInput").addEventListener("keydown",function(e){
   }
 });
 
-// ── 진행 중인 실행 취소 ─────────────────────────────────────────────
-// status.json은 파이프라인이 "게시한" 상태일 뿐이라 이미 죽은 job도 남아
-// 있을 수 있고, 반대로 아직 첫 상태를 게시하기 전인 실행은 들어 있지도
-// 않다. 그래서 취소 대상은 status.json이 아니라 Actions API가 알려주는
-// 실행 목록에서 고른다 — 실제로 지금 돌고 있는 것이 그쪽이다.
+// ── GitHub Actions 조회·취소 ────────────────────────────────────────
+// 「Job 관제」가 쓰는 하위 도구다. status.json은 파이프라인이 "게시한"
+// 상태일 뿐이라 이미 죽은 job도 남아 있을 수 있고, 반대로 아직 첫 상태를
+// 게시하기 전인 실행은 들어 있지도 않다. 지금 실제로 무엇이 돌고 있는지를
+// 아는 쪽은 Actions API이므로 취소 대상은 여기서 가져온다.
 //
 // 이 호출은 방문자 본인의 PAT를 쓴다(createGithubIssue와 같은 토큰).
 // 저장소 소스코드에 들어가는 토큰이 아니므로, "public 페이지에 토큰을 두지
@@ -1509,7 +1533,6 @@ el("promptInput").addEventListener("keydown",function(e){
 var GH_WORKFLOW_FILE="subagent-execution-claude-code.yml";
 var REWORK_LABEL="kpo:rework";
 var ACTIVE_RUN_STATUSES=["queued","in_progress","waiting","requested","pending"];
-var runChoices=[];
 
 function ghHeadersFor(token){
   return {
@@ -1558,85 +1581,144 @@ function cancelRun(id){
   });
 }
 
-function renderRunList(runs){
-  var list=el("runList");
-  list.innerHTML="";
-  runChoices=runs;
-  if(!runs.length){
-    var p=document.createElement("li");
-    p.className="qempty";
-    p.textContent="진행 중이거나 대기 중인 실행이 없습니다.";
-    list.appendChild(p);
-    el("runCancelSel").disabled=true; el("runAll").disabled=true;
+
+// ── Job 관제 ────────────────────────────────────────────────────────
+// status.json은 파이프라인이 "게시한" 상태이고, Actions API는 지금 "돌고
+// 있는" 실행이다. 둘은 겹치지만 어느 쪽도 전체가 아니다 — 방금 접수한
+// job은 실행만 있고 상태가 없으며, 끝난 job은 상태만 있고 실행이 없다.
+// 이 메뉴는 둘을 job_id로 합쳐 보여 준다. 그래서 워크플로가 run-name에
+// job_id를 박는다(subagent-execution-claude-code.yml).
+function jobIdFromRun(run){
+  var m=/^JOB-\d+/.exec(String(run.display_title||run.name||""));
+  return m?m[0]:null;
+}
+
+function mergeJobsAndRuns(jobs,runs){
+  var byId={}, order=[];
+  var touch=function(id){
+    if(!byId[id]){ byId[id]={ jobId:id, job:null, runs:[] }; order.push(id); }
+    return byId[id];
+  };
+  (jobs||[]).forEach(function(j){ touch(j.job_id).job=j; });
+  (runs||[]).forEach(function(r){
+    var id=jobIdFromRun(r);
+    // job_id를 못 읽는 실행(run-name 도입 전의 예전 실행)은 버리지 않고
+    // 별도 항목으로 남긴다 — 취소해야 할 실행이 목록에서 사라지면 안 된다.
+    touch(id||("실행 #"+r.run_number)).runs.push(r);
+  });
+  return order.map(function(id){ return byId[id]; });
+}
+
+function jobRowState(entry){
+  if(entry.job) return entry.job.state;
+  return entry.runs.length?"실행 대기 중":"—";
+}
+
+function renderJobList(entries){
+  var ul=el("jobList");
+  ul.innerHTML="";
+  if(!entries.length){
+    ul.innerHTML='<li><p class="qempty">진행 중이거나 최근에 끝난 Job이 없습니다.</p></li>';
     return;
   }
-  el("runCancelSel").disabled=false; el("runAll").disabled=false;
-  runs.forEach(function(r,i){
+  entries.forEach(function(entry){
+    var j=entry.job, id=entry.jobId, isOwn=(id===App.ownJobId);
     var li=document.createElement("li");
-    li.className="ritem"; li.id="ritem-"+i;
-    var cb=document.createElement("input");
-    cb.type="checkbox"; cb.id="runchk-"+i; cb.value=String(r.id);
-    var wrap=document.createElement("label");
-    wrap.className="rx"; wrap.setAttribute("for",cb.id);
-    var n=document.createElement("span");
-    n.className="rn mono";
-    n.textContent="#"+r.run_number+" · "+r.status+(r.run_attempt>1?" (재시도 "+r.run_attempt+")":"");
-    var m=document.createElement("span");
-    m.className="rm";
-    m.textContent=(r.display_title||"(제목 없음)")+" — "+new Date(r.created_at).toLocaleString();
-    wrap.appendChild(n); wrap.appendChild(m);
-    li.appendChild(cb); li.appendChild(wrap);
-    list.appendChild(li);
-  });
-}
+    li.className="jitem"+(isOwn?" own":"")+(entry.runs.length?" live":"")+
+                 (j&&j.state==="FAILED"?" gone":"");
+    var x=document.createElement("span"); x.className="jx";
+    var n=document.createElement("span"); n.className="jn mono";
+    n.textContent=id+" · "+jobRowState(entry)+(isOwn?"  ← 따라가는 중":"");
+    var m=document.createElement("span"); m.className="jm";
+    var bits=[];
+    if(j&&j.agents){
+      bits.push(Object.keys(j.agents).filter(function(k){
+        return j.agents[k]==="COMPLETED";
+      }).length+"/4 완료");
+    }
+    if(j&&j.pr_number) bits.push("PR #"+j.pr_number);
+    if(entry.runs.length) bits.push(entry.runs.map(function(r){
+      return "실행 #"+r.run_number+" "+r.status;
+    }).join(", "));
+    if(j&&j.updated_at) bits.push(new Date(j.updated_at).toLocaleString());
+    m.textContent=bits.join(" · ")||"상태 정보 없음";
+    x.appendChild(n); x.appendChild(m);
 
-function openRunDialog(){
-  el("runMask").hidden=false;
-  el("runMeta").textContent=GH_REPO+" · "+GH_WORKFLOW_FILE;
-  el("runList").innerHTML="";
-  el("runHint").textContent="실행 목록을 불러오는 중…";
-  el("runCancelSel").disabled=true; el("runAll").disabled=true;
-  listActiveRuns().then(function(runs){
-    renderRunList(runs);
-    el("runHint").textContent=runs.length
-      ? "취소할 실행을 고르세요. 실행만 취소되고 GitHub Issue는 남습니다."
-      : "취소할 것이 없습니다.";
-  }).catch(function(err){
-    el("runHint").textContent="실행 목록을 불러오지 못했습니다: "+err.message;
-  });
-}
-
-function closeRunDialog(){ el("runMask").hidden=true; runChoices=[]; }
-
-el("runClose").addEventListener("click",closeRunDialog);
-el("runMask").addEventListener("click",function(e){ if(e.target===el("runMask")) closeRunDialog(); });
-el("runAll").addEventListener("click",function(){
-  runChoices.forEach(function(r,i){ el("runchk-"+i).checked=true; });
-});
-
-el("runCancelSel").addEventListener("click",function(){
-  var picked=[];
-  runChoices.forEach(function(r,i){ if(el("runchk-"+i).checked) picked.push({run:r,idx:i}); });
-  if(!picked.length){ el("runHint").textContent="취소할 실행을 하나 이상 선택하세요."; return; }
-  el("runCancelSel").disabled=true;
-  el("runHint").textContent=picked.length+"건 취소 요청 중…";
-  var ok=0, failed=[];
-  Promise.all(picked.map(function(p){
-    return cancelRun(p.run.id).then(function(){
-      ok++; el("ritem-"+p.idx).className="ritem done";
-    }).catch(function(err){
-      failed.push("#"+p.run.run_number+" ("+err.message+")");
-      el("ritem-"+p.idx).className="ritem err";
+    var b=document.createElement("span"); b.className="jb";
+    if(!isOwn && j){
+      var follow=document.createElement("button");
+      follow.type="button"; follow.textContent="이 Job 따라가기";
+      follow.addEventListener("click",function(){ followJob(id); });
+      b.appendChild(follow);
+    }
+    if(j&&j.state==="QA_REVIEW"&&j.pr_number){
+      var tray=document.createElement("button");
+      tray.type="button"; tray.className="go"; tray.textContent="결재함";
+      tray.addEventListener("click",function(){
+        enqueueForJob(j); closeJobDialog(); openQueue();
+      });
+      b.appendChild(tray);
+    }
+    entry.runs.forEach(function(r){
+      var c=document.createElement("button");
+      c.type="button"; c.className="bad"; c.textContent="실행 #"+r.run_number+" 취소";
+      c.addEventListener("click",function(){
+        c.disabled=true; c.textContent="취소 중…";
+        cancelRun(r.id).then(function(){
+          c.textContent="취소됨";
+          say("실행 #"+r.run_number+" 취소를 요청했습니다.");
+        }).catch(function(err){
+          c.disabled=false; c.textContent="실행 #"+r.run_number+" 취소";
+          el("jobHint").textContent="취소 실패: "+err.message;
+        });
+      });
+      b.appendChild(c);
     });
-  })).then(function(){
-    el("runCancelSel").disabled=false;
-    el("runHint").textContent=failed.length
-      ? ok+"건 취소, "+failed.length+"건 실패 — "+failed.join(", ")
-      : ok+"건 취소를 요청했습니다. GitHub에서 실제로 중단되기까지 몇 초 걸립니다.";
-    say(ok+"건의 실행 취소를 요청했습니다"+(failed.length?" ("+failed.length+"건 실패)":"")+".");
-    if(ok) logAction(-1,"진행 중이던 실행 "+ok+"건 취소","wait");
+    li.appendChild(x); li.appendChild(b);
+    ul.appendChild(li);
   });
-});
+}
+
+// 메뉴에서 직접 고르는 행위가 곧 "이 job을 보겠다"는 동의다. 그래서 남의
+// job이라도 층을 움직인다 — 요청한 적 없는데 저절로 움직이는 것과 다르다.
+function followJob(id){
+  setOwnJob(id);
+  App.lastStatus=null; App.foreignSig=null;
+  Q.items=[]; Q.sel=null; scene.tray=0; showApprove(false);
+  clearHistory();
+  logAction(-1,"Job 전환 — "+id+" 을(를) 따라갑니다","run");
+  closeJobDialog();
+  // 지금 상태는 방금 일어난 사건이 아니라 스냅샷이므로 baseline으로 채택한다.
+  if(App.lastDoc) applyStatus(App.lastDoc,true);
+  say(id+" 을(를) 따라갑니다.");
+}
+
+function closeJobDialog(){ el("jobMask").hidden=true; }
+
+function openJobDialog(){
+  el("jobMask").hidden=false;
+  el("jobMeta").textContent=GH_REPO;
+  el("jobHint").textContent="불러오는 중…";
+  var jobs=App.allJobs||[];
+  if(!ghToken()){
+    // 토큰이 없어도 status.json만으로 목록과 전환은 된다. 취소만 못 한다.
+    renderJobList(mergeJobsAndRuns(jobs,[]));
+    el("jobHint").textContent="GitHub 토큰이 없어 진행 중인 실행은 표시하지 않습니다 — 전환만 가능합니다.";
+    return;
+  }
+  listActiveRuns().then(function(runs){
+    renderJobList(mergeJobsAndRuns(jobs,runs));
+    el("jobHint").textContent="따라갈 Job을 고르면 이 층이 그 작업을 표시합니다.";
+  }).catch(function(err){
+    renderJobList(mergeJobsAndRuns(jobs,[]));
+    el("jobHint").textContent="실행 목록을 불러오지 못했습니다("+err.message+") — 상태 파일 기준으로만 표시합니다.";
+  });
+}
+
+el("btnJobs").addEventListener("click",openJobDialog);
+el("jobRefresh").addEventListener("click",openJobDialog);
+el("jobClose").addEventListener("click",closeJobDialog);
+el("jobMask").addEventListener("click",function(e){ if(e.target===el("jobMask")) closeJobDialog(); });
 
 el("btnReset").addEventListener("click",function(){
   stopPolling(); App.lastStatus=null;
@@ -1648,16 +1730,12 @@ el("btnReset").addEventListener("click",function(){
   setState("IDLE"); showApprove(false);
   Scene.reset(false); Scene.clearTray(); setProgress(0);
   agents.forEach(function(a){ a.status="PENDING"; });
-  // 콘솔 표시를 되돌리는 것과 CI에서 실제로 도는 실행을 멈추는 것은 다른
-  // 일이다. 전자는 항상 하고, 후자는 고를 수 있게 목록을 띄운다.
-  if(App.mode==="live" && ghToken()){
-    say("초기화했습니다. 진행 중인 실행을 골라 취소할 수 있습니다.");
-    openRunDialog();
-  }else if(App.mode==="live"){
-    say("초기화했습니다 — 진행 중인 실행까지 취소하려면 위에 GitHub 토큰을 저장하세요(Actions: Read and write 필요).");
-  }else{
-    say("초기화했습니다. 요청을 입력하면 다시 시작합니다.");
-  }
+  // 초기화는 이 콘솔의 표시만 되돌린다. CI에서 도는 실행을 멈추는 것은
+  // 다른 일이고, 그건 「Job 관제」에서 대상을 보고 고른다 — 초기화에
+  // 묶어 두면 화면만 정리하려던 사람이 남의 실행까지 지우게 된다.
+  say(App.mode==="live"
+    ? "초기화했습니다. 진행 중인 실행을 멈추거나 다른 Job을 따라가려면 「Job 관제」를 여세요."
+    : "초기화했습니다. 요청을 입력하면 다시 시작합니다.");
 });
 
 function decide(decision,comment){
