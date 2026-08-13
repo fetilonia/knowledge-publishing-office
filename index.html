@@ -1097,10 +1097,22 @@ function demoPublish(){
   });
 }
 
-function liveAgentStatus(agentId,status,detail){
+// quiet=true 는 "접속 시점에 이미 그 상태였다"는 뜻이다 — 화면에 상태는
+// 반영하되 완료 토스트·히스토리·say 는 내보내지 않는다. 이걸 구분하지
+// 않으면 라이브 모드로 붙는 순간 이미 끝나 있던 Researcher 가 방금 검색을
+// 마친 것처럼 보인다(입력한 적도 없는 요청에 대해).
+function liveAgentStatus(agentId,status,detail,quiet){
   var i=BACKEND_TO_IDX[agentId];
   if(i==null||!agents[i]) return;
   agents[i].status=status;
+  if(quiet){
+    if(status==="RUNNING"){ setTask(i,detail||AGENTS[i].verb,"run"); Scene.activate(i); }
+    else if(status==="FAILED") setTask(i,detail||"작업이 실패했습니다.","bad");
+    else if(status==="WAITING_HUMAN") setTask(i,detail||"사람의 결정을 기다립니다.","wait");
+    else if(status==="REWORK_REQUIRED") setTask(i,detail||"재작업 요청을 받았습니다.","wait");
+    else setTask(i,null); // PENDING / COMPLETED — 지나간 일이라 말풍선을 띄우지 않는다
+    return;
+  }
   if(status==="RUNNING"){
     setTask(i,detail||AGENTS[i].verb,"run");
     logAction(i,detail||AGENTS[i].verb,"run");
@@ -1204,7 +1216,11 @@ function uncoveredAgents(cur){
   return out;
 }
 
-function applyStatus(cur){
+// baseline=true 는 폴링으로 관측한 "변화"가 아니라 접속 시점의 스냅샷을
+// 채택하는 경우다. status.json 은 이 콘솔이 시작하지 않은 job(직전 job의
+// 잔존 상태이거나, 지금 CI에서 돌고 있는 남의 job)을 담고 있을 수 있으므로,
+// 그걸 방금 일어난 사건처럼 애니메이션으로 재생하면 안 된다.
+function applyStatus(cur,baseline){
   var prev=App.lastStatus;
   if(!prev || prev.job_id!==cur.job_id){
     App.jobId=cur.job_id;
@@ -1212,19 +1228,30 @@ function applyStatus(cur){
     App.t0=Date.now(); App.tEnd=0; App.running=true;
     Scene.reset(false); Scene.clearTray(); showApprove(false);
     agents.forEach(function(a){ a.status="PENDING"; a.setTask(null); });
-    logAction(-1,"Job 감지 — "+cur.job_id,"run");
+    logAction(-1, baseline
+      ? "접속 시점에 이미 진행 중이던 Job — "+cur.job_id+" ("+cur.state+")"
+      : "Job 감지 — "+cur.job_id, baseline?"wait":"run");
   }
   AGENTS.forEach(function(d,i){
     if(!d.backend) return;
     var status=cur.agents && cur.agents[d.backend];
     if(status===undefined) return;
     if(!prev || !prev.agents || prev.agents[d.backend]!==status){
-      liveEvent("agent.status.changed",{data:{agent_id:d.backend,status:status}});
+      if(baseline) liveAgentStatus(d.backend,status,null,true);
+      else liveEvent("agent.status.changed",{data:{agent_id:d.backend,status:status}});
     }
   });
   Scene.setUnwired(uncoveredAgents(cur));
   if(!prev || prev.state!==cur.state){
-    liveEvent("job.transition",{data:{to:cur.state}});
+    if(baseline){
+      // 전이 애니메이션(책상 간 인계)과 "상태 전이 →" 히스토리 없이
+      // 현재 상태만 반영한다.
+      setState(cur.state);
+      if(LIVE_PROGRESS[cur.state]!=null) setProgress(LIVE_PROGRESS[cur.state]);
+      if(cur.state==="PUBLISHED"||cur.state==="FAILED"){ App.running=false; App.tEnd=Date.now(); }
+    }else{
+      liveEvent("job.transition",{data:{to:cur.state}});
+    }
     if(cur.state==="QA_REVIEW"){
       say("QA 통과 — 이 Job의 PR을 GitHub에서 검토하고 merge하면 승인됩니다(이 페이지에서 승인할 수 없습니다).");
     }
@@ -1293,10 +1320,12 @@ el("rtConnect").addEventListener("click",function(){
     }
     setMode("live");
     try{ localStorage.setItem("kpo.statusUrl",path); }catch(e){}
-    App.lastStatus=null; // 첫 응답을 job.created처럼 취급
-    applyStatus(cur);
+    // 첫 응답은 사건이 아니라 스냅샷이다 — baseline으로 채택한다.
+    App.lastStatus=null;
+    applyStatus(cur,true);
     startPolling(url);
-    say("상태 폴링 시작 — "+(POLL_INTERVAL_MS/1000)+"초마다 갱신합니다.");
+    say("상태 폴링 시작 — "+(POLL_INTERVAL_MS/1000)+"초마다 갱신합니다. 지금 화면은 접속 시점의 "
+      +cur.job_id+" 상태이며, 이 접속이 시작한 작업이 아닙니다.");
   }).catch(function(err){
     el("led").className="led err";
     setMode("demo");
