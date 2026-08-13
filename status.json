@@ -1,7 +1,20 @@
 {
   "schema_version": "0.2.0",
-  "updated_at": "2026-08-13T16:30:13Z",
+  "updated_at": "2026-08-13T16:31:11Z",
   "jobs": [
+    {
+      "job_id": "JOB-30",
+      "state": "RESEARCHING",
+      "updated_at": "2026-08-13T16:31:11Z",
+      "issue_number": 30,
+      "agents": {
+        "research-worker": "RUNNING",
+        "document-writer": "PENDING",
+        "proofreader": "PENDING",
+        "qa-critic": "PENDING"
+      },
+      "title": "PowerAutomate Solution Packaging 관련"
+    },
     {
       "job_id": "JOB-29",
       "state": "PROOFREADING",
