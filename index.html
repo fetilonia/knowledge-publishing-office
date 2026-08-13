@@ -1507,6 +1507,7 @@ el("promptInput").addEventListener("keydown",function(e){
 // 않는다"는 console-status-polling.md의 결정과 어긋나지 않는다. 다만 실행
 // 취소에는 Issues 권한만으로는 부족하고 Actions: Read and write가 필요하다.
 var GH_WORKFLOW_FILE="subagent-execution-claude-code.yml";
+var REWORK_LABEL="kpo:rework";
 var ACTIVE_RUN_STATUSES=["queued","in_progress","waiting","requested","pending"];
 var runChoices=[];
 
@@ -1738,17 +1739,43 @@ function decide(decision,comment){
       method:"PATCH", headers:h, body:JSON.stringify({state:"closed"})
     }).then(check);
   }).then(function(){
+    return startRework(sel,h);
+  }).then(function(reworkStarted){
     dequeue(sel.id); showApprove(Q.items.length>0);
-    setState("REWORK"); setProgress(0.5);
+    setState("REWORK"); setProgress(LIVE_PROGRESS.REWORK);
     logAction(-1,"반려 — PR #"+pr+" 닫힘"+(reason?(": "+reason):""),"wait");
-    // 재작업은 아직 자동으로 시작되지 않는다. 파이프라인을 다시 돌리려면
-    // 해당 이슈에 kpo:ready 라벨을 다시 붙여야 한다 — 사실대로 알린다.
-    say("반려했습니다 — PR #"+pr+"을 닫고 의견을 남겼습니다. 재작업은 이슈에 kpo:ready 라벨을 다시 붙여야 시작됩니다.");
+    say(reworkStarted
+      ? "반려했습니다 — PR #"+pr+"을 닫고 재작업을 시작했습니다. 조사는 다시 하지 않고 문서 작성부터 재개합니다."
+      : "반려했습니다 — PR #"+pr+"을 닫았습니다. 재작업은 시작되지 않았습니다(이슈 번호를 알 수 없음) — 이슈에 kpo:rework 라벨을 직접 붙여 주세요.");
     closeDoc();
   }).catch(function(err){
     say("반려 실패 — PR #"+pr+"에 기록하지 못했습니다: "+err.message);
   }).then(release);
   return true;
+}
+
+// 반려된 job은 DRAFTING부터 재개한다(contract.yaml human_approval.on_rejection).
+// 그 재개를 시작시키는 것이 이 라벨이다. 이미 붙어 있는 라벨을 다시 붙이면
+// GitHub이 labeled 웹훅을 쏘지 않으므로, 반드시 떼었다가 다시 붙인다 —
+// 두 번째 반려부터 재작업이 조용히 시작되지 않는 원인이 된다.
+function startRework(sel,h){
+  var issue=sel&&sel.issueNumber;
+  if(!issue) return Promise.resolve(false);
+  var base="https://api.github.com/repos/"+GH_REPO+"/issues/"+issue+"/labels";
+  return fetch(base+"/"+encodeURIComponent(REWORK_LABEL),{method:"DELETE",headers:h})
+    .catch(function(){ /* 안 붙어 있었으면 404 — 정상이다 */ })
+    .then(function(){
+      return fetch(base,{method:"POST",headers:h,
+        body:JSON.stringify({labels:[REWORK_LABEL]})});
+    })
+    .then(function(res){
+      if(!res.ok){
+        return res.json().catch(function(){ return null; }).then(function(b){
+          throw new Error(ghErrorMessage(res,b));
+        });
+      }
+      return true;
+    });
 }
 
 // 결재함 — QA를 통과해 도착한 항목을 건별로 보관한다. 카운터가 아니라 목록이어야
@@ -1786,8 +1813,8 @@ function enqueueForJob(job){
   }).length;
   var it={ id:"AP-"+("00"+Q.seq).slice(-3),
            title:App.lastPrompt?queueTitle():("Job "+job.job_id),
-           jobId:job.job_id, prNumber:job.pr_number, artifactId:null,
-           prompt:App.lastPrompt, artifacts:completed };
+           jobId:job.job_id, prNumber:job.pr_number, issueNumber:job.issue_number,
+           artifactId:null, prompt:App.lastPrompt, artifacts:completed };
   Q.items.push(it); scene.tray=Q.items.length;
   logAction(-1,"결재함 도착 — "+it.id+" (PR #"+job.pr_number+")","wait");
   showApprove(true);
