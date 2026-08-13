@@ -1,0 +1,8 @@
+{
+  "schema_version": "0.1.0",
+  "job_id": "diagnostic-token-check",
+  "state": "DIAGNOSTIC",
+  "updated_at": "2026-08-13T06:41:58Z",
+  "issue_number": 0,
+  "agents": {}
+}
