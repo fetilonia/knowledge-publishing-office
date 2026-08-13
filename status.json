@@ -1,7 +1,19 @@
 {
   "schema_version": "0.2.0",
-  "updated_at": "2026-08-13T13:30:19Z",
+  "updated_at": "2026-08-13T13:31:32Z",
   "jobs": [
+    {
+      "job_id": "JOB-25",
+      "state": "RESEARCHING",
+      "updated_at": "2026-08-13T13:31:32Z",
+      "issue_number": 25,
+      "agents": {
+        "research-worker": "RUNNING",
+        "document-writer": "PENDING",
+        "proofreader": "PENDING",
+        "qa-critic": "PENDING"
+      }
+    },
     {
       "job_id": "JOB-24",
       "state": "RESEARCHING",
