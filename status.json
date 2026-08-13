@@ -1,24 +1,24 @@
 {
   "schema_version": "0.2.0",
-  "updated_at": "2026-08-13T13:31:32Z",
+  "updated_at": "2026-08-13T13:36:42Z",
   "jobs": [
     {
-      "job_id": "JOB-25",
-      "state": "RESEARCHING",
-      "updated_at": "2026-08-13T13:31:32Z",
-      "issue_number": 25,
+      "job_id": "JOB-24",
+      "state": "DRAFTING",
+      "updated_at": "2026-08-13T13:36:42Z",
+      "issue_number": 24,
       "agents": {
-        "research-worker": "RUNNING",
-        "document-writer": "PENDING",
+        "research-worker": "COMPLETED",
+        "document-writer": "RUNNING",
         "proofreader": "PENDING",
         "qa-critic": "PENDING"
       }
     },
     {
-      "job_id": "JOB-24",
+      "job_id": "JOB-25",
       "state": "RESEARCHING",
-      "updated_at": "2026-08-13T13:30:19Z",
-      "issue_number": 24,
+      "updated_at": "2026-08-13T13:31:32Z",
+      "issue_number": 25,
       "agents": {
         "research-worker": "RUNNING",
         "document-writer": "PENDING",
