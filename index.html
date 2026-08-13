@@ -1063,6 +1063,25 @@ function renderHistRows(list){
   var html=""; for(var k=list.length-1;k>=0;k--) html+=histRowHtml(list[k]);
   return html;
 }
+
+// 팝업 전용 — 주제 추적과 같은 이유로 여기도 표로 나눈다: 코르크 미리보기는
+// "에이전트: 문장" 한 줄이 전부지만, 팝업에서는 에이전트명·실행한 작업·
+// 결과를 별도 칸으로 나눠 어떤 에이전트가 무슨 일을 해서 어떻게
+// 끝났는지 한눈에 훑을 수 있게 한다.
+var HIST_KIND_LABEL={ run:"진행 중", ok:"완료", wait:"대기", bad:"실패" };
+function renderHistTable(list){
+  if(!list.length) return '<p class="hb-empty">아직 기록이 없습니다.</p>';
+  var rows="";
+  for(var k=list.length-1;k>=0;k--){
+    var h=list[k], nm=h.i>=0?AGENTS[h.i].name:"System";
+    rows+='<tr><td class="tt-job">'+esc(nm)+'</td>'+
+          '<td class="tt-title">'+esc(h.text)+'</td>'+
+          '<td class="tt-state hb-'+h.kind+'">'+esc(HIST_KIND_LABEL[h.kind]||h.kind)+'</td></tr>';
+  }
+  return '<table class="topicTable"><thead><tr><th>에이전트</th><th>실행한 작업</th><th>결과</th></tr></thead>'+
+    '<tbody>'+rows+'</tbody></table>';
+}
+
 function paintHistory(){
   if(histDrawn===histRev) return;
   histDrawn=histRev;
@@ -1922,7 +1941,7 @@ function refreshBoardModal(){
     boardModalHistDrawn=histRev;
     el("boardTitle").textContent="진행 기록";
     el("boardMeta").textContent=histLog.length+"건";
-    el("boardModalList").innerHTML=renderHistRows(histLog);
+    el("boardModalList").innerHTML=renderHistTable(histLog);
     el("boardHint").textContent="최근 사건이 맨 위입니다.";
   }else if(openBoardKind==="topic"){
     if(boardModalTopicDrawn===topicRev) return;
