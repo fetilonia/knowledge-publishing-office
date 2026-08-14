@@ -4,9 +4,9 @@
 
 에이전트 파이프라인의 진행 상태를 픽셀 사무실로 보여주는 정적 프론트엔드다. 의존성이 없는 단일 HTML 파일이며, 빌드 단계가 없다.
 
-Live 모드에서 오피스 화면은 **하나의 job이 아니라 전체 현황을 보여주는 대시보드**다. 서로 다른 이슈는 실제로 병렬 실행되므로(아래 "Live 모드 연결"), 각 에이전트 책상은 지금 그 단계에 있는 job번호(+PR번호가 있으면 그것도)를 말풍선으로 보여주고, 여러 건이 겹치면 "+N건"이 붙는다. 말풍선을 클릭하면 그 단계에서 지금 병렬로 도는 job 전체를 표로 볼 수 있다. Poster와 Final Reviewer는 아직 이 파일에 상태를 보고하지 않아 흐리게(UNWIRED) 표시된다 — Final Reviewer는 데모 모드 전용 연출 캐릭터이고, 실제 최종 승인은 결재함에서 사람이 PR을 merge하는 것이다.
+Live 모드에서 오피스 화면은 **하나의 job이 아니라 전체 현황을 보여주는 대시보드**다. 서로 다른 이슈는 실제로 병렬 실행되므로(아래 "Live 모드 연결"), 각 에이전트 책상은 지금 그 단계에 있는 job번호(+PR번호가 있으면 그것도)를 말풍선으로 보여주고, 여러 건이 겹치면 "+N건"이 붙는다. 말풍선을 클릭하면 그 단계에서 지금 병렬로 도는 job 전체를 표로 볼 수 있다. Researcher·Documentor·Proofreader·Technical QA·Final Reviewer는 `status.json`의 `agents` 맵에서, Poster는 `status.json`의 job 상태(`PUBLISHING`)에서 실시간 상태를 읽는다 — 아래 "백엔드 매핑" 참고. 실제 최종 승인 여부는 결재함에서 사람이 PR을 merge하거나 final-reviewer가 자동 판정(AUTO_APPROVE/REJECT)한 결과로 정해진다.
 
-오른쪽 벽에는 게시판 두 개가 세로로 나란히 걸려 있다. 위쪽(**진행 기록**)에는 에이전트별 액션 히스토리가 시간순으로 쌓인다. 아래쪽(**주제 추적**)은 시간순 로그가 아니라 job 단위 현황판이다 — 페이지를 새로 열어도, 내가 접수하지 않은 job이라도, 폴링 중인 `status.json`에 있는 모든 job을 상태와 4단계(연구·작성·교열·QA) 완료 점으로 보여준다. 지금 이 콘솔이 따라가는 job은 이름이 붉게 강조된다.
+오른쪽 벽에는 게시판 두 개가 세로로 나란히 걸려 있다. 위쪽(**진행 기록**)에는 에이전트별 액션 히스토리가 시간순으로 쌓인다. 아래쪽(**주제 추적**)은 시간순 로그가 아니라 job 단위 현황판이다 — 페이지를 새로 열어도, 내가 접수하지 않은 job이라도, 폴링 중인 `status.json`에 있는 모든 job을 상태와 5단계(연구·작성·교열·QA·최종검수) 완료 점으로 보여준다. 지금 이 콘솔이 따라가는 job은 이름이 붉게 강조된다.
 
 각 게시판은 최근 몇 줄만 보여준다. 코르크 면 오른쪽 위의 **⤢** 버튼을 누르면 전체 목록을 **표**로 보는 팝업이 뜬다 — 코르크 미리보기는 "에이전트: 한 줄 요약"처럼 좁은 줄에 맞춘 형태지만, 팝업에서는 칸을 나눠 더 많은 정보를 보여준다. 진행 기록의 팝업은 에이전트 / 실행한 작업 / 결과 세 칸이고, 주제 추적의 팝업은 Job / 제목(원본 GitHub 이슈 제목) / 상태 / 진행 네 칸이다(코르크 미리보기는 `JOB-28`처럼 job_id만 보여 좁은 줄이 지저분해지지 않게 한다). 화면이 좁아지면 게시판은 사무실 아래 카드로 떨어지는데, 이때도 미리보기는 같은 상한만큼만 보이고 ⤢ 버튼은 그대로 남는다.
 
@@ -75,7 +75,9 @@ GitHub의 새 이슈 웹 폼으로 라벨을 미리 채운 채 만들어도 `iss
 
 QA를 통과한 문서는 카운터가 아니라 **항목 목록**으로 결재함에 쌓인다. 상단 `결재 대기` 타일이나 승인 바의 **결재함 열기**로 목록을 열고, 항목을 선택하면 문서 본문이 열리며, 거기서 건별로 승인하거나 반려한다. 내용을 보지 않은 채 결재하지 않도록 승인 버튼이 문서를 먼저 연다.
 
-Live 모드에서 이 결재는 **PR에 대한 실제 행위**다. 파이프라인은 QA 통과 후 PR을 열고 그 번호를 `status.json`에 실어 보내며, 결재함은 `pr_number`가 있는 job을 **누가 접수했는지와 무관하게** 전부 올린다 — 이 파이프라인에서 사람의 결정이 필요한 지점은 QA_REVIEW뿐이고(Final Reviewer는 실제 게이트가 아니라 연출이다), 같은 저장소를 함께 쓰는 협업자라면 내가 접수하지 않은 job도 결재할 수 있어야 결재함의 의미가 있기 때문이다. 문서 본문도 그 PR에서 직접 읽는다(`status.json`에는 본문이 담기지 않는다 — 아래 「보안 주의」).
+Live 모드에서 이 결재는 **PR에 대한 실제 행위**다. 파이프라인은 QA 통과 후 PR을 열고 그 번호를 `status.json`에 실어 보내며, 결재함은 `state==="QA_REVIEW"`이고 `pr_number`가 있는 job을 **누가 접수했는지와 무관하게** 전부 올린다 — 같은 저장소를 함께 쓰는 협업자라면 내가 접수하지 않은 job도 결재할 수 있어야 결재함의 의미가 있기 때문이다. 문서 본문도 그 PR에서 직접 읽는다(`status.json`에는 본문이 담기지 않는다 — 아래 「보안 주의」).
+
+**알려진 제약(2026-08-14, final-reviewer 도입 이후):** `agents/orchestrator/contract.yaml`의 `final_review_gate`에 따르면 final-reviewer는 qa-critic 통과 직후 곧바로 실행되고, 사람의 반려/승인 대기는 `QA_REVIEW`가 아니라 `FINAL_REVIEW` 상태에서 일어난다(REQUEST_APPROVAL 밴드). 이 콘솔의 결재함 트리거는 아직 `state==="QA_REVIEW"`만 보므로, 폴링 간격(8초) 안에 상태가 이미 `FINAL_REVIEW`로 넘어가 버리면 결재함이 그 job을 놓칠 수 있다. 이 트리거 조건을 `FINAL_REVIEW`까지 넓혀야 하는지는 별도 확인이 필요하다(REJECT/AUTO_APPROVE 밴드도 잠시 `FINAL_REVIEW` 상태를 거치므로, 무조건 넓히면 사람 개입이 필요 없는 job까지 결재함에 잘못 올라올 수 있다).
 
 오피스 화면(에이전트 책상)도 이미 모든 job을 보여주므로, 결재함이 "내 job"으로 좁히지 않는 것과 같은 방향이다 — "내가 접수한 job"이라는 구분은 상단 타일·티커·주제 추적의 강조 표시에만 남아 있다.
 
@@ -94,19 +96,19 @@ Live 모드의 아티팩트 조회 경로는 런타임 계약이 확정되지 �
 
 ## 백엔드 매핑
 
-`status.json`의 `agents` 맵에 상태를 보고하는 워커는 넷이다.
+`status.json`의 `agents` 맵에 상태를 보고하는 workflow1 워커는 다섯이다(2026-08-14부터 final-reviewer 포함). Poster(workflow2)는 `agents` 맵이 아니라 job 자체의 `state`로 보고한다.
 
 | 화면의 자리 | 보고하는 키 |
 | --- | --- |
-| Researcher | `research-worker` |
-| Documentor | `document-writer` |
-| Proofreader | `proofreader` |
-| Technical QA | `qa-critic` |
-| Poster | *(없음 — Live에서 미연결로 표시)* |
-| Final Reviewer | *(없음 — 데모 전용 연출, Live에서 미연결로 표시)* |
-| Head Director 책상(결재함) | Human Approval — 해당 PR을 GitHub에서 merge |
+| Researcher | `agents["research-worker"]` |
+| Documentor | `agents["document-writer"]` |
+| Proofreader | `agents["proofreader"]` |
+| Technical QA | `agents["qa-critic"]` |
+| Final Reviewer | `agents["final-reviewer"]` |
+| Poster | `state==="PUBLISHING"`(agents 맵에는 키가 없다 — workflow2가 별도로 보고) |
+| Head Director 책상(결재함) | Human Approval — 해당 PR을 GitHub에서 merge, 또는 final-reviewer의 AUTO_APPROVE/REJECT 자동 판정 |
 
-`status.json`에 키가 없는 자리는 "실패"가 아니라 **이 상태 소스가 아직 보고하지 않음**으로 흐리게 표시된다. Poster의 게시 단계와 사람의 최종 승인은 아직 이 파일에 반영되지 않으므로, QA 통과 이후는 GitHub의 해당 PR에서 확인해야 한다. Final Reviewer는 애초에 실제 게이트가 아니다 — 아무리 거만하게 굴어도 최종 승인 권한은 없고, 결재함으로 올려 보내는 연출만 한다.
+`agents` 맵에 키가 아예 없는 backend(현재는 없음)만 "실패"가 아니라 **이 상태 소스가 아직 보고하지 않음**으로 흐리게(UNWIRED) 표시된다. Final Reviewer는 qa-critic·proofreader가 통과시킨 잔여 medium/low/info 이슈를 정합률 점수로 환산해 REJECT(≤70, 자동 반려)/REQUEST_APPROVAL(71-90, 결재함으로)/AUTO_APPROVE(≥91, 자동 승인) 세 갈래로 판정하는 실제 게이트다 — 사람이 직접 보는 QA_REVIEW 상태 없이 qa-critic 통과 직후 바로 실행된다(`agents/orchestrator/contract.yaml`의 `final_review_gate` 참고).
 
 ## 보안 주의
 

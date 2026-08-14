@@ -437,10 +437,12 @@ var AGENTS=[
   {key:"proofreader",name:"Proofreader",role:"포맷·이미지 검토",head:HEAD_GLS,m:"#B5514A",d:"#853934",l:"#D4756D",
    deskR:11,deskC:8,seat:{r:10,c:9},errand:null,backend:"proofreader",
    verb:"문장 구조와 이미지 삽입 상태를 훑습니다"},
-  // Head Director 책상(옛 빈 의자) 담당. backend는 실제로 존재하지 않는 자리표시자다 —
-  // LIVE_KNOWN_BACKENDS(syncAgentDashboard 근처)에 없으므로 Live 모드에서
-  // 항상 UNWIRED로 흐리게 표시한다(Poster와 같은 패턴). 데모에서만 등장하는
-  // 연출용 캐릭터.
+  // Head Director 책상(옛 빈 의자) 담당. 2026-08-14부터 final-reviewer가
+  // 실제 workflow1 backend로 승격되어 job.agents["final-reviewer"]를
+  // 보고한다(kpo_harness.status_publish.AGENT_ORDER 참고) — 이제
+  // LIVE_KNOWN_BACKENDS(syncAgentDashboard 근처)에 포함되므로 Live 모드에서
+  // 실제 작업 상태를 그대로 반영한다. UNWIRED로 흐리게 표시되던 것은
+  // 콘솔이 이 승격을 아직 반영하지 못했던 시점의 낡은 동작이었다.
   {key:"finalreviewer",name:"Final Reviewer",role:"최종 검수 · 스스로 최고 권위자로 여김",head:HEAD_DIR,
    m:"#9AA2AF",d:"#20232B",l:"#C9CEDA",
    deskR:14,deskC:8,seat:{r:15,c:9},errand:null,backend:"final-reviewer",
@@ -958,9 +960,10 @@ function buildBubbles(){
     n.querySelector(".who").textContent=d.name;
     // backend가 있는 에이전트만 클릭 가능하다 — 그 말풍선 텍스트가
     // syncAgentDashboard()가 채운 "지금 이 단계의 job"이고, 클릭하면 그
-    // 단계에 병렬로 몇 건이 있는지 팝업으로 볼 수 있다. Poster/Final
-    // Reviewer는 라이브 데이터가 없으므로(UNWIRED) 클릭해도 보여줄 게
-    // 없다 — bubbles 컨테이너의 pointer-events:none을 그대로 둔다.
+    // 단계에 병렬로 몇 건이 있는지 팝업으로 볼 수 있다. LIVE_WIRED_BACKENDS에
+    // 없는 backend만(현재는 없음 — Poster/Final Reviewer 모두 라이브 신호가
+    // 있다) UNWIRED로 흐려지고 bubbles 컨테이너의 pointer-events:none이
+    // 그대로 남아 클릭이 막힌다.
     if(d.backend){
       n.classList.add("clickable");
       n.addEventListener("click",function(){
@@ -1079,7 +1082,11 @@ var TOPIC_MAX_ROWS=3;   // BOARD2 축소(4타일)에 맞춘 미리보기 상한 
 function topicKind(state){ return TOPIC_KIND[state]||"run"; }
 function progressDots(j){
   var completed=Object.keys(j.agents||{}).filter(function(k){ return j.agents[k]==="COMPLETED"; }).length;
-  var dots=""; for(var d=0;d<4;d++) dots+='<i class="'+(d<completed?"on":"")+'"></i>';
+  // 점 개수는 LIVE_KNOWN_BACKENDS 길이를 따른다 — 하드코딩된 4는
+  // final-reviewer가 5번째 backend로 추가된 뒤로 실제 완료 건수를
+  // 과소 표시했다(최대 4점에서 멈춤).
+  var total=LIVE_KNOWN_BACKENDS.length;
+  var dots=""; for(var d=0;d<total;d++) dots+='<i class="'+(d<completed?"on":"")+'"></i>';
   return dots;
 }
 // 코르크 면 미리보기는 job_id만 보여준다(title까지 넣으면 좁은 줄에서
@@ -1399,21 +1406,29 @@ function demoPublish(){
 // job.transition 같은 사건 로그를 재생할 필요가 없다).
 //
 // backend가 실제로 job.agents 맵에 나타나는 키 목록이다
-// (kpo_harness.status_publish.AGENT_ORDER와 동일해야 한다). Poster/Final
-// Reviewer는 이 목록에 없다 — 결과가 아니라 이 콘솔이 만든 구조적 사실이라
-// job 유무와 무관하게 항상 참이다.
-var LIVE_KNOWN_BACKENDS=["research-worker","document-writer","proofreader","qa-critic"];
+// (kpo_harness.status_publish.AGENT_ORDER와 동일해야 한다). final-reviewer는
+// 2026-08-14부터 이 목록에 포함된다(workflow1의 5번째 backend로 승격).
+// Poster는 여전히 이 목록에 없다 — Poster는 workflow2가 별도로 돌리고,
+// job.agents가 아니라 job.state===PUBLISHING/PUBLISHED로 보고한다
+// (agentJobs의 poster 특수 케이스, console-status-polling.md 참고). 그래도
+// 실제 라이브 신호가 존재하므로 LIVE_WIRED_BACKENDS에는 포함해 UNWIRED로
+// 흐리게 표시하지 않는다.
+var LIVE_KNOWN_BACKENDS=["research-worker","document-writer","proofreader","qa-critic","final-reviewer"];
+var LIVE_WIRED_BACKENDS=LIVE_KNOWN_BACKENDS.concat(["poster"]);
 
 function agentJobs(backend){
   if(App.mode!=="live") return [];
   // App.allJobs는 서버가 최신순으로 정렬해 보낸다(status_publish._prune) —
   // 여기서 다시 정렬하지 않는다.
+  if(backend==="poster"){
+    return (App.allJobs||[]).filter(function(j){ return j.state==="PUBLISHING"; });
+  }
   return (App.allJobs||[]).filter(function(j){ return j.agents && j.agents[backend]==="RUNNING"; });
 }
 
 function syncAgentDashboard(){
   Scene.setUnwired(AGENTS.map(function(d,i){ return i; })
-    .filter(function(i){ return AGENTS[i].backend && LIVE_KNOWN_BACKENDS.indexOf(AGENTS[i].backend)<0; }));
+    .filter(function(i){ return AGENTS[i].backend && LIVE_WIRED_BACKENDS.indexOf(AGENTS[i].backend)<0; }));
   AGENTS.forEach(function(d,i){
     if(!d.backend || !agents[i]) return;
     var jobs=agentJobs(d.backend), running=jobs.length>0;
@@ -1427,7 +1442,7 @@ function syncAgentDashboard(){
 
 // APPROVED 는 더 이상 종착점이 아니다. 게시까지 남아 있으므로 1.0 을 주지 않는다.
 var LIVE_PROGRESS={ NEW:0.04, RESEARCHING:0.14, DRAFTING:0.36, PROOFREADING:0.52,
-  QA_REVIEW:0.66, REWORK:0.50, APPROVED:0.86, PUBLISHING:0.94, PUBLISHED:1, FAILED:0 };
+  QA_REVIEW:0.66, FINAL_REVIEW:0.78, REWORK:0.50, APPROVED:0.86, PUBLISHING:0.94, PUBLISHED:1, FAILED:0 };
 
 // M6: 이 콘솔은 더 이상 REST/SSE 백엔드에 붙지 않는다. 그 계약을 구현하던
 // GitHubJobsController가 auth 저장소 폐기와 함께 사라졌고, kpo_harness는
