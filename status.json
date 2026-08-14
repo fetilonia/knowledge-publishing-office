@@ -1,18 +1,18 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T14:23:49Z",
+  "updated_at": "2026-08-14T14:26:49Z",
   "jobs": [
     {
       "job_id": "JOB-52",
-      "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-14T14:23:49Z",
+      "state": "REWORK",
+      "updated_at": "2026-08-14T14:26:49Z",
       "issue_number": 52,
       "agents": {
         "research-worker": "COMPLETED",
         "document-writer": "COMPLETED",
         "proofreader": "COMPLETED",
         "qa-critic": "COMPLETED",
-        "final-reviewer": "RUNNING"
+        "final-reviewer": "COMPLETED"
       },
       "title": "Entra Plan 2 Access Review 가이드",
       "activity": [
