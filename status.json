@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T14:19:38Z",
+  "updated_at": "2026-08-14T14:19:40Z",
   "jobs": [
     {
       "job_id": "JOB-48",
       "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-14T14:19:38Z",
+      "updated_at": "2026-08-14T14:19:40Z",
       "issue_number": 48,
       "agents": {
         "research-worker": "COMPLETED",
@@ -16,13 +16,6 @@
       },
       "title": "Defender for Cloud 구성 가이드",
       "activity": [
-        {
-          "ts": "2026-08-14T12:04:57Z",
-          "agent": "research-worker",
-          "action": "gate_pass",
-          "detail": "research-result 스키마/게이트 통과 (claim 16개, source 9개, Microsoft 소스 정책 통과)",
-          "kind": "ok"
-        },
         {
           "ts": "2026-08-14T12:04:59Z",
           "agent": "document-writer",
@@ -154,6 +147,13 @@
           "agent": "final-reviewer",
           "action": "score",
           "detail": "conformance_score=60 → REJECT (residual medium=3, low=1)",
+          "kind": "bad"
+        },
+        {
+          "ts": "2026-08-14T14:19:40Z",
+          "agent": "orchestrator",
+          "action": "reject",
+          "detail": "PR #55 오픈 → 반려 코멘트 → close, 이슈 #48에 kpo:rework 재부착",
           "kind": "bad"
         }
       ],
