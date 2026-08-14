@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T14:07:49Z",
+  "updated_at": "2026-08-14T14:07:51Z",
   "jobs": [
     {
       "job_id": "JOB-52",
       "state": "QA_REVIEW",
-      "updated_at": "2026-08-14T14:07:49Z",
+      "updated_at": "2026-08-14T14:07:51Z",
       "issue_number": 52,
       "agents": {
         "research-worker": "COMPLETED",
@@ -50,6 +50,13 @@
           "action": "invoke",
           "detail": "proofreader 서브에이전트를 호출합니다",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-14T14:07:51Z",
+          "agent": "proofreader",
+          "action": "gate_pass",
+          "detail": "proofread-result 스키마/proofread_gate 통과, decision=FAIL(advisory, critical=0/high=1) — 다음 단계 차단 없음",
+          "kind": "ok"
         }
       ]
     },
