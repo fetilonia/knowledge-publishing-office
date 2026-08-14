@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T14:53:05Z",
+  "updated_at": "2026-08-14T14:57:18Z",
   "jobs": [
     {
       "job_id": "JOB-52",
       "state": "QA_REVIEW",
-      "updated_at": "2026-08-14T14:53:05Z",
+      "updated_at": "2026-08-14T14:57:18Z",
       "issue_number": 52,
       "agents": {
         "research-worker": "COMPLETED",
@@ -16,13 +16,6 @@
       },
       "title": "Entra Plan 2 Access Review 가이드",
       "activity": [
-        {
-          "ts": "2026-08-14T13:47:50Z",
-          "agent": "research-worker",
-          "action": "invoke",
-          "detail": "research-worker 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
         {
           "ts": "2026-08-14T13:55:53Z",
           "agent": "research-worker",
@@ -155,6 +148,13 @@
           "action": "invoke",
           "detail": "QA Critic이 제안한 다이어그램(MMD-JOB-52-04) 임베딩을 위해 재호출",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-14T14:57:18Z",
+          "agent": "document-writer",
+          "action": "embed_diagrams",
+          "detail": "QA Critic이 제안한 다이어그램 1개(MMD-JOB-52-04) 삽입",
+          "kind": "ok"
         }
       ]
     },
