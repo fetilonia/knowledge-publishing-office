@@ -1075,9 +1075,12 @@ function paintHistory(){
   histList.innerHTML=renderHistRows(histLog.slice(-HIST_MAX_ROWS));
 }
 
-// job.state -> hb-* 색상 분류. QA_REVIEW는 사람 결정을 기다리는 것이므로
-// "완료"가 아니라 "대기"로 표시한다 — 결재함에 이미 올라와 있다는 뜻이다.
-var TOPIC_KIND={FAILED:"bad", APPROVED:"ok", PUBLISHED:"ok", QA_REVIEW:"wait"};
+// job.state -> hb-* 색상 분류. FINAL_REVIEW는 사람 결정을 기다릴 수 있는
+// 상태이므로(REQUEST_APPROVAL 밴드 — 결재함에 이미 올라와 있을 수 있다)
+// "완료"가 아니라 "대기"로 표시한다. QA_REVIEW는 final-reviewer가 곧바로
+// 이어받는 순간적인 상태라 더는 "대기"가 아니다(진행 중인 다른 상태처럼
+// topicKind()의 기본값 "run"으로 떨어진다).
+var TOPIC_KIND={FAILED:"bad", APPROVED:"ok", PUBLISHED:"ok", FINAL_REVIEW:"wait"};
 var TOPIC_MAX_ROWS=3;   // BOARD2 축소(4타일)에 맞춘 미리보기 상한 — 전체는 확장 팝업에서
 function topicKind(state){ return TOPIC_KIND[state]||"run"; }
 function progressDots(j){
@@ -1548,13 +1551,31 @@ function adoptNextNewJob(jobs){
 }
 
 // 결재함은 "내가 접수한 job"으로 좁히지 않는다. 이 파이프라인에서 사람의
-// 결정이 필요한 지점은 QA_REVIEW(+pr_number)뿐이고(Final Reviewer는 실제
-// 게이트가 아니라 연출이다 — README "백엔드 매핑" 참고), 다른 방문자가
-// 접수한 job이라도 같은 저장소를 함께 쓰는 협업자라면 결재할 수 있어야
-// 통합 결재함의 의미가 있다. 층(사무실 애니메이션)을 움직이는 것과는
-// 별개다 — 그건 여전히 내 job 또는 Job 관제에서 직접 고른 job만 따라간다.
+// 결정이 필요한 지점은 FINAL_REVIEW(+pr_number)다 — final-reviewer가
+// qa-critic 통과 직후 곧바로 실행되어(agents/orchestrator/contract.yaml의
+// final_review_gate) job은 QA_REVIEW에 머물지 않고 FINAL_REVIEW로 넘어가며,
+// 사람의 승인/반려는 그 FINAL_REVIEW 상태에서 일어난다(REQUEST_APPROVAL
+// 밴드). REJECT/AUTO_APPROVE 밴드는 사람 개입 없이 자동으로 REWORK/APPROVED로
+// 넘어가므로, 그 사이 폴링에 FINAL_REVIEW로 잠깐 걸리더라도 다음 폴링에서는
+// 아래 stale 제거로 결재함에서 다시 빠진다. 다른 방문자가 접수한 job이라도
+// 같은 저장소를 함께 쓰는 협업자라면 결재할 수 있어야 통합 결재함의 의미가
+// 있다. 층(사무실 애니메이션)을 움직이는 것과는 별개다 — 그건 여전히 내 job
+// 또는 Job 관제에서 직접 고른 job만 따라간다.
 function syncApprovalQueue(jobs){
-  jobs.forEach(function(j){ if(j.state==="QA_REVIEW" && j.pr_number) enqueueForJob(j); });
+  var openPRs={};
+  jobs.forEach(function(j){
+    if(j.state==="FINAL_REVIEW" && j.pr_number){
+      openPRs[j.pr_number]=true;
+      enqueueForJob(j);
+    }
+  });
+  // FINAL_REVIEW를 벗어난(자동 REJECT/AUTO_APPROVE로 넘어갔거나, 다른
+  // 협업자가 이미 결재한) job은 결재함에서 뗀다 — 안 그러면 이미
+  // merge/close된 PR에 승인·반려를 시도하게 된다. 라이브 PR 항목만
+  // 대상이다(prNumber가 없는 데모 항목은 그대로 둔다).
+  var before=Q.items.length;
+  Q.items=Q.items.filter(function(it){ return !it.prNumber || openPRs[it.prNumber]; });
+  if(Q.items.length!==before) scene.tray=Q.items.length;
 }
 
 function applyStatus(doc,baseline){
@@ -1638,8 +1659,8 @@ function applyOwnJob(cur,baseline){
       logAction(-1,"내 Job 상태 전이 → "+cur.state,
         cur.state==="FAILED"?"bad":(cur.state==="APPROVED"?"ok":(cur.state==="REWORK"?"wait":"run")));
     }
-    if(cur.state==="QA_REVIEW"){
-      say("QA 통과 — 결재함에서 문서를 확인하고 승인하면 해당 PR이 merge됩니다.");
+    if(cur.state==="FINAL_REVIEW"){
+      say("QA 통과 — Final Reviewer의 최종 검수 중입니다. 결재가 필요하면 결재함에 올라옵니다.");
     }
   }
   // 결재함 반영은 applyStatus의 syncApprovalQueue가 전체 job을 훑어
@@ -1876,7 +1897,7 @@ function renderJobList(entries){
     if(j&&j.agents){
       bits.push(Object.keys(j.agents).filter(function(k){
         return j.agents[k]==="COMPLETED";
-      }).length+"/4 완료");
+      }).length+"/"+LIVE_KNOWN_BACKENDS.length+" 완료");
     }
     if(j&&j.pr_number) bits.push("PR #"+j.pr_number);
     if(entry.runs.length) bits.push(entry.runs.map(function(r){
@@ -1896,7 +1917,7 @@ function renderJobList(entries){
       mark.addEventListener("click",function(){ markAsOwnJob(id); });
       b.appendChild(mark);
     }
-    if(j&&j.state==="QA_REVIEW"&&j.pr_number){
+    if(j&&j.state==="FINAL_REVIEW"&&j.pr_number){
       var tray=document.createElement("button");
       tray.type="button"; tray.className="go"; tray.textContent="결재함";
       tray.addEventListener("click",function(){
@@ -2191,9 +2212,11 @@ function enqueue(){
 // 실어 보낸 job만 여기 올라온다 — 브랜치 이름에서 PR을 되짚는 것은
 // 추측이고, merge 대상을 추측으로 정하면 안 된다.
 // 이미 결재한 PR은 다시 올리지 않는다. status.json은 merge 직후 바로
-// QA_REVIEW에서 벗어나지 않고(그 갱신은 console-status-on-merge.yml이
+// FINAL_REVIEW에서 벗어나지 않고(그 갱신은 console-status-on-merge.yml이
 // 몇 초 뒤에 한다), 반려 후 재작업 실행이 REWORK를 게시하기까지도 시간이
-// 걸린다. 그 사이의 폴링이 방금 처리한 항목을 결재함에 되살리면 안 된다.
+// 걸린다. 그 사이의 폴링이 방금 처리한 항목을 결재함에 되살리면 안 된다
+// (syncApprovalQueue의 stale 제거도 이 짧은 창 안에서는 아직 FINAL_REVIEW로
+// 보이므로 걷어내지 못한다 — decidedPRs가 실질적인 방어선이다).
 var decidedPRs={};
 function enqueueForJob(job){
   if(decidedPRs[job.pr_number]) return null;

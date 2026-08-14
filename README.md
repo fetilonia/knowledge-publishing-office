@@ -75,9 +75,9 @@ GitHub의 새 이슈 웹 폼으로 라벨을 미리 채운 채 만들어도 `iss
 
 QA를 통과한 문서는 카운터가 아니라 **항목 목록**으로 결재함에 쌓인다. 상단 `결재 대기` 타일이나 승인 바의 **결재함 열기**로 목록을 열고, 항목을 선택하면 문서 본문이 열리며, 거기서 건별로 승인하거나 반려한다. 내용을 보지 않은 채 결재하지 않도록 승인 버튼이 문서를 먼저 연다.
 
-Live 모드에서 이 결재는 **PR에 대한 실제 행위**다. 파이프라인은 QA 통과 후 PR을 열고 그 번호를 `status.json`에 실어 보내며, 결재함은 `state==="QA_REVIEW"`이고 `pr_number`가 있는 job을 **누가 접수했는지와 무관하게** 전부 올린다 — 같은 저장소를 함께 쓰는 협업자라면 내가 접수하지 않은 job도 결재할 수 있어야 결재함의 의미가 있기 때문이다. 문서 본문도 그 PR에서 직접 읽는다(`status.json`에는 본문이 담기지 않는다 — 아래 「보안 주의」).
+Live 모드에서 이 결재는 **PR에 대한 실제 행위**다. 파이프라인은 QA 통과 후 PR을 열고 그 번호를 `status.json`에 실어 보내며, 결재함은 `state==="FINAL_REVIEW"`이고 `pr_number`가 있는 job을 **누가 접수했는지와 무관하게** 전부 올린다 — 같은 저장소를 함께 쓰는 협업자라면 내가 접수하지 않은 job도 결재할 수 있어야 결재함의 의미가 있기 때문이다. 문서 본문도 그 PR에서 직접 읽는다(`status.json`에는 본문이 담기지 않는다 — 아래 「보안 주의」).
 
-**알려진 제약(2026-08-14, final-reviewer 도입 이후):** `agents/orchestrator/contract.yaml`의 `final_review_gate`에 따르면 final-reviewer는 qa-critic 통과 직후 곧바로 실행되고, 사람의 반려/승인 대기는 `QA_REVIEW`가 아니라 `FINAL_REVIEW` 상태에서 일어난다(REQUEST_APPROVAL 밴드). 이 콘솔의 결재함 트리거는 아직 `state==="QA_REVIEW"`만 보므로, 폴링 간격(8초) 안에 상태가 이미 `FINAL_REVIEW`로 넘어가 버리면 결재함이 그 job을 놓칠 수 있다. 이 트리거 조건을 `FINAL_REVIEW`까지 넓혀야 하는지는 별도 확인이 필요하다(REJECT/AUTO_APPROVE 밴드도 잠시 `FINAL_REVIEW` 상태를 거치므로, 무조건 넓히면 사람 개입이 필요 없는 job까지 결재함에 잘못 올라올 수 있다).
+트리거가 `FINAL_REVIEW`인 이유(2026-08-14, final-reviewer 도입 이후): `agents/orchestrator/contract.yaml`의 `final_review_gate`에 따르면 final-reviewer는 qa-critic 통과 직후 곧바로 실행되므로 job은 `QA_REVIEW`에 머물지 않고 `FINAL_REVIEW`로 넘어가며, 사람의 승인/반려 대기는 그 `FINAL_REVIEW` 상태에서 일어난다(REQUEST_APPROVAL 밴드). REJECT/AUTO_APPROVE 밴드는 사람 개입 없이 자동으로 REWORK/APPROVED로 넘어가므로 결재함에 필요 없다 — `syncApprovalQueue`가 매 폴링마다 결재함을 `FINAL_REVIEW`+`pr_number` job 집합으로 다시 계산하면서, 더 이상 `FINAL_REVIEW`가 아닌(자동 처리됐거나 다른 협업자가 이미 결재한) PR 항목은 걷어낸다.
 
 오피스 화면(에이전트 책상)도 이미 모든 job을 보여주므로, 결재함이 "내 job"으로 좁히지 않는 것과 같은 방향이다 — "내가 접수한 job"이라는 구분은 상단 타일·티커·주제 추적의 강조 표시에만 남아 있다.
 
