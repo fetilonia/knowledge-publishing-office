@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T05:30:32Z",
+  "updated_at": "2026-08-14T05:36:12Z",
   "jobs": [
     {
       "job_id": "JOB-42",
       "state": "DRAFTING",
-      "updated_at": "2026-08-14T05:30:32Z",
+      "updated_at": "2026-08-14T05:36:12Z",
       "issue_number": 42,
       "agents": {
         "research-worker": "COMPLETED",
@@ -106,6 +106,13 @@
           "action": "retry",
           "detail": "qa-critic FAIL 반영, 개정판 작성 (DOC-JOB-42-03)",
           "kind": "wait"
+        },
+        {
+          "ts": "2026-08-14T05:36:12Z",
+          "agent": "document-writer",
+          "action": "gate_pass",
+          "detail": "개정판 DOC-JOB-42-03 스키마/claim_map 재검증 통과",
+          "kind": "ok"
         }
       ]
     },
