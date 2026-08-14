@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T05:24:50Z",
+  "updated_at": "2026-08-14T05:30:29Z",
   "jobs": [
     {
       "job_id": "JOB-42",
       "state": "QA_REVIEW",
-      "updated_at": "2026-08-14T05:24:50Z",
+      "updated_at": "2026-08-14T05:30:29Z",
       "issue_number": 42,
       "agents": {
         "research-worker": "COMPLETED",
@@ -92,6 +92,13 @@
           "action": "invoke",
           "detail": "qa-critic 서브에이전트를 호출합니다 (시도 1/2)",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-14T05:30:29Z",
+          "agent": "qa-critic",
+          "action": "gate_fail",
+          "detail": "QA_HIGH_ISSUE: ISS-JOB-42-01 permission citation mismatch (시도 1/2)",
+          "kind": "bad"
         }
       ]
     },
