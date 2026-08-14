@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T05:36:51Z",
+  "updated_at": "2026-08-14T05:39:18Z",
   "jobs": [
     {
       "job_id": "JOB-42",
       "state": "PROOFREADING",
-      "updated_at": "2026-08-14T05:36:51Z",
+      "updated_at": "2026-08-14T05:39:18Z",
       "issue_number": 42,
       "agents": {
         "research-worker": "COMPLETED",
@@ -127,6 +127,13 @@
           "action": "retry",
           "detail": "DOC-JOB-42-03(QA 반영 개정판) 재검수 — PROOFREADING>QA_REVIEW 간선 유지를 위한 재인증",
           "kind": "wait"
+        },
+        {
+          "ts": "2026-08-14T05:39:18Z",
+          "agent": "proofreader",
+          "action": "gate_pass",
+          "detail": "PRF-JOB-42-03 PASS (low 2건 잔여 non-blocking)",
+          "kind": "ok"
         }
       ]
     },
