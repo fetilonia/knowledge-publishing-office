@@ -1656,6 +1656,15 @@ function applyOwnJob(cur,baseline){
     if(LIVE_PROGRESS[cur.state]!=null) setProgress(LIVE_PROGRESS[cur.state]);
     if(cur.state==="PUBLISHED"||cur.state==="FAILED"){ App.running=false; App.tEnd=Date.now(); }
     if(!quiet){
+      // Poster는 job.agents 맵에 키가 없어(workflow2가 별도로 돈다) 위
+      // newlyCompletedAgents가 절대 잡아내지 못한다 — job.state의
+      // PUBLISHING/PUBLISHED 전이 자체가 Poster의 시작·완료 신호이므로
+      // 여기서 다른 에이전트와 같은 형식으로 이름을 붙여 기록한다.
+      if(cur.state==="PUBLISHING"){
+        logAction(-1, agentDisplayName("poster")+" — "+AGENTS[STAGE_PUBLISH].verb, "run");
+      }else if(cur.state==="PUBLISHED"){
+        logAction(-1, agentDisplayName("poster")+" — 결과 전달, 게이트 통과", "ok");
+      }
       logAction(-1,"내 Job 상태 전이 → "+cur.state,
         cur.state==="FAILED"?"bad":(cur.state==="APPROVED"?"ok":(cur.state==="REWORK"?"wait":"run")));
     }
