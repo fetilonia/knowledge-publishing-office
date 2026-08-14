@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T11:58:00Z",
+  "updated_at": "2026-08-14T12:03:00Z",
   "jobs": [
     {
       "job_id": "JOB-48",
       "state": "RESEARCHING",
-      "updated_at": "2026-08-14T11:58:00Z",
+      "updated_at": "2026-08-14T12:03:00Z",
       "issue_number": 48,
       "agents": {
         "research-worker": "RUNNING",
@@ -21,6 +21,13 @@
           "agent": "research-worker",
           "action": "invoke",
           "detail": "research-worker 서브에이전트를 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-14T12:03:00Z",
+          "agent": "research-worker",
+          "action": "gate_check",
+          "detail": "research-result 산출물 수신, 스키마/게이트 검증 시작",
           "kind": "run"
         }
       ]
