@@ -1,7 +1,21 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T07:19:10Z",
+  "updated_at": "2026-08-14T11:57:59Z",
   "jobs": [
+    {
+      "job_id": "JOB-48",
+      "state": "RESEARCHING",
+      "updated_at": "2026-08-14T11:57:59Z",
+      "issue_number": 48,
+      "agents": {
+        "research-worker": "RUNNING",
+        "document-writer": "PENDING",
+        "proofreader": "PENDING",
+        "qa-critic": "PENDING",
+        "final-reviewer": "PENDING"
+      },
+      "title": "Defender for Cloud 구성 가이드"
+    },
     {
       "job_id": "JOB-46",
       "state": "PUBLISHED",
@@ -259,21 +273,6 @@
         }
       ],
       "pr_number": 44
-    },
-    {
-      "job_id": "JOB-34",
-      "state": "FAILED",
-      "updated_at": "2026-08-14T03:00:40Z",
-      "issue_number": 34,
-      "agents": {
-        "research-worker": "COMPLETED",
-        "document-writer": "COMPLETED",
-        "proofreader": "PENDING",
-        "qa-critic": "FAILED",
-        "final-reviewer": "PENDING"
-      },
-      "title": "Notion 문서를 GitHub Pages로 마이그레이션하기 위한 기술적 절차",
-      "pr_number": 38
     }
   ]
 }
