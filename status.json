@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T06:54:40Z",
+  "updated_at": "2026-08-14T07:04:12Z",
   "jobs": [
     {
       "job_id": "JOB-46",
       "state": "RESEARCHING",
-      "updated_at": "2026-08-14T06:54:40Z",
+      "updated_at": "2026-08-14T07:04:12Z",
       "issue_number": 46,
       "agents": {
         "research-worker": "RUNNING",
@@ -22,6 +22,13 @@
           "action": "invoke",
           "detail": "research-worker 서브에이전트를 호출합니다",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-14T07:04:12Z",
+          "agent": "research-worker",
+          "action": "gate_pass",
+          "detail": "research-result 스키마 및 Microsoft 소스 정책 검증 통과 (claims=36, sources=7)",
+          "kind": "ok"
         }
       ]
     },
