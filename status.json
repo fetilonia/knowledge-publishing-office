@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T12:19:29Z",
+  "updated_at": "2026-08-14T12:19:31Z",
   "jobs": [
     {
       "job_id": "JOB-48",
       "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-14T12:19:29Z",
+      "updated_at": "2026-08-14T12:19:31Z",
       "issue_number": 48,
       "agents": {
         "research-worker": "COMPLETED",
@@ -78,6 +78,13 @@
           "action": "gate_pass",
           "detail": "qa-result decision=PASS, critical/high=0, 잔여 low 3건",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-14T12:19:31Z",
+          "agent": "final-reviewer",
+          "action": "invoke",
+          "detail": "final-reviewer 서브에이전트를 호출합니다",
+          "kind": "run"
         }
       ]
     },
