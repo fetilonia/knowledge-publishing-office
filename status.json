@@ -1,17 +1,17 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T12:13:09Z",
+  "updated_at": "2026-08-14T12:13:10Z",
   "jobs": [
     {
       "job_id": "JOB-48",
-      "state": "PROOFREADING",
-      "updated_at": "2026-08-14T12:13:09Z",
+      "state": "QA_REVIEW",
+      "updated_at": "2026-08-14T12:13:10Z",
       "issue_number": 48,
       "agents": {
         "research-worker": "COMPLETED",
         "document-writer": "COMPLETED",
-        "proofreader": "RUNNING",
-        "qa-critic": "PENDING",
+        "proofreader": "COMPLETED",
+        "qa-critic": "RUNNING",
         "final-reviewer": "PENDING"
       },
       "title": "Defender for Cloud 구성 가이드",
