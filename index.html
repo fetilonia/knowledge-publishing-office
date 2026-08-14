@@ -48,6 +48,7 @@ h1{ margin:.3rem 0 0; font-size:28px; font-weight:500; letter-spacing:-.01em; }
 .tile .v{ font-size:19px; font-weight:500; margin-top:3px; font-variant-numeric:tabular-nums; line-height:1.2; }
 .tile .v.sm{ font-size:13px; }
 .tile.wide{ grid-column:span 2; }
+.tile.dim{ opacity:.55; }
 .pbar{ height:6px; background:var(--soft); border-radius:3px; margin-top:8px; overflow:hidden; }
 .pbar i{ display:block; height:100%; width:0; background:var(--accent); transition:width .45s ease; }
 .badge{ display:inline-block; font-size:11px; font-weight:500; letter-spacing:.06em;
@@ -290,9 +291,13 @@ button.bad:hover:not(:disabled){ background:var(--bad); color:#fff; }
     <!-- 상태·진행률·경과·아티팩트 타일은 뺐다 — 오피스 화면이 "내가 접수한
          job 하나"가 아니라 전체 현황을 보여주는 대시보드가 되면서 그 넷은
          더 이상 뜻이 없다(하나의 job을 전제한 지표였다). 대신 파이프라인
-         순서대로 에이전트별 "지금 병렬로 몇 건 처리 중인지" 타일을
-         buildAgentCountTiles()가 여기 채운다. 결재 대기·Job(내가 접수한
-         job의 ticket 표시)은 그대로 남긴다 — 둘 다 이 새 모델에서도
+         순서대로 여섯 에이전트(Researcher·Documentor·Proofreader·
+         Technical QA·Final Reviewer·Poster) 전부의 "지금 병렬로 몇 건
+         처리 중인지" 타일을 buildAgentCountTiles()가 여기 채운다 — 로스터
+         패널이 이미 여섯을 다 보여주므로 상단 타일도 맞춘다. Final
+         Reviewer·Poster는 status.json이 보고하지 않아 라이브 모드에서는
+         "—"로 흐리게 표시된다(백엔드 매핑 표 참고). 결재 대기·Job(내가
+         접수한 job의 ticket 표시)은 그대로 남긴다 — 둘 다 이 새 모델에서도
          뜻이 있다. -->
     <div class="tile" id="tileTray"><div class="k mono">결재 대기</div><div class="v mono" id="tTray">0</div></div>
     <div class="tile wide"><div class="k mono">Job</div><div class="v sm mono" id="tJob">—</div></div>
@@ -1219,8 +1224,10 @@ function paintDash(){
   el("tileTray").classList.toggle("clickable",Q.items.length>0);
   el("tJob").textContent=App.jobId||"—";
   agentCountTiles.forEach(function(t){
-    var n = App.mode==="live" ? agentJobs(t.backend).length : (scene.active===t.i?1:0);
-    t.el.textContent=String(n);
+    var unwiredLive=App.mode==="live" && !t.live;
+    t.node.classList.toggle("dim",unwiredLive);
+    t.el.textContent = unwiredLive ? "—"
+      : String(App.mode==="live" ? agentJobs(t.backend).length : (scene.active===t.i?1:0));
   });
 }
 
@@ -1259,14 +1266,21 @@ function buildRoster(){
 }
 
 // 파이프라인 순서(STAGE_ORDER: 연구→작성→교열→QA)대로 에이전트별 타일을
-// 만든다. AGENTS 배열 순서는 책상 배치 순서라 파이프라인 순서와 다르다.
+// 만들고, 그 뒤에 QA 이후 단계인 Final Reviewer·Poster(STAGE_PUBLISH)를
+// 이어 붙인다 — 로스터 패널은 이미 여섯 에이전트를 전부 보여주는데 상단
+// 타일 줄만 넷으로 멈춰 있으면 같은 화면 안에서 정보가 어긋난다.
+// AGENTS 배열 순서는 책상 배치 순서라 파이프라인 순서와 다르다.
 // count는 paintDash()가 매번 채운다 — 라이브 모드는 agentJobs(backend).length
 // (지금 이 단계에서 병렬로 도는 job 수), 데모 모드는 지금 활성화된 에이전트
-// 하나만 1이다(데모는 job이 하나뿐이므로).
+// 하나만 1이다(데모는 job이 하나뿐이므로). Final Reviewer·Poster는
+// status.json의 agents 맵에 아예 보고되지 않으므로(LIVE_KNOWN_BACKENDS
+// 밖) 라이브 모드에서는 "0건"이 아니라 로스터의 UNWIRED와 같은 뜻으로
+// "—"를 보여주고 타일을 흐리게 한다 — 0으로 잘못 단정하지 않기 위해서다.
 var agentCountTiles=[];
 function buildAgentCountTiles(){
   var tray=el("tileTray");
-  STAGE_ORDER.forEach(function(i){
+  var order=STAGE_ORDER.concat([FINAL_REVIEWER_IDX, STAGE_PUBLISH]);
+  order.forEach(function(i){
     var d=AGENTS[i];
     var node=document.createElement("div");
     node.className="tile";
@@ -1274,7 +1288,8 @@ function buildAgentCountTiles(){
     node.querySelector(".k").textContent=d.name;
     var v=node.querySelector(".v");
     tray.parentNode.insertBefore(node,tray);
-    agentCountTiles.push({i:i,backend:d.backend,el:v});
+    agentCountTiles.push({i:i,backend:d.backend,el:v,node:node,
+      live:LIVE_KNOWN_BACKENDS.indexOf(d.backend)>=0});
   });
 }
 
