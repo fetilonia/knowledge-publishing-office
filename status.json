@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T14:22:40Z",
+  "updated_at": "2026-08-14T14:23:49Z",
   "jobs": [
     {
       "job_id": "JOB-52",
       "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-14T14:22:40Z",
+      "updated_at": "2026-08-14T14:23:49Z",
       "issue_number": 52,
       "agents": {
         "research-worker": "COMPLETED",
@@ -92,6 +92,13 @@
           "action": "invoke",
           "detail": "final-reviewer 서브에이전트를 호출합니다",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-14T14:23:49Z",
+          "agent": "final-reviewer",
+          "action": "score",
+          "detail": "conformance_score=0 (critical=0,high=1,medium=6,low=4) → REJECT",
+          "kind": "bad"
         }
       ]
     },
