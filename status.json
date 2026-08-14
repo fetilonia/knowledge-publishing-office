@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T12:10:39Z",
+  "updated_at": "2026-08-14T12:10:40Z",
   "jobs": [
     {
       "job_id": "JOB-48",
       "state": "PROOFREADING",
-      "updated_at": "2026-08-14T12:10:39Z",
+      "updated_at": "2026-08-14T12:10:40Z",
       "issue_number": 48,
       "agents": {
         "research-worker": "COMPLETED",
@@ -50,6 +50,13 @@
           "action": "gate_pass",
           "detail": "document-draft 스키마 및 교차검증 통과 (claim_map 16개 전체 매핑)",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-14T12:10:40Z",
+          "agent": "proofreader",
+          "action": "invoke",
+          "detail": "proofreader 서브에이전트를 호출합니다",
+          "kind": "run"
         }
       ]
     },
