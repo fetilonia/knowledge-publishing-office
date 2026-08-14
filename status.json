@@ -1,14 +1,14 @@
 {
   "schema_version": "0.2.0",
-  "updated_at": "2026-08-14T01:32:59Z",
+  "updated_at": "2026-08-14T01:47:28Z",
   "jobs": [
     {
       "job_id": "JOB-34",
-      "state": "FAILED",
-      "updated_at": "2026-08-14T01:32:59Z",
+      "state": "REWORK",
+      "updated_at": "2026-08-14T01:47:28Z",
       "issue_number": 34,
       "agents": {
-        "research-worker": "PENDING",
+        "research-worker": "COMPLETED",
         "document-writer": "PENDING",
         "proofreader": "PENDING",
         "qa-critic": "PENDING",
