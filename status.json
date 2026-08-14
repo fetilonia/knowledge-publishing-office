@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T05:43:35Z",
+  "updated_at": "2026-08-14T05:47:26Z",
   "jobs": [
     {
       "job_id": "JOB-42",
       "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-14T05:43:35Z",
+      "updated_at": "2026-08-14T05:47:26Z",
       "issue_number": 42,
       "agents": {
         "research-worker": "COMPLETED",
@@ -16,13 +16,6 @@
       },
       "title": "Notion 문서를 GitHub Pages로 마이그레이션하기 위한 기술적 절차",
       "activity": [
-        {
-          "ts": "2026-08-14T05:00:26Z",
-          "agent": "research-worker",
-          "action": "invoke",
-          "detail": "research-worker 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
         {
           "ts": "2026-08-14T05:06:53Z",
           "agent": "research-worker",
@@ -155,6 +148,13 @@
           "action": "invoke",
           "detail": "final-reviewer 서브에이전트를 호출합니다",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-14T05:47:26Z",
+          "agent": "final-reviewer",
+          "action": "score",
+          "detail": "conformance_score=68 → REJECT",
+          "kind": "bad"
         }
       ]
     },
