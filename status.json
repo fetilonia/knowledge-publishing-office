@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T14:15:25Z",
+  "updated_at": "2026-08-14T14:15:28Z",
   "jobs": [
     {
       "job_id": "JOB-48",
       "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-14T14:15:25Z",
+      "updated_at": "2026-08-14T14:15:28Z",
       "issue_number": 48,
       "agents": {
         "research-worker": "COMPLETED",
@@ -16,13 +16,6 @@
       },
       "title": "Defender for Cloud 구성 가이드",
       "activity": [
-        {
-          "ts": "2026-08-14T11:58:00Z",
-          "agent": "research-worker",
-          "action": "invoke",
-          "detail": "research-worker 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
         {
           "ts": "2026-08-14T12:03:00Z",
           "agent": "research-worker",
@@ -155,6 +148,13 @@
           "action": "gate_pass",
           "detail": "diagram_embedding_gate 통과 — MMD-JOB-48-01/02/03 모두 마커 삽입 확인, powerpoint_spec으로 JOB-48.architecture.pptx(4장) 생성",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-14T14:15:28Z",
+          "agent": "final-reviewer",
+          "action": "invoke",
+          "detail": "final-reviewer 서브에이전트를 호출합니다",
+          "kind": "run"
         }
       ],
       "pr_number": 49
