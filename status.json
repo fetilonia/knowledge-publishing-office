@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T14:36:35Z",
+  "updated_at": "2026-08-14T14:36:37Z",
   "jobs": [
     {
       "job_id": "JOB-52",
       "state": "PROOFREADING",
-      "updated_at": "2026-08-14T14:36:35Z",
+      "updated_at": "2026-08-14T14:36:37Z",
       "issue_number": 52,
       "agents": {
         "research-worker": "COMPLETED",
@@ -112,6 +112,13 @@
           "agent": "document-writer",
           "action": "invoke",
           "detail": "REWORK: document-writer 재호출 (반려 사유 반영)",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-14T14:36:37Z",
+          "agent": "proofreader",
+          "action": "invoke",
+          "detail": "proofreader 서브에이전트를 호출합니다 (REWORK 재검토)",
           "kind": "run"
         }
       ]
