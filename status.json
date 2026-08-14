@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T14:04:08Z",
+  "updated_at": "2026-08-14T14:04:09Z",
   "jobs": [
     {
       "job_id": "JOB-52",
       "state": "PROOFREADING",
-      "updated_at": "2026-08-14T14:04:08Z",
+      "updated_at": "2026-08-14T14:04:09Z",
       "issue_number": 52,
       "agents": {
         "research-worker": "COMPLETED",
@@ -36,6 +36,13 @@
           "action": "invoke",
           "detail": "document-writer 서브에이전트를 호출합니다",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-14T14:04:09Z",
+          "agent": "document-writer",
+          "action": "gate_pass",
+          "detail": "document-draft 스키마 및 draft_gate(claim_map/image_map) 통과",
+          "kind": "ok"
         }
       ]
     },
