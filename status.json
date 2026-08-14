@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T13:49:49Z",
+  "updated_at": "2026-08-14T13:49:50Z",
   "jobs": [
     {
       "job_id": "JOB-48",
       "state": "DRAFTING",
-      "updated_at": "2026-08-14T13:49:49Z",
+      "updated_at": "2026-08-14T13:49:50Z",
       "issue_number": 48,
       "agents": {
         "research-worker": "COMPLETED",
@@ -98,6 +98,13 @@
           "agent": "orchestrator",
           "action": "rework_start",
           "detail": "PR #49 반려(REJECT): 시각화/구성도 보강 요청. DRAFTING부터 재개, research-worker 재호출 없음",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-14T13:49:50Z",
+          "agent": "document-writer",
+          "action": "invoke",
+          "detail": "document-writer 서브에이전트를 재작업(REWORK)으로 호출합니다 (1/2)",
           "kind": "run"
         }
       ],
