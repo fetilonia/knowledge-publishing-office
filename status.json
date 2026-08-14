@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T14:26:49Z",
+  "updated_at": "2026-08-14T14:26:50Z",
   "jobs": [
     {
       "job_id": "JOB-52",
       "state": "REWORK",
-      "updated_at": "2026-08-14T14:26:49Z",
+      "updated_at": "2026-08-14T14:26:50Z",
       "issue_number": 52,
       "agents": {
         "research-worker": "COMPLETED",
@@ -98,6 +98,13 @@
           "agent": "final-reviewer",
           "action": "score",
           "detail": "conformance_score=0 (critical=0,high=1,medium=6,low=4) → REJECT",
+          "kind": "bad"
+        },
+        {
+          "ts": "2026-08-14T14:26:50Z",
+          "agent": "final-reviewer",
+          "action": "gate_pass",
+          "detail": "REJECT 밴드 처리 완료: PR #56 반려 코멘트 후 close, 이슈 #52에 kpo:rework 라벨 재부착, FINAL_REVIEW>REWORK 전이 기록·커밋",
           "kind": "bad"
         }
       ]
