@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T05:13:53Z",
+  "updated_at": "2026-08-14T05:16:52Z",
   "jobs": [
     {
       "job_id": "JOB-42",
       "state": "PROOFREADING",
-      "updated_at": "2026-08-14T05:13:53Z",
+      "updated_at": "2026-08-14T05:16:52Z",
       "issue_number": 42,
       "agents": {
         "research-worker": "COMPLETED",
@@ -50,6 +50,13 @@
           "action": "invoke",
           "detail": "proofreader 서브에이전트를 호출합니다 (시도 1/2)",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-14T05:16:52Z",
+          "agent": "proofreader",
+          "action": "gate_fail",
+          "detail": "PROHIBITED_EXPRESSION: PRF-JOB-42-01-F1 high, Expected output 절대 표현 (시도 1/2)",
+          "kind": "bad"
         }
       ]
     },
