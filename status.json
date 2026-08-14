@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T05:30:30Z",
+  "updated_at": "2026-08-14T05:30:32Z",
   "jobs": [
     {
       "job_id": "JOB-42",
       "state": "DRAFTING",
-      "updated_at": "2026-08-14T05:30:30Z",
+      "updated_at": "2026-08-14T05:30:32Z",
       "issue_number": 42,
       "agents": {
         "research-worker": "COMPLETED",
@@ -99,6 +99,13 @@
           "action": "gate_fail",
           "detail": "QA_HIGH_ISSUE: ISS-JOB-42-01 permission citation mismatch (시도 1/2)",
           "kind": "bad"
+        },
+        {
+          "ts": "2026-08-14T05:30:32Z",
+          "agent": "document-writer",
+          "action": "retry",
+          "detail": "qa-critic FAIL 반영, 개정판 작성 (DOC-JOB-42-03)",
+          "kind": "wait"
         }
       ]
     },
