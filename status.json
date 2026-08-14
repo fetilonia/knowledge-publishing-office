@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T05:36:13Z",
+  "updated_at": "2026-08-14T05:36:14Z",
   "jobs": [
     {
       "job_id": "JOB-42",
       "state": "QA_REVIEW",
-      "updated_at": "2026-08-14T05:36:13Z",
+      "updated_at": "2026-08-14T05:36:14Z",
       "issue_number": 42,
       "agents": {
         "research-worker": "COMPLETED",
@@ -113,6 +113,13 @@
           "action": "gate_pass",
           "detail": "개정판 DOC-JOB-42-03 스키마/claim_map 재검증 통과",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-14T05:36:14Z",
+          "agent": "qa-critic",
+          "action": "retry",
+          "detail": "qa-critic 재호출 (시도 2/2, 최종)",
+          "kind": "wait"
         }
       ]
     },
