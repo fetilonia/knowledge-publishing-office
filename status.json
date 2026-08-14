@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T07:18:59Z",
+  "updated_at": "2026-08-14T07:19:01Z",
   "jobs": [
     {
       "job_id": "JOB-46",
       "state": "APPROVED",
-      "updated_at": "2026-08-14T07:18:59Z",
+      "updated_at": "2026-08-14T07:19:01Z",
       "issue_number": 46,
       "agents": {
         "research-worker": "COMPLETED",
@@ -91,6 +91,13 @@
           "agent": "final-reviewer",
           "action": "save",
           "detail": "AUTO_APPROVE 기록 완료, PR #47 오픈",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-14T07:19:01Z",
+          "agent": "final-reviewer",
+          "action": "save",
+          "detail": "PR #47 셀프 merge 완료 (squash, branch 삭제)",
           "kind": "ok"
         }
       ],
