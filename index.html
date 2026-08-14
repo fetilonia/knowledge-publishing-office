@@ -870,7 +870,12 @@ var App={
   foreignSig:null, allJobs:[], lastDoc:null,
   // adoptAfter: 요청을 GitHub 양식으로 넘긴 시점에 이미 있던 job_id 집합.
   // 이 뒤에 새로 나타나는 job을 방금 낸 요청으로 채택한다. null이면 대기 아님.
-  adoptAfter:null
+  adoptAfter:null,
+  // activitySeen: job_id -> 지금까지 진행 기록 게시판에 반영한 job.activity[]
+  // 길이. status.json 0.3.0(kpo_harness.status_publish.log_activity)부터
+  // 각 job이 세부 작업 로그를 담는다 — syncActivityLog()가 폴링마다 이
+  // 길이보다 뒤에 있는 항목만 새 사건으로 게시판에 얹는다.
+  activitySeen:{}
 };
 
 var OWN_JOB_KEY="kpo.ownJobId";
@@ -1578,9 +1583,47 @@ function syncApprovalQueue(jobs){
   if(Q.items.length!==before) scene.tray=Q.items.length;
 }
 
+// job.activity[]는 status.json 0.3.0부터 각 job이 담는 세부 작업 로그다
+// (kpo_harness.status_publish.log_activity — 설계는
+// knowledge-publishing-agents/docs/architecture/console-status-polling.md의
+// "세부 진행 기록 — activity[]" 참고). agents 맵의 PENDING/RUNNING/
+// COMPLETED보다 한 단계 더 세밀하게 게이트 통과/실패, 재시도 횟수,
+// documentor Skill 단독 실행까지 이 배열에 쌓인다.
+//
+// 상태 전이 로그(applyOwnJob)는 "내가 접수한 job"으로 좁히지만, 이 로그는
+// 그러지 않는다 — 감사 목적의 게시판이므로 지금 status.json이 아는 모든
+// job의 활동을 함께 보여준다(결재함이 "내 job"으로 좁히지 않는 것과 같은
+// 이유). 여러 job이 동시에 활동 중이면 어느 job인지 앞에 붙인다.
+function activityAgentIndex(agentKey){
+  if(!agentKey) return -1;
+  var base=agentKey.replace(/-skill$/,"");
+  return BACKEND_TO_IDX.hasOwnProperty(base) ? BACKEND_TO_IDX[base] : -1;
+}
+function syncActivityLog(jobs,baseline){
+  var activeCount=jobs.filter(function(j){ return Array.isArray(j.activity)&&j.activity.length; }).length;
+  jobs.forEach(function(j){
+    var list=Array.isArray(j.activity)?j.activity:[];
+    var seen=App.activitySeen[j.job_id]||0;
+    if(baseline || seen>list.length){
+      // 접속 시점의 스냅샷이거나(재생 방지), 우리가 알던 것보다 배열이
+      // 짧아졌다(같은 job_id가 다시 쓰였을 때의 방어적 처리) — 두 경우 모두
+      // 지금 길이를 기준선으로 삼고 조용히 넘어간다.
+      App.activitySeen[j.job_id]=list.length;
+      return;
+    }
+    for(var k=seen;k<list.length;k++){
+      var a=list[k]||{}, isSkill=/-skill$/.test(a.agent||"");
+      var label=(isSkill?"[Skill] ":"")+(a.detail||a.action||"활동");
+      logAction(activityAgentIndex(a.agent), (activeCount>1?j.job_id+" — ":"")+label, a.kind||"run");
+    }
+    App.activitySeen[j.job_id]=list.length;
+  });
+}
+
 function applyStatus(doc,baseline){
   var jobs=normalizeStatus(doc);
   App.allJobs=jobs; App.lastDoc=doc; touchTopicBoard();
+  syncActivityLog(jobs,baseline);
   syncApprovalQueue(jobs);
   // 오피스 화면(책상·말풍선)은 "내가 접수한 job"과 무관하게 항상 전체
   // 현황을 반영한다 — 아래 mine/foreign 분기는 상단 타일·티커처럼 "내가
