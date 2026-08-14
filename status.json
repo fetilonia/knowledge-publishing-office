@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T14:42:11Z",
+  "updated_at": "2026-08-14T14:42:12Z",
   "jobs": [
     {
       "job_id": "JOB-52",
       "state": "QA_REVIEW",
-      "updated_at": "2026-08-14T14:42:11Z",
+      "updated_at": "2026-08-14T14:42:12Z",
       "issue_number": 52,
       "agents": {
         "research-worker": "COMPLETED",
@@ -119,6 +119,13 @@
           "agent": "proofreader",
           "action": "invoke",
           "detail": "proofreader 서브에이전트를 호출합니다 (REWORK 재검토)",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-14T14:42:12Z",
+          "agent": "qa-critic",
+          "action": "invoke",
+          "detail": "qa-critic 서브에이전트를 호출합니다 (REWORK 재검토)",
           "kind": "run"
         }
       ]
