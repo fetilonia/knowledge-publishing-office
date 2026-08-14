@@ -1,17 +1,17 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T05:36:12Z",
+  "updated_at": "2026-08-14T05:36:13Z",
   "jobs": [
     {
       "job_id": "JOB-42",
-      "state": "DRAFTING",
-      "updated_at": "2026-08-14T05:36:12Z",
+      "state": "QA_REVIEW",
+      "updated_at": "2026-08-14T05:36:13Z",
       "issue_number": 42,
       "agents": {
         "research-worker": "COMPLETED",
-        "document-writer": "RUNNING",
-        "proofreader": "PENDING",
-        "qa-critic": "PENDING",
+        "document-writer": "COMPLETED",
+        "proofreader": "COMPLETED",
+        "qa-critic": "RUNNING",
         "final-reviewer": "PENDING"
       },
       "title": "Notion 문서를 GitHub Pages로 마이그레이션하기 위한 기술적 절차",
