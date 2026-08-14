@@ -1,7 +1,21 @@
 {
   "schema_version": "0.2.0",
-  "updated_at": "2026-08-13T22:26:06Z",
+  "updated_at": "2026-08-14T01:02:45Z",
   "jobs": [
+    {
+      "job_id": "JOB-34",
+      "state": "RESEARCHING",
+      "updated_at": "2026-08-14T01:02:45Z",
+      "issue_number": 34,
+      "agents": {
+        "research-worker": "RUNNING",
+        "document-writer": "PENDING",
+        "proofreader": "PENDING",
+        "qa-critic": "PENDING",
+        "final-reviewer": "PENDING"
+      },
+      "title": "Notion 문서를 GitHub Pages로 마이그레이션하기 위한 기술적 절차"
+    },
     {
       "job_id": "JOB-31",
       "state": "PUBLISHED",
@@ -15,58 +29,6 @@
       },
       "title": "PowerAutomate Default Security",
       "pr_number": 32
-    },
-    {
-      "job_id": "JOB-25",
-      "state": "FAILED",
-      "updated_at": "2026-08-13T17:39:00Z",
-      "issue_number": 25,
-      "agents": {
-        "research-worker": "COMPLETED",
-        "document-writer": "COMPLETED",
-        "proofreader": "COMPLETED",
-        "qa-critic": "COMPLETED"
-      },
-      "pr_number": 26
-    },
-    {
-      "job_id": "JOB-30",
-      "state": "FAILED",
-      "updated_at": "2026-08-13T16:59:47Z",
-      "issue_number": 30,
-      "agents": {
-        "research-worker": "PENDING",
-        "document-writer": "PENDING",
-        "proofreader": "PENDING",
-        "qa-critic": "PENDING"
-      },
-      "title": "PowerAutomate Solution Packaging 관련"
-    },
-    {
-      "job_id": "JOB-22",
-      "state": "APPROVED",
-      "updated_at": "2026-08-13T16:57:45Z",
-      "issue_number": 22,
-      "agents": {
-        "research-worker": "COMPLETED",
-        "document-writer": "COMPLETED",
-        "proofreader": "COMPLETED",
-        "qa-critic": "COMPLETED"
-      },
-      "pr_number": 23
-    },
-    {
-      "job_id": "JOB-29",
-      "state": "FAILED",
-      "updated_at": "2026-08-13T16:42:05Z",
-      "issue_number": 29,
-      "agents": {
-        "research-worker": "PENDING",
-        "document-writer": "PENDING",
-        "proofreader": "PENDING",
-        "qa-critic": "PENDING"
-      },
-      "title": "okta OIDC 연결을 통한 Entra IdP 허브 프로비저닝"
     }
   ]
 }
