@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T14:06:39Z",
+  "updated_at": "2026-08-14T14:06:40Z",
   "jobs": [
     {
       "job_id": "JOB-48",
       "state": "QA_REVIEW",
-      "updated_at": "2026-08-14T14:06:39Z",
+      "updated_at": "2026-08-14T14:06:40Z",
       "issue_number": 48,
       "agents": {
         "research-worker": "COMPLETED",
@@ -141,6 +141,13 @@
           "action": "gate_pass",
           "detail": "qa-result QA-JOB-48-02 및 technical-visualization VIZ-JOB-48-01 스키마/gate 통과 (decision=FAIL, advisory, critical/high=0; diagrams=3, powerpoint_spec 존재)",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-14T14:06:40Z",
+          "agent": "document-writer",
+          "action": "embed_diagrams",
+          "detail": "qa-critic이 제안한 다이어그램 3개를 document-writer로 임베딩 시도 (1/2)",
+          "kind": "run"
         }
       ],
       "pr_number": 49
