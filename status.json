@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T12:03:00Z",
+  "updated_at": "2026-08-14T12:04:57Z",
   "jobs": [
     {
       "job_id": "JOB-48",
       "state": "RESEARCHING",
-      "updated_at": "2026-08-14T12:03:00Z",
+      "updated_at": "2026-08-14T12:04:57Z",
       "issue_number": 48,
       "agents": {
         "research-worker": "RUNNING",
@@ -29,6 +29,13 @@
           "action": "gate_check",
           "detail": "research-result 산출물 수신, 스키마/게이트 검증 시작",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-14T12:04:57Z",
+          "agent": "research-worker",
+          "action": "gate_pass",
+          "detail": "research-result 스키마/게이트 통과 (claim 16개, source 9개, Microsoft 소스 정책 통과)",
+          "kind": "ok"
         }
       ]
     },
