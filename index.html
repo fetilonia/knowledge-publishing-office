@@ -1084,8 +1084,11 @@ function paintHistory(){
 // 상태이므로(REQUEST_APPROVAL 밴드 — 결재함에 이미 올라와 있을 수 있다)
 // "완료"가 아니라 "대기"로 표시한다. QA_REVIEW는 final-reviewer가 곧바로
 // 이어받는 순간적인 상태라 더는 "대기"가 아니다(진행 중인 다른 상태처럼
-// topicKind()의 기본값 "run"으로 떨어진다).
-var TOPIC_KIND={FAILED:"bad", APPROVED:"ok", PUBLISHED:"ok", FINAL_REVIEW:"wait"};
+// topicKind()의 기본값 "run"으로 떨어진다). CANCELED는 FAILED(빨강, 게이트
+// 결함)와 구분한다 — 사람이 「실행 #N 취소」로 의도적으로 멈춘 job이지 이
+// 파이프라인이 무언가를 잘못해서 죽은 게 아니므로, 대기(hb-wait, 노랑)
+// 색으로 "빨간 결함"과 시각적으로 갈라놓는다.
+var TOPIC_KIND={FAILED:"bad", CANCELED:"wait", APPROVED:"ok", PUBLISHED:"ok", FINAL_REVIEW:"wait"};
 var TOPIC_MAX_ROWS=3;   // BOARD2 축소(4타일)에 맞춘 미리보기 상한 — 전체는 확장 팝업에서
 function topicKind(state){ return TOPIC_KIND[state]||"run"; }
 function progressDots(j){
@@ -1450,7 +1453,8 @@ function syncAgentDashboard(){
 
 // APPROVED 는 더 이상 종착점이 아니다. 게시까지 남아 있으므로 1.0 을 주지 않는다.
 var LIVE_PROGRESS={ NEW:0.04, RESEARCHING:0.14, DRAFTING:0.36, PROOFREADING:0.52,
-  QA_REVIEW:0.66, FINAL_REVIEW:0.78, REWORK:0.50, APPROVED:0.86, PUBLISHING:0.94, PUBLISHED:1, FAILED:0 };
+  QA_REVIEW:0.66, FINAL_REVIEW:0.78, REWORK:0.50, APPROVED:0.86, PUBLISHING:0.94, PUBLISHED:1,
+  FAILED:0, CANCELED:0 };
 
 // M6: 이 콘솔은 더 이상 REST/SSE 백엔드에 붙지 않는다. 그 계약을 구현하던
 // GitHubJobsController가 auth 저장소 폐기와 함께 사라졌고, kpo_harness는
@@ -1697,7 +1701,7 @@ function applyOwnJob(cur,baseline){
   if(!prev || prev.state!==cur.state){
     setState(cur.state);
     if(LIVE_PROGRESS[cur.state]!=null) setProgress(LIVE_PROGRESS[cur.state]);
-    if(cur.state==="PUBLISHED"||cur.state==="FAILED"){ App.running=false; App.tEnd=Date.now(); }
+    if(cur.state==="PUBLISHED"||cur.state==="FAILED"||cur.state==="CANCELED"){ App.running=false; App.tEnd=Date.now(); }
     if(!quiet){
       // Poster는 job.agents 맵에 키가 없어(workflow2가 별도로 돈다) 위
       // newlyCompletedAgents가 절대 잡아내지 못한다 — job.state의
@@ -1709,7 +1713,8 @@ function applyOwnJob(cur,baseline){
         logAction(-1, agentDisplayName("poster")+" — 결과 전달, 게이트 통과", "ok");
       }
       logAction(-1,"내 Job 상태 전이 → "+cur.state,
-        cur.state==="FAILED"?"bad":(cur.state==="APPROVED"?"ok":(cur.state==="REWORK"?"wait":"run")));
+        cur.state==="FAILED"?"bad":(cur.state==="CANCELED"?"wait":
+        (cur.state==="APPROVED"?"ok":(cur.state==="REWORK"?"wait":"run"))));
     }
     if(cur.state==="FINAL_REVIEW"){
       say("QA 통과 — Final Reviewer의 최종 검수 중입니다. 결재가 필요하면 결재함에 올라옵니다.");
@@ -1940,7 +1945,7 @@ function renderJobList(entries){
     var j=entry.job, id=entry.jobId, isOwn=(id===App.ownJobId);
     var li=document.createElement("li");
     li.className="jitem"+(isOwn?" own":"")+(entry.runs.length?" live":"")+
-                 (j&&j.state==="FAILED"?" gone":"");
+                 (j&&(j.state==="FAILED"||j.state==="CANCELED")?" gone":"");
     var x=document.createElement("span"); x.className="jx";
     var n=document.createElement("span"); n.className="jn mono";
     n.textContent=id+" · "+jobRowState(entry)+(isOwn?"  ← 내가 접수한 job":"");
