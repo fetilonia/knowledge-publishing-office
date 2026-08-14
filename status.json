@@ -1,17 +1,17 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T07:12:04Z",
+  "updated_at": "2026-08-14T07:12:10Z",
   "jobs": [
     {
       "job_id": "JOB-46",
-      "state": "PROOFREADING",
-      "updated_at": "2026-08-14T07:12:04Z",
+      "state": "QA_REVIEW",
+      "updated_at": "2026-08-14T07:12:10Z",
       "issue_number": 46,
       "agents": {
         "research-worker": "COMPLETED",
         "document-writer": "COMPLETED",
-        "proofreader": "RUNNING",
-        "qa-critic": "PENDING",
+        "proofreader": "COMPLETED",
+        "qa-critic": "RUNNING",
         "final-reviewer": "PENDING"
       },
       "title": "Purview DLP Endpoint DLP를 통한 SIT 기반 프로세스 간 민감정보 탐지",
