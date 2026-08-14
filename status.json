@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T05:07:00Z",
+  "updated_at": "2026-08-14T05:13:49Z",
   "jobs": [
     {
       "job_id": "JOB-42",
       "state": "DRAFTING",
-      "updated_at": "2026-08-14T05:07:00Z",
+      "updated_at": "2026-08-14T05:13:49Z",
       "issue_number": 42,
       "agents": {
         "research-worker": "COMPLETED",
@@ -36,6 +36,13 @@
           "action": "invoke",
           "detail": "document-writer 서브에이전트를 호출합니다 (research-result 경로 전달, 시도 1/2)",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-14T05:13:49Z",
+          "agent": "document-writer",
+          "action": "gate_pass",
+          "detail": "document-draft 스키마 및 claim_map 교차검증 통과 (claim 26개 전부 인용)",
+          "kind": "ok"
         }
       ]
     },
