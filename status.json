@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T14:51:24Z",
+  "updated_at": "2026-08-14T14:53:04Z",
   "jobs": [
     {
       "job_id": "JOB-52",
       "state": "QA_REVIEW",
-      "updated_at": "2026-08-14T14:51:24Z",
+      "updated_at": "2026-08-14T14:53:04Z",
       "issue_number": 52,
       "agents": {
         "research-worker": "COMPLETED",
@@ -141,6 +141,13 @@
           "action": "retry",
           "detail": "재시도 2/2",
           "kind": "wait"
+        },
+        {
+          "ts": "2026-08-14T14:53:04Z",
+          "agent": "qa-critic",
+          "action": "gate_pass",
+          "detail": "qa-result/technical-visualization 스키마 및 교차검증 통과",
+          "kind": "ok"
         }
       ]
     },
