@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-14T06:03:31Z",
+  "updated_at": "2026-08-14T06:08:15Z",
   "jobs": [
     {
       "job_id": "JOB-42",
       "state": "QA_REVIEW",
-      "updated_at": "2026-08-14T06:03:31Z",
+      "updated_at": "2026-08-14T06:08:15Z",
       "issue_number": 42,
       "agents": {
         "research-worker": "COMPLETED",
@@ -16,13 +16,6 @@
       },
       "title": "Notion 문서를 GitHub Pages로 마이그레이션하기 위한 기술적 절차",
       "activity": [
-        {
-          "ts": "2026-08-14T05:16:54Z",
-          "agent": "document-writer",
-          "action": "retry",
-          "detail": "proofreader FAIL 반영, 개정판 작성 (시도 2/2)",
-          "kind": "wait"
-        },
         {
           "ts": "2026-08-14T05:21:14Z",
           "agent": "document-writer",
@@ -155,6 +148,13 @@
           "action": "invoke",
           "detail": "qa-critic 호출 (시도 1/2)",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-14T06:08:15Z",
+          "agent": "qa-critic",
+          "action": "gate_pass",
+          "detail": "qa-result QA-JOB-42-04 PASS (low 2건 non-blocking)",
+          "kind": "ok"
         }
       ]
     },
