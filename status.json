@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-17T23:18:23Z",
+  "updated_at": "2026-08-17T23:18:25Z",
   "jobs": [
     {
       "job_id": "JOB-59",
       "state": "PROOFREADING",
-      "updated_at": "2026-08-17T23:18:23Z",
+      "updated_at": "2026-08-17T23:18:25Z",
       "issue_number": 59,
       "agents": {
         "research-worker": "COMPLETED",
@@ -113,6 +113,13 @@
           "action": "invoke",
           "detail": "REWORK: 이전 draft를 반려 사유(high 2, medium 2, low 3) 반영해 개정",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-17T23:18:25Z",
+          "agent": "document-writer",
+          "action": "gate_pass",
+          "detail": "document-draft(DOC-JOB-59-02) 스키마 및 교차검증 통과",
+          "kind": "ok"
         }
       ]
     },
