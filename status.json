@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-17T23:09:00Z",
+  "updated_at": "2026-08-17T23:09:02Z",
   "jobs": [
     {
       "job_id": "JOB-59",
       "state": "DRAFTING",
-      "updated_at": "2026-08-17T23:09:00Z",
+      "updated_at": "2026-08-17T23:09:02Z",
       "issue_number": 59,
       "agents": {
         "research-worker": "COMPLETED",
@@ -105,6 +105,13 @@
           "agent": "document-writer",
           "action": "invoke",
           "detail": "REWORK 모드: 이전 research-result 재사용, document-writer 재호출 준비",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-17T23:09:02Z",
+          "agent": "document-writer",
+          "action": "invoke",
+          "detail": "REWORK: 이전 draft를 반려 사유(high 2, medium 2, low 3) 반영해 개정",
           "kind": "run"
         }
       ]
