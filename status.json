@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-17T23:34:07Z",
+  "updated_at": "2026-08-17T23:39:33Z",
   "jobs": [
     {
       "job_id": "JOB-59",
       "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-17T23:34:07Z",
+      "updated_at": "2026-08-17T23:39:33Z",
       "issue_number": 59,
       "agents": {
         "research-worker": "COMPLETED",
@@ -16,13 +16,6 @@
       },
       "title": "Entra Conditional Access를 통한 디바이스 준수 정책 강제 적용 가이드",
       "activity": [
-        {
-          "ts": "2026-08-17T22:38:57Z",
-          "agent": "document-writer",
-          "action": "invoke",
-          "detail": "document-writer 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
         {
           "ts": "2026-08-17T22:46:14Z",
           "agent": "document-writer",
@@ -155,6 +148,13 @@
           "action": "invoke",
           "detail": "final-reviewer 서브에이전트를 호출합니다",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-17T23:39:33Z",
+          "agent": "final-reviewer",
+          "action": "score",
+          "detail": "conformance_score=84 → REQUEST_APPROVAL",
+          "kind": "wait"
         }
       ]
     },
