@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-17T23:28:12Z",
+  "updated_at": "2026-08-17T23:28:14Z",
   "jobs": [
     {
       "job_id": "JOB-59",
       "state": "QA_REVIEW",
-      "updated_at": "2026-08-17T23:28:12Z",
+      "updated_at": "2026-08-17T23:28:14Z",
       "issue_number": 59,
       "agents": {
         "research-worker": "COMPLETED",
@@ -148,6 +148,13 @@
           "action": "gate_pass",
           "detail": "qa-result(QA-JOB-59-02) decision=PASS, issues=0; technical-visualization(VIZ-JOB-59-02) 다이어그램 2건 제안",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-17T23:28:14Z",
+          "agent": "document-writer",
+          "action": "invoke",
+          "detail": "qa-critic 제안 다이어그램 2건 임베딩을 위해 document-writer 재호출",
+          "kind": "run"
         }
       ]
     },
