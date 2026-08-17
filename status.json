@@ -1,17 +1,17 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-17T23:18:28Z",
+  "updated_at": "2026-08-17T23:22:35Z",
   "jobs": [
     {
       "job_id": "JOB-59",
-      "state": "PROOFREADING",
-      "updated_at": "2026-08-17T23:18:28Z",
+      "state": "QA_REVIEW",
+      "updated_at": "2026-08-17T23:22:35Z",
       "issue_number": 59,
       "agents": {
         "research-worker": "COMPLETED",
         "document-writer": "COMPLETED",
-        "proofreader": "RUNNING",
-        "qa-critic": "PENDING",
+        "proofreader": "COMPLETED",
+        "qa-critic": "RUNNING",
         "final-reviewer": "PENDING"
       },
       "title": "Entra Conditional Access를 통한 디바이스 준수 정책 강제 적용 가이드",
