@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-17T23:34:05Z",
+  "updated_at": "2026-08-17T23:34:07Z",
   "jobs": [
     {
       "job_id": "JOB-59",
       "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-17T23:34:05Z",
+      "updated_at": "2026-08-17T23:34:07Z",
       "issue_number": 59,
       "agents": {
         "research-worker": "COMPLETED",
@@ -16,13 +16,6 @@
       },
       "title": "Entra Conditional Access를 통한 디바이스 준수 정책 강제 적용 가이드",
       "activity": [
-        {
-          "ts": "2026-08-17T22:38:54Z",
-          "agent": "research-worker",
-          "action": "gate_pass",
-          "detail": "research-result 스키마 및 교차검증 통과 (claim 26, source 9)",
-          "kind": "ok"
-        },
         {
           "ts": "2026-08-17T22:38:57Z",
           "agent": "document-writer",
@@ -155,6 +148,13 @@
           "action": "embed_diagrams",
           "detail": "QA Critic이 제안한 다이어그램 2개 삽입, architecture.pptx(3장) 생성",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-17T23:34:07Z",
+          "agent": "final-reviewer",
+          "action": "invoke",
+          "detail": "final-reviewer 서브에이전트를 호출합니다",
+          "kind": "run"
         }
       ]
     },
