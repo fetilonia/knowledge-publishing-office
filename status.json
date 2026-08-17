@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-17T23:04:56Z",
+  "updated_at": "2026-08-17T23:04:58Z",
   "jobs": [
     {
       "job_id": "JOB-60",
       "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-17T23:04:56Z",
+      "updated_at": "2026-08-17T23:04:58Z",
       "issue_number": 60,
       "agents": {
         "research-worker": "COMPLETED",
@@ -85,6 +85,13 @@
           "action": "gate_pass",
           "detail": "다이어그램 3개 임베딩 게이트 통과(1차 시도), PPTX 생성 완료",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-17T23:04:58Z",
+          "agent": "final-reviewer",
+          "action": "invoke",
+          "detail": "final-reviewer 서브에이전트를 호출합니다",
+          "kind": "run"
         }
       ]
     },
