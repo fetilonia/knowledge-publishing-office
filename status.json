@@ -1,18 +1,18 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-17T23:07:16Z",
+  "updated_at": "2026-08-17T23:07:18Z",
   "jobs": [
     {
       "job_id": "JOB-60",
       "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-17T23:07:16Z",
+      "updated_at": "2026-08-17T23:07:18Z",
       "issue_number": 60,
       "agents": {
         "research-worker": "COMPLETED",
         "document-writer": "COMPLETED",
         "proofreader": "COMPLETED",
         "qa-critic": "COMPLETED",
-        "final-reviewer": "RUNNING"
+        "final-reviewer": "COMPLETED"
       },
       "title": "Microsoft Purview Information Protection 라벨 자동 분류 구성 가이드",
       "activity": [
@@ -100,7 +100,8 @@
           "detail": "conformance_score=72 → REQUEST_APPROVAL",
           "kind": "wait"
         }
-      ]
+      ],
+      "pr_number": 62
     },
     {
       "job_id": "JOB-59",
