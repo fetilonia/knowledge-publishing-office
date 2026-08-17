@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-17T23:22:40Z",
+  "updated_at": "2026-08-17T23:28:12Z",
   "jobs": [
     {
       "job_id": "JOB-59",
       "state": "QA_REVIEW",
-      "updated_at": "2026-08-17T23:22:40Z",
+      "updated_at": "2026-08-17T23:28:12Z",
       "issue_number": 59,
       "agents": {
         "research-worker": "COMPLETED",
@@ -141,6 +141,13 @@
           "action": "invoke",
           "detail": "qa-critic 서브에이전트를 호출합니다",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-17T23:28:12Z",
+          "agent": "qa-critic",
+          "action": "gate_pass",
+          "detail": "qa-result(QA-JOB-59-02) decision=PASS, issues=0; technical-visualization(VIZ-JOB-59-02) 다이어그램 2건 제안",
+          "kind": "ok"
         }
       ]
     },
