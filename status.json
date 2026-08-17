@@ -1,7 +1,86 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-17T22:58:21Z",
+  "updated_at": "2026-08-17T23:02:04Z",
   "jobs": [
+    {
+      "job_id": "JOB-59",
+      "state": "FINAL_REVIEW",
+      "updated_at": "2026-08-17T23:02:04Z",
+      "issue_number": 59,
+      "agents": {
+        "research-worker": "COMPLETED",
+        "document-writer": "COMPLETED",
+        "proofreader": "COMPLETED",
+        "qa-critic": "COMPLETED",
+        "final-reviewer": "RUNNING"
+      },
+      "title": "Entra Conditional Access를 통한 디바이스 준수 정책 강제 적용 가이드",
+      "activity": [
+        {
+          "ts": "2026-08-17T22:30:00Z",
+          "agent": "research-worker",
+          "action": "invoke",
+          "detail": "research-worker 서브에이전트를 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-17T22:38:54Z",
+          "agent": "research-worker",
+          "action": "gate_pass",
+          "detail": "research-result 스키마 및 교차검증 통과 (claim 26, source 9)",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-17T22:38:57Z",
+          "agent": "document-writer",
+          "action": "invoke",
+          "detail": "document-writer 서브에이전트를 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-17T22:46:14Z",
+          "agent": "document-writer",
+          "action": "gate_pass",
+          "detail": "document-draft 스키마 및 교차검증 통과",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-17T22:46:16Z",
+          "agent": "proofreader",
+          "action": "invoke",
+          "detail": "proofreader 서브에이전트를 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-17T22:50:56Z",
+          "agent": "proofreader",
+          "action": "gate_pass",
+          "detail": "proofread-result 스키마 검증 통과 (decision=FAIL, high=1 — advisory, final-reviewer로 이월)",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-17T22:50:59Z",
+          "agent": "qa-critic",
+          "action": "invoke",
+          "detail": "qa-critic 서브에이전트를 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-17T22:57:01Z",
+          "agent": "qa-critic",
+          "action": "gate_pass",
+          "detail": "qa-result/technical-visualization 스키마 검증 통과 (decision=FAIL, high=1 — advisory; diagrams=2)",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-17T22:57:04Z",
+          "agent": "document-writer",
+          "action": "embed_diagrams",
+          "detail": "QA Critic이 제안한 다이어그램 2개 삽입 재호출",
+          "kind": "run"
+        }
+      ]
+    },
     {
       "job_id": "JOB-60",
       "state": "QA_REVIEW",
@@ -77,85 +156,6 @@
           "agent": "document-writer",
           "action": "embed_diagrams",
           "detail": "QA Critic이 제안한 다이어그램 3개 삽입을 위해 document-writer 재호출",
-          "kind": "run"
-        }
-      ]
-    },
-    {
-      "job_id": "JOB-59",
-      "state": "QA_REVIEW",
-      "updated_at": "2026-08-17T22:57:04Z",
-      "issue_number": 59,
-      "agents": {
-        "research-worker": "COMPLETED",
-        "document-writer": "COMPLETED",
-        "proofreader": "COMPLETED",
-        "qa-critic": "RUNNING",
-        "final-reviewer": "PENDING"
-      },
-      "title": "Entra Conditional Access를 통한 디바이스 준수 정책 강제 적용 가이드",
-      "activity": [
-        {
-          "ts": "2026-08-17T22:30:00Z",
-          "agent": "research-worker",
-          "action": "invoke",
-          "detail": "research-worker 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-17T22:38:54Z",
-          "agent": "research-worker",
-          "action": "gate_pass",
-          "detail": "research-result 스키마 및 교차검증 통과 (claim 26, source 9)",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-17T22:38:57Z",
-          "agent": "document-writer",
-          "action": "invoke",
-          "detail": "document-writer 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-17T22:46:14Z",
-          "agent": "document-writer",
-          "action": "gate_pass",
-          "detail": "document-draft 스키마 및 교차검증 통과",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-17T22:46:16Z",
-          "agent": "proofreader",
-          "action": "invoke",
-          "detail": "proofreader 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-17T22:50:56Z",
-          "agent": "proofreader",
-          "action": "gate_pass",
-          "detail": "proofread-result 스키마 검증 통과 (decision=FAIL, high=1 — advisory, final-reviewer로 이월)",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-17T22:50:59Z",
-          "agent": "qa-critic",
-          "action": "invoke",
-          "detail": "qa-critic 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-17T22:57:01Z",
-          "agent": "qa-critic",
-          "action": "gate_pass",
-          "detail": "qa-result/technical-visualization 스키마 검증 통과 (decision=FAIL, high=1 — advisory; diagrams=2)",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-17T22:57:04Z",
-          "agent": "document-writer",
-          "action": "embed_diagrams",
-          "detail": "QA Critic이 제안한 다이어그램 2개 삽입 재호출",
           "kind": "run"
         }
       ]
