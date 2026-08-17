@@ -1,7 +1,30 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-17T22:31:37Z",
+  "updated_at": "2026-08-17T22:38:52Z",
   "jobs": [
+    {
+      "job_id": "JOB-59",
+      "state": "DRAFTING",
+      "updated_at": "2026-08-17T22:38:52Z",
+      "issue_number": 59,
+      "agents": {
+        "research-worker": "COMPLETED",
+        "document-writer": "RUNNING",
+        "proofreader": "PENDING",
+        "qa-critic": "PENDING",
+        "final-reviewer": "PENDING"
+      },
+      "title": "Entra Conditional Access를 통한 디바이스 준수 정책 강제 적용 가이드",
+      "activity": [
+        {
+          "ts": "2026-08-17T22:30:00Z",
+          "agent": "research-worker",
+          "action": "invoke",
+          "detail": "research-worker 서브에이전트를 호출합니다",
+          "kind": "run"
+        }
+      ]
+    },
     {
       "job_id": "JOB-60",
       "state": "RESEARCHING",
@@ -18,29 +41,6 @@
       "activity": [
         {
           "ts": "2026-08-17T22:31:37Z",
-          "agent": "research-worker",
-          "action": "invoke",
-          "detail": "research-worker 서브에이전트를 호출합니다",
-          "kind": "run"
-        }
-      ]
-    },
-    {
-      "job_id": "JOB-59",
-      "state": "RESEARCHING",
-      "updated_at": "2026-08-17T22:30:00Z",
-      "issue_number": 59,
-      "agents": {
-        "research-worker": "RUNNING",
-        "document-writer": "PENDING",
-        "proofreader": "PENDING",
-        "qa-critic": "PENDING",
-        "final-reviewer": "PENDING"
-      },
-      "title": "Entra Conditional Access를 통한 디바이스 준수 정책 강제 적용 가이드",
-      "activity": [
-        {
-          "ts": "2026-08-17T22:30:00Z",
           "agent": "research-worker",
           "action": "invoke",
           "detail": "research-worker 서브에이전트를 호출합니다",
