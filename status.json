@@ -1,7 +1,108 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-17T23:28:14Z",
+  "updated_at": "2026-08-17T23:29:43Z",
   "jobs": [
+    {
+      "job_id": "JOB-60",
+      "state": "APPROVED",
+      "updated_at": "2026-08-17T23:29:43Z",
+      "issue_number": 60,
+      "agents": {
+        "research-worker": "COMPLETED",
+        "document-writer": "COMPLETED",
+        "proofreader": "COMPLETED",
+        "qa-critic": "COMPLETED",
+        "final-reviewer": "COMPLETED"
+      },
+      "title": "Microsoft Purview Information Protection 라벨 자동 분류 구성 가이드",
+      "activity": [
+        {
+          "ts": "2026-08-17T22:31:37Z",
+          "agent": "research-worker",
+          "action": "invoke",
+          "detail": "research-worker 서브에이전트를 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-17T22:39:21Z",
+          "agent": "research-worker",
+          "action": "gate_pass",
+          "detail": "research-result 스키마 및 게이트 통과 (claim 41개, source 4개)",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-17T22:39:22Z",
+          "agent": "document-writer",
+          "action": "invoke",
+          "detail": "document-writer 서브에이전트를 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-17T22:49:06Z",
+          "agent": "document-writer",
+          "action": "gate_pass",
+          "detail": "document-draft 스키마 및 claim_map 대조 통과",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-17T22:49:09Z",
+          "agent": "proofreader",
+          "action": "invoke",
+          "detail": "proofreader 서브에이전트를 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-17T22:53:24Z",
+          "agent": "proofreader",
+          "action": "gate_pass",
+          "detail": "proofread-result 스키마 검증 통과 (decision=PASS, medium 1/low 2)",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-17T22:53:33Z",
+          "agent": "qa-critic",
+          "action": "invoke",
+          "detail": "qa-critic 서브에이전트를 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-17T22:58:19Z",
+          "agent": "qa-critic",
+          "action": "gate_pass",
+          "detail": "qa-result 및 technical-visualization 스키마 검증 통과 (다이어그램 3개 제안)",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-17T22:58:21Z",
+          "agent": "document-writer",
+          "action": "embed_diagrams",
+          "detail": "QA Critic이 제안한 다이어그램 3개 삽입을 위해 document-writer 재호출",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-17T23:04:37Z",
+          "agent": "document-writer",
+          "action": "gate_pass",
+          "detail": "다이어그램 3개 임베딩 게이트 통과(1차 시도), PPTX 생성 완료",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-17T23:04:58Z",
+          "agent": "final-reviewer",
+          "action": "invoke",
+          "detail": "final-reviewer 서브에이전트를 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-17T23:07:16Z",
+          "agent": "final-reviewer",
+          "action": "score",
+          "detail": "conformance_score=72 → REQUEST_APPROVAL",
+          "kind": "wait"
+        }
+      ],
+      "pr_number": 62
+    },
     {
       "job_id": "JOB-59",
       "state": "QA_REVIEW",
@@ -157,107 +258,6 @@
           "kind": "run"
         }
       ]
-    },
-    {
-      "job_id": "JOB-60",
-      "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-17T23:07:18Z",
-      "issue_number": 60,
-      "agents": {
-        "research-worker": "COMPLETED",
-        "document-writer": "COMPLETED",
-        "proofreader": "COMPLETED",
-        "qa-critic": "COMPLETED",
-        "final-reviewer": "COMPLETED"
-      },
-      "title": "Microsoft Purview Information Protection 라벨 자동 분류 구성 가이드",
-      "activity": [
-        {
-          "ts": "2026-08-17T22:31:37Z",
-          "agent": "research-worker",
-          "action": "invoke",
-          "detail": "research-worker 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-17T22:39:21Z",
-          "agent": "research-worker",
-          "action": "gate_pass",
-          "detail": "research-result 스키마 및 게이트 통과 (claim 41개, source 4개)",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-17T22:39:22Z",
-          "agent": "document-writer",
-          "action": "invoke",
-          "detail": "document-writer 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-17T22:49:06Z",
-          "agent": "document-writer",
-          "action": "gate_pass",
-          "detail": "document-draft 스키마 및 claim_map 대조 통과",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-17T22:49:09Z",
-          "agent": "proofreader",
-          "action": "invoke",
-          "detail": "proofreader 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-17T22:53:24Z",
-          "agent": "proofreader",
-          "action": "gate_pass",
-          "detail": "proofread-result 스키마 검증 통과 (decision=PASS, medium 1/low 2)",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-17T22:53:33Z",
-          "agent": "qa-critic",
-          "action": "invoke",
-          "detail": "qa-critic 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-17T22:58:19Z",
-          "agent": "qa-critic",
-          "action": "gate_pass",
-          "detail": "qa-result 및 technical-visualization 스키마 검증 통과 (다이어그램 3개 제안)",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-17T22:58:21Z",
-          "agent": "document-writer",
-          "action": "embed_diagrams",
-          "detail": "QA Critic이 제안한 다이어그램 3개 삽입을 위해 document-writer 재호출",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-17T23:04:37Z",
-          "agent": "document-writer",
-          "action": "gate_pass",
-          "detail": "다이어그램 3개 임베딩 게이트 통과(1차 시도), PPTX 생성 완료",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-17T23:04:58Z",
-          "agent": "final-reviewer",
-          "action": "invoke",
-          "detail": "final-reviewer 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-17T23:07:16Z",
-          "agent": "final-reviewer",
-          "action": "score",
-          "detail": "conformance_score=72 → REQUEST_APPROVAL",
-          "kind": "wait"
-        }
-      ],
-      "pr_number": 62
     },
     {
       "job_id": "JOB-52",
