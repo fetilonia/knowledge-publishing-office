@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-17T22:53:24Z",
+  "updated_at": "2026-08-17T22:53:33Z",
   "jobs": [
     {
       "job_id": "JOB-60",
       "state": "QA_REVIEW",
-      "updated_at": "2026-08-17T22:53:24Z",
+      "updated_at": "2026-08-17T22:53:33Z",
       "issue_number": 60,
       "agents": {
         "research-worker": "COMPLETED",
@@ -57,6 +57,13 @@
           "action": "gate_pass",
           "detail": "proofread-result 스키마 검증 통과 (decision=PASS, medium 1/low 2)",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-17T22:53:33Z",
+          "agent": "qa-critic",
+          "action": "invoke",
+          "detail": "qa-critic 서브에이전트를 호출합니다",
+          "kind": "run"
         }
       ]
     },
