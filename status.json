@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-17T23:02:04Z",
+  "updated_at": "2026-08-17T23:02:06Z",
   "jobs": [
     {
       "job_id": "JOB-59",
       "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-17T23:02:04Z",
+      "updated_at": "2026-08-17T23:02:06Z",
       "issue_number": 59,
       "agents": {
         "research-worker": "COMPLETED",
@@ -78,6 +78,13 @@
           "action": "embed_diagrams",
           "detail": "QA Critic이 제안한 다이어그램 2개 삽입 재호출",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-17T23:02:06Z",
+          "agent": "document-writer",
+          "action": "embed_diagrams",
+          "detail": "QA Critic이 제안한 다이어그램 2개 삽입 완료, diagram_embedding_gate 통과, architecture.pptx(3장) 생성",
+          "kind": "ok"
         }
       ]
     },
