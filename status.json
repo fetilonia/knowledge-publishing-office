@@ -1,18 +1,18 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T05:45:20Z",
+  "updated_at": "2026-08-18T05:45:22Z",
   "jobs": [
     {
       "job_id": "JOB-77",
-      "state": "QA_REVIEW",
-      "updated_at": "2026-08-18T05:45:20Z",
+      "state": "FINAL_REVIEW",
+      "updated_at": "2026-08-18T05:45:22Z",
       "issue_number": 77,
       "agents": {
         "research-worker": "COMPLETED",
         "document-writer": "COMPLETED",
         "proofreader": "COMPLETED",
-        "qa-critic": "RUNNING",
-        "final-reviewer": "PENDING"
+        "qa-critic": "COMPLETED",
+        "final-reviewer": "RUNNING"
       },
       "title": "Microsoft Entra Workload ID를 이용한 CI/CD 파이프라인 무인증서 인증 구성 가이드",
       "activity": [
