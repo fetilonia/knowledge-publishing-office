@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T05:49:14Z",
+  "updated_at": "2026-08-18T05:49:16Z",
   "jobs": [
     {
       "job_id": "JOB-79",
       "state": "REWORK",
-      "updated_at": "2026-08-18T05:49:14Z",
+      "updated_at": "2026-08-18T05:49:16Z",
       "issue_number": 79,
       "agents": {
         "research-worker": "COMPLETED",
@@ -120,6 +120,13 @@
           "action": "reject",
           "detail": "PR #80 반려 코멘트 후 close, kpo:rework 라벨 재부착 완료",
           "kind": "bad"
+        },
+        {
+          "ts": "2026-08-18T05:49:16Z",
+          "agent": "research-worker",
+          "action": "skip",
+          "detail": "REWORK 모드: research-worker 재호출 없이 기존 research-result 재사용",
+          "kind": "wait"
         }
       ]
     },
