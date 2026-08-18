@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T05:38:38Z",
+  "updated_at": "2026-08-18T05:38:41Z",
   "jobs": [
     {
       "job_id": "JOB-79",
       "state": "PROOFREADING",
-      "updated_at": "2026-08-18T05:38:38Z",
+      "updated_at": "2026-08-18T05:38:41Z",
       "issue_number": 79,
       "agents": {
         "research-worker": "COMPLETED",
@@ -77,6 +77,13 @@
           "agent": "proofreader",
           "action": "gate_pass",
           "detail": "proofread-result 스키마 통과 (decision=FAIL, advisory, high=1)",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T05:38:41Z",
+          "agent": "qa-critic",
+          "action": "gate_pass",
+          "detail": "qa-result/technical-visualization 스키마 통과 (decision=FAIL, advisory, high=1, diagrams=3)",
           "kind": "ok"
         }
       ]
