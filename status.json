@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T03:02:57Z",
+  "updated_at": "2026-08-18T03:05:50Z",
   "jobs": [
     {
       "job_id": "JOB-66",
       "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-18T03:02:57Z",
+      "updated_at": "2026-08-18T03:05:50Z",
       "issue_number": 66,
       "agents": {
         "research-worker": "COMPLETED",
@@ -141,6 +141,13 @@
           "action": "invoke",
           "detail": "final-reviewer 호출 (REWORK 2차 사이클)",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T03:05:50Z",
+          "agent": "final-reviewer",
+          "action": "score",
+          "detail": "conformance_score=76 → REQUEST_APPROVAL",
+          "kind": "wait"
         }
       ]
     },
