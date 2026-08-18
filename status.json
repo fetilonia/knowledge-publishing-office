@@ -1,7 +1,21 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T06:53:33Z",
+  "updated_at": "2026-08-18T07:29:46Z",
   "jobs": [
+    {
+      "job_id": "JOB-88",
+      "state": "RESEARCHING",
+      "updated_at": "2026-08-18T07:29:46Z",
+      "issue_number": 88,
+      "agents": {
+        "research-worker": "RUNNING",
+        "document-writer": "PENDING",
+        "qa-critic": "PENDING",
+        "proofreader": "PENDING",
+        "final-reviewer": "PENDING"
+      },
+      "title": "Microsoft Entra ID Governance Access Package를 이용한 외부 협력사 접근 수명주기 관리 가이드"
+    },
     {
       "job_id": "JOB-79",
       "state": "FINAL_REVIEW",
@@ -423,162 +437,6 @@
       ]
     },
     {
-      "job_id": "JOB-65",
-      "state": "REWORK",
-      "updated_at": "2026-08-18T04:27:13Z",
-      "issue_number": 65,
-      "agents": {
-        "research-worker": "COMPLETED",
-        "document-writer": "PENDING",
-        "proofreader": "PENDING",
-        "qa-critic": "PENDING",
-        "final-reviewer": "PENDING"
-      },
-      "title": "Microsoft Defender for Identity와 Entra ID Protection 연동을 통한 위험 기반 자동 대응 구성 가이드",
-      "activity": [
-        {
-          "ts": "2026-08-18T03:38:40Z",
-          "agent": "final-reviewer",
-          "action": "score",
-          "detail": "conformance_score=24 → REJECT",
-          "kind": "bad"
-        },
-        {
-          "ts": "2026-08-18T03:41:09Z",
-          "agent": "document-writer",
-          "action": "invoke",
-          "detail": "REWORK: document-writer 재호출 (DRAFTING 재개)",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T03:49:15Z",
-          "agent": "document-writer",
-          "action": "gate_pass",
-          "detail": "document-draft 스키마 및 draft_gate(claim_map/research_artifact_id) 통과 — REWORK 반영 완료",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-18T03:49:19Z",
-          "agent": "proofreader",
-          "action": "invoke",
-          "detail": "proofreader 서브에이전트를 호출합니다 (qa-critic과 병렬)",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T03:49:21Z",
-          "agent": "qa-critic",
-          "action": "invoke",
-          "detail": "qa-critic 서브에이전트를 호출합니다 (proofreader와 병렬)",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T03:57:58Z",
-          "agent": "proofreader",
-          "action": "gate_pass",
-          "detail": "proofread-result 스키마 검증 통과 (decision=FAIL advisory, high 1/low 1)",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-18T03:58:01Z",
-          "agent": "qa-critic",
-          "action": "gate_pass",
-          "detail": "qa-result/technical-visualization 스키마 검증 통과 (decision=FAIL advisory, high 1/medium 2/low 1; 신규 다이어그램 1건 제안)",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-18T03:58:05Z",
-          "agent": "document-writer",
-          "action": "invoke",
-          "detail": "QA Critic이 제안한 신규 다이어그램 1건(MMD-JOB-65-04) 임베딩을 위해 재호출",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T04:02:12Z",
-          "agent": "document-writer",
-          "action": "embed_diagrams",
-          "detail": "QA Critic이 제안한 다이어그램 1건(MMD-JOB-65-04) 삽입, diagram_embedding_gate 통과, architecture.pptx(3장) 생성",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-18T04:02:16Z",
-          "agent": "final-reviewer",
-          "action": "invoke",
-          "detail": "final-reviewer 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T04:05:37Z",
-          "agent": "final-reviewer",
-          "action": "score",
-          "detail": "conformance_score=32 → REJECT (이전 24 대비 개선, 여전히 REJECT 밴드)",
-          "kind": "bad"
-        },
-        {
-          "ts": "2026-08-18T04:07:35Z",
-          "agent": "document-writer",
-          "action": "invoke",
-          "detail": "REWORK 3차 사이클 시작: PR #73 반려(score=32) 사유 6건 반영 재작성",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T04:15:04Z",
-          "agent": "document-writer",
-          "action": "gate_pass",
-          "detail": "document-draft DOC-JOB-65-01 순방향 개정 draft_gate 통과 (반려 사유 6건 반영)",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-18T04:15:09Z",
-          "agent": "proofreader",
-          "action": "invoke",
-          "detail": "proofreader/qa-critic 병렬 호출 시작 (REWORK 3차)",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T04:15:12Z",
-          "agent": "qa-critic",
-          "action": "invoke",
-          "detail": "proofreader/qa-critic 병렬 호출 시작 (REWORK 3차)",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T04:21:57Z",
-          "agent": "proofreader",
-          "action": "gate_pass",
-          "detail": "PRF-JOB-65-03 스키마/게이트 통과 (decision=FAIL advisory, high 1/medium 1/low 1)",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-18T04:22:00Z",
-          "agent": "qa-critic",
-          "action": "gate_pass",
-          "detail": "QA-JOB-65-03 스키마/게이트 통과 (decision=FAIL advisory, high 2). VIZ-JOB-65-03 diagrams=0(no-op), powerpoint_spec 생성 완료",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-18T04:22:08Z",
-          "agent": "final-reviewer",
-          "action": "invoke",
-          "detail": "final-reviewer 호출 (qa-critic/proofreader 잔여 이슈 집계)",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T04:25:24Z",
-          "agent": "final-reviewer",
-          "action": "score",
-          "detail": "conformance_score=30 → REJECT",
-          "kind": "bad"
-        },
-        {
-          "ts": "2026-08-18T04:27:13Z",
-          "agent": "document-writer",
-          "action": "invoke",
-          "detail": "REWORK 4차 사이클: PR #75 반려 사유(high 3/medium 1/low 1) 반영하여 document-writer 재호출",
-          "kind": "run"
-        }
-      ]
-    },
-    {
       "job_id": "JOB-66",
       "state": "FAILED",
       "updated_at": "2026-08-18T03:29:49Z",
@@ -734,29 +592,6 @@
         }
       ],
       "pr_number": 70
-    },
-    {
-      "job_id": "JOB-67",
-      "state": "RESEARCHING",
-      "updated_at": "2026-08-18T02:12:48Z",
-      "issue_number": 67,
-      "agents": {
-        "research-worker": "RUNNING",
-        "document-writer": "PENDING",
-        "proofreader": "PENDING",
-        "qa-critic": "PENDING",
-        "final-reviewer": "PENDING"
-      },
-      "title": "Microsoft Sentinel Analytics Rule을 통한 이상 로그인 탐지 및 자동 대응 플레이북 구성 가이드",
-      "activity": [
-        {
-          "ts": "2026-08-18T02:12:48Z",
-          "agent": "research-worker",
-          "action": "invoke",
-          "detail": "research-worker 서브에이전트를 호출합니다",
-          "kind": "run"
-        }
-      ]
     },
     {
       "job_id": "JOB-52",
