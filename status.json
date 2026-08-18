@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T08:27:44Z",
+  "updated_at": "2026-08-18T08:27:46Z",
   "jobs": [
     {
       "job_id": "JOB-88",
       "state": "PROOFREADING",
-      "updated_at": "2026-08-18T08:27:44Z",
+      "updated_at": "2026-08-18T08:27:46Z",
       "issue_number": 88,
       "agents": {
         "research-worker": "COMPLETED",
@@ -113,6 +113,13 @@
           "action": "gate_pass",
           "detail": "technical-visualization(VIZ-JOB-88-02) 스키마·diagram_embedding_gate 통과 (다이어그램 3개)",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T08:27:46Z",
+          "agent": "proofreader",
+          "action": "invoke",
+          "detail": "proofreader 호출",
+          "kind": "run"
         }
       ]
     },
