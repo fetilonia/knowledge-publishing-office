@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T04:22:05Z",
+  "updated_at": "2026-08-18T04:22:08Z",
   "jobs": [
     {
       "job_id": "JOB-65",
       "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-18T04:22:05Z",
+      "updated_at": "2026-08-18T04:22:08Z",
       "issue_number": 65,
       "agents": {
         "research-worker": "COMPLETED",
@@ -16,13 +16,6 @@
       },
       "title": "Microsoft Defender for Identity와 Entra ID Protection 연동을 통한 위험 기반 자동 대응 구성 가이드",
       "activity": [
-        {
-          "ts": "2026-08-18T03:30:33Z",
-          "agent": "document-writer",
-          "action": "invoke",
-          "detail": "qa-critic 제안 다이어그램 3건 임베딩을 위해 재호출 (시도 1/2)",
-          "kind": "run"
-        },
         {
           "ts": "2026-08-18T03:36:04Z",
           "agent": "document-writer",
@@ -155,6 +148,13 @@
           "action": "gate_pass",
           "detail": "QA-JOB-65-03 스키마/게이트 통과 (decision=FAIL advisory, high 2). VIZ-JOB-65-03 diagrams=0(no-op), powerpoint_spec 생성 완료",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T04:22:08Z",
+          "agent": "final-reviewer",
+          "action": "invoke",
+          "detail": "final-reviewer 호출 (qa-critic/proofreader 잔여 이슈 집계)",
+          "kind": "run"
         }
       ]
     },
