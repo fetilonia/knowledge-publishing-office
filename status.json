@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T07:53:01Z",
+  "updated_at": "2026-08-18T07:53:03Z",
   "jobs": [
     {
       "job_id": "JOB-88",
       "state": "PROOFREADING",
-      "updated_at": "2026-08-18T07:53:01Z",
+      "updated_at": "2026-08-18T07:53:03Z",
       "issue_number": 88,
       "agents": {
         "research-worker": "COMPLETED",
@@ -57,6 +57,13 @@
           "action": "embed_diagrams",
           "detail": "QA Critic이 제안한 다이어그램 2개 삽입, pptx 생성 완료",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T07:53:03Z",
+          "agent": "proofreader",
+          "action": "invoke",
+          "detail": "proofreader 서브에이전트를 호출합니다",
+          "kind": "run"
         }
       ]
     },
