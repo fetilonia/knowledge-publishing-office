@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T03:49:21Z",
+  "updated_at": "2026-08-18T03:57:58Z",
   "jobs": [
     {
       "job_id": "JOB-65",
       "state": "PROOFREADING",
-      "updated_at": "2026-08-18T03:49:21Z",
+      "updated_at": "2026-08-18T03:57:58Z",
       "issue_number": 65,
       "agents": {
         "research-worker": "COMPLETED",
@@ -141,6 +141,13 @@
           "action": "invoke",
           "detail": "qa-critic 서브에이전트를 호출합니다 (proofreader와 병렬)",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T03:57:58Z",
+          "agent": "proofreader",
+          "action": "gate_pass",
+          "detail": "proofread-result 스키마 검증 통과 (decision=FAIL advisory, high 1/low 1)",
+          "kind": "ok"
         }
       ]
     },
