@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T08:33:08Z",
+  "updated_at": "2026-08-18T08:33:10Z",
   "jobs": [
     {
       "job_id": "JOB-88",
       "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-18T08:33:08Z",
+      "updated_at": "2026-08-18T08:33:10Z",
       "issue_number": 88,
       "agents": {
         "research-worker": "COMPLETED",
@@ -127,6 +127,13 @@
           "action": "gate_pass",
           "detail": "proofread-result(PRF-JOB-88-02) 스키마 통과, decision=PASS, high=0 medium=1 low=1",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T08:33:10Z",
+          "agent": "final-reviewer",
+          "action": "invoke",
+          "detail": "final-reviewer 호출 — 기술 QA 판정 + conformance_score 산정",
+          "kind": "run"
         }
       ]
     },
