@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T02:52:52Z",
+  "updated_at": "2026-08-18T02:57:49Z",
   "jobs": [
     {
       "job_id": "JOB-66",
       "state": "PROOFREADING",
-      "updated_at": "2026-08-18T02:52:52Z",
+      "updated_at": "2026-08-18T02:57:49Z",
       "issue_number": 66,
       "agents": {
         "research-worker": "COMPLETED",
@@ -113,6 +113,13 @@
           "action": "invoke",
           "detail": "proofreader + qa-critic 병렬 호출 (REWORK 2차 사이클)",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T02:57:49Z",
+          "agent": "qa-critic",
+          "action": "gate_pass",
+          "detail": "proofread-result/qa-result/technical-visualization 스키마+게이트 검증 통과 (PRF-JOB-66-02 PASS, QA-JOB-66-02 PASS)",
+          "kind": "ok"
         }
       ]
     },
