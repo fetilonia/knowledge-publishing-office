@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T06:06:29Z",
+  "updated_at": "2026-08-18T06:06:31Z",
   "jobs": [
     {
       "job_id": "JOB-79",
       "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-18T06:06:29Z",
+      "updated_at": "2026-08-18T06:06:31Z",
       "issue_number": 79,
       "agents": {
         "research-worker": "COMPLETED",
@@ -16,13 +16,6 @@
       },
       "title": "Azure Policy를 이용한 Entra Conditional Access 정책 표준화 및 드리프트 방지 가이드",
       "activity": [
-        {
-          "ts": "2026-08-18T05:31:06Z",
-          "agent": "proofreader",
-          "action": "invoke",
-          "detail": "proofreader 서브에이전트를 호출합니다 (병렬)",
-          "kind": "run"
-        },
         {
           "ts": "2026-08-18T05:31:09Z",
           "agent": "qa-critic",
@@ -155,6 +148,13 @@
           "action": "embed_diagrams",
           "detail": "QA Critic이 제안한 다이어그램 0개 — 임베딩 게이트 no-op",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T06:06:31Z",
+          "agent": "final-reviewer",
+          "action": "invoke",
+          "detail": "final-reviewer 서브에이전트를 호출합니다",
+          "kind": "run"
         }
       ]
     },
