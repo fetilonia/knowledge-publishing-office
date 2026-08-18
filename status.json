@@ -1,7 +1,21 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T02:12:41Z",
+  "updated_at": "2026-08-18T02:12:44Z",
   "jobs": [
+    {
+      "job_id": "JOB-65",
+      "state": "RESEARCHING",
+      "updated_at": "2026-08-18T02:12:44Z",
+      "issue_number": 65,
+      "agents": {
+        "research-worker": "RUNNING",
+        "document-writer": "PENDING",
+        "proofreader": "PENDING",
+        "qa-critic": "PENDING",
+        "final-reviewer": "PENDING"
+      },
+      "title": "Microsoft Defender for Identity와 Entra ID Protection 연동을 통한 위험 기반 자동 대응 구성 가이드"
+    },
     {
       "job_id": "JOB-66",
       "state": "RESEARCHING",
