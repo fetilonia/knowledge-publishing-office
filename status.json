@@ -1,7 +1,51 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T05:33:01Z",
+  "updated_at": "2026-08-18T05:33:20Z",
   "jobs": [
+    {
+      "job_id": "JOB-77",
+      "state": "DRAFTING",
+      "updated_at": "2026-08-18T05:33:20Z",
+      "issue_number": 77,
+      "agents": {
+        "research-worker": "COMPLETED",
+        "document-writer": "RUNNING",
+        "proofreader": "PENDING",
+        "qa-critic": "PENDING",
+        "final-reviewer": "PENDING"
+      },
+      "title": "Microsoft Entra Workload ID를 이용한 CI/CD 파이프라인 무인증서 인증 구성 가이드",
+      "activity": [
+        {
+          "ts": "2026-08-18T05:19:58Z",
+          "agent": "research-worker",
+          "action": "invoke",
+          "detail": "research-worker 서브에이전트를 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T05:26:33Z",
+          "agent": "research-worker",
+          "action": "gate_pass",
+          "detail": "research-result 스키마 및 claim/source 교차검증 통과 (claim 24, source 9)",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T05:26:35Z",
+          "agent": "document-writer",
+          "action": "invoke",
+          "detail": "document-writer 서브에이전트를 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T05:33:20Z",
+          "agent": "document-writer",
+          "action": "gate_pass",
+          "detail": "document-draft 스키마 및 claim/image 교차검증 통과 (claim_map 24, image_map 2)",
+          "kind": "ok"
+        }
+      ]
+    },
     {
       "job_id": "JOB-78",
       "state": "PROOFREADING",
@@ -114,43 +158,6 @@
           "agent": "qa-critic",
           "action": "invoke",
           "detail": "qa-critic 서브에이전트를 호출합니다 (병렬)",
-          "kind": "run"
-        }
-      ]
-    },
-    {
-      "job_id": "JOB-77",
-      "state": "DRAFTING",
-      "updated_at": "2026-08-18T05:26:35Z",
-      "issue_number": 77,
-      "agents": {
-        "research-worker": "COMPLETED",
-        "document-writer": "RUNNING",
-        "proofreader": "PENDING",
-        "qa-critic": "PENDING",
-        "final-reviewer": "PENDING"
-      },
-      "title": "Microsoft Entra Workload ID를 이용한 CI/CD 파이프라인 무인증서 인증 구성 가이드",
-      "activity": [
-        {
-          "ts": "2026-08-18T05:19:58Z",
-          "agent": "research-worker",
-          "action": "invoke",
-          "detail": "research-worker 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T05:26:33Z",
-          "agent": "research-worker",
-          "action": "gate_pass",
-          "detail": "research-result 스키마 및 claim/source 교차검증 통과 (claim 24, source 9)",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-18T05:26:35Z",
-          "agent": "document-writer",
-          "action": "invoke",
-          "detail": "document-writer 서브에이전트를 호출합니다",
           "kind": "run"
         }
       ]
