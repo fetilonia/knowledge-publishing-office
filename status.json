@@ -1,7 +1,21 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T02:12:44Z",
+  "updated_at": "2026-08-18T02:12:46Z",
   "jobs": [
+    {
+      "job_id": "JOB-67",
+      "state": "RESEARCHING",
+      "updated_at": "2026-08-18T02:12:46Z",
+      "issue_number": 67,
+      "agents": {
+        "research-worker": "RUNNING",
+        "document-writer": "PENDING",
+        "proofreader": "PENDING",
+        "qa-critic": "PENDING",
+        "final-reviewer": "PENDING"
+      },
+      "title": "Microsoft Sentinel Analytics Rule을 통한 이상 로그인 탐지 및 자동 대응 플레이북 구성 가이드"
+    },
     {
       "job_id": "JOB-65",
       "state": "RESEARCHING",
