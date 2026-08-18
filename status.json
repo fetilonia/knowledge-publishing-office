@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T05:44:40Z",
+  "updated_at": "2026-08-18T05:44:50Z",
   "jobs": [
     {
       "job_id": "JOB-78",
       "state": "QA_REVIEW",
-      "updated_at": "2026-08-18T05:44:40Z",
+      "updated_at": "2026-08-18T05:44:50Z",
       "issue_number": 78,
       "agents": {
         "research-worker": "COMPLETED",
@@ -84,6 +84,13 @@
           "agent": "document-writer",
           "action": "gate_pass",
           "detail": "diagram_embedding_gate 1차 시도에서 통과(마커 3개 전부 content_markdown에 실재, diagram_map 3건 기록)",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T05:44:50Z",
+          "agent": "document-writer",
+          "action": "generate_pptx",
+          "detail": "powerpoint_spec 존재하여 JOB-78.architecture.pptx(3장) 생성",
           "kind": "ok"
         }
       ]
