@@ -1,7 +1,121 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T05:45:24Z",
+  "updated_at": "2026-08-18T05:47:59Z",
   "jobs": [
+    {
+      "job_id": "JOB-79",
+      "state": "FINAL_REVIEW",
+      "updated_at": "2026-08-18T05:47:59Z",
+      "issue_number": 79,
+      "agents": {
+        "research-worker": "COMPLETED",
+        "document-writer": "COMPLETED",
+        "proofreader": "COMPLETED",
+        "qa-critic": "COMPLETED",
+        "final-reviewer": "RUNNING"
+      },
+      "title": "Azure Policy를 이용한 Entra Conditional Access 정책 표준화 및 드리프트 방지 가이드",
+      "activity": [
+        {
+          "ts": "2026-08-18T05:19:34Z",
+          "agent": "research-worker",
+          "action": "invoke",
+          "detail": "research-worker 서브에이전트를 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T05:27:47Z",
+          "agent": "research-worker",
+          "action": "gate_pass",
+          "detail": "research-result 스키마 및 research_gate 통과 (claims=12, sources=11)",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T05:27:52Z",
+          "agent": "document-writer",
+          "action": "invoke",
+          "detail": "document-writer 서브에이전트를 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T05:31:00Z",
+          "agent": "document-writer",
+          "action": "gate_pass",
+          "detail": "document-draft 스키마 및 draft_gate 통과",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T05:31:06Z",
+          "agent": "proofreader",
+          "action": "invoke",
+          "detail": "proofreader 서브에이전트를 호출합니다 (병렬)",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T05:31:09Z",
+          "agent": "qa-critic",
+          "action": "invoke",
+          "detail": "qa-critic 서브에이전트를 호출합니다 (병렬)",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T05:36:55Z",
+          "agent": "proofreader",
+          "action": "gate_fail",
+          "detail": "SCHEMA_VALIDATION_FAILED: findings[0..3]에 필수 필드 blocking 누락 (시도 1/2)",
+          "kind": "bad"
+        },
+        {
+          "ts": "2026-08-18T05:36:58Z",
+          "agent": "proofreader",
+          "action": "retry",
+          "detail": "재시도 2/2",
+          "kind": "wait"
+        },
+        {
+          "ts": "2026-08-18T05:38:38Z",
+          "agent": "proofreader",
+          "action": "gate_pass",
+          "detail": "proofread-result 스키마 통과 (decision=FAIL, advisory, high=1)",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T05:38:41Z",
+          "agent": "qa-critic",
+          "action": "gate_pass",
+          "detail": "qa-result/technical-visualization 스키마 통과 (decision=FAIL, advisory, high=1, diagrams=3)",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T05:38:50Z",
+          "agent": "document-writer",
+          "action": "invoke",
+          "detail": "qa-critic이 제안한 다이어그램 3개를 본문에 임베딩하기 위해 재호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T05:41:41Z",
+          "agent": "document-writer",
+          "action": "embed_diagrams",
+          "detail": "QA Critic이 제안한 다이어그램 3개 삽입 및 diagram_embedding_gate 통과",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T05:41:47Z",
+          "agent": "final-reviewer",
+          "action": "invoke",
+          "detail": "final-reviewer 서브에이전트를 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T05:47:59Z",
+          "agent": "final-reviewer",
+          "action": "score",
+          "detail": "conformance_score=32 → REJECT",
+          "kind": "wait"
+        }
+      ]
+    },
     {
       "job_id": "JOB-77",
       "state": "FINAL_REVIEW",
@@ -188,113 +302,6 @@
         },
         {
           "ts": "2026-08-18T05:44:55Z",
-          "agent": "final-reviewer",
-          "action": "invoke",
-          "detail": "final-reviewer 서브에이전트를 호출합니다",
-          "kind": "run"
-        }
-      ]
-    },
-    {
-      "job_id": "JOB-79",
-      "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-18T05:41:47Z",
-      "issue_number": 79,
-      "agents": {
-        "research-worker": "COMPLETED",
-        "document-writer": "COMPLETED",
-        "proofreader": "COMPLETED",
-        "qa-critic": "COMPLETED",
-        "final-reviewer": "RUNNING"
-      },
-      "title": "Azure Policy를 이용한 Entra Conditional Access 정책 표준화 및 드리프트 방지 가이드",
-      "activity": [
-        {
-          "ts": "2026-08-18T05:19:34Z",
-          "agent": "research-worker",
-          "action": "invoke",
-          "detail": "research-worker 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T05:27:47Z",
-          "agent": "research-worker",
-          "action": "gate_pass",
-          "detail": "research-result 스키마 및 research_gate 통과 (claims=12, sources=11)",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-18T05:27:52Z",
-          "agent": "document-writer",
-          "action": "invoke",
-          "detail": "document-writer 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T05:31:00Z",
-          "agent": "document-writer",
-          "action": "gate_pass",
-          "detail": "document-draft 스키마 및 draft_gate 통과",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-18T05:31:06Z",
-          "agent": "proofreader",
-          "action": "invoke",
-          "detail": "proofreader 서브에이전트를 호출합니다 (병렬)",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T05:31:09Z",
-          "agent": "qa-critic",
-          "action": "invoke",
-          "detail": "qa-critic 서브에이전트를 호출합니다 (병렬)",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T05:36:55Z",
-          "agent": "proofreader",
-          "action": "gate_fail",
-          "detail": "SCHEMA_VALIDATION_FAILED: findings[0..3]에 필수 필드 blocking 누락 (시도 1/2)",
-          "kind": "bad"
-        },
-        {
-          "ts": "2026-08-18T05:36:58Z",
-          "agent": "proofreader",
-          "action": "retry",
-          "detail": "재시도 2/2",
-          "kind": "wait"
-        },
-        {
-          "ts": "2026-08-18T05:38:38Z",
-          "agent": "proofreader",
-          "action": "gate_pass",
-          "detail": "proofread-result 스키마 통과 (decision=FAIL, advisory, high=1)",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-18T05:38:41Z",
-          "agent": "qa-critic",
-          "action": "gate_pass",
-          "detail": "qa-result/technical-visualization 스키마 통과 (decision=FAIL, advisory, high=1, diagrams=3)",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-18T05:38:50Z",
-          "agent": "document-writer",
-          "action": "invoke",
-          "detail": "qa-critic이 제안한 다이어그램 3개를 본문에 임베딩하기 위해 재호출합니다",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T05:41:41Z",
-          "agent": "document-writer",
-          "action": "embed_diagrams",
-          "detail": "QA Critic이 제안한 다이어그램 3개 삽입 및 diagram_embedding_gate 통과",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-18T05:41:47Z",
           "agent": "final-reviewer",
           "action": "invoke",
           "detail": "final-reviewer 서브에이전트를 호출합니다",
