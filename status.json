@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T08:18:28Z",
+  "updated_at": "2026-08-18T08:18:29Z",
   "jobs": [
     {
       "job_id": "JOB-88",
       "state": "DRAFTING",
-      "updated_at": "2026-08-18T08:18:28Z",
+      "updated_at": "2026-08-18T08:18:29Z",
       "issue_number": 88,
       "agents": {
         "research-worker": "COMPLETED",
@@ -99,6 +99,13 @@
           "action": "gate_pass",
           "detail": "document-draft(DOC-JOB-88-02) 스키마 및 draft gate 통과 (REWORK 반영)",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T08:18:29Z",
+          "agent": "qa-critic",
+          "action": "invoke",
+          "detail": "qa-critic(Technical Agent) 호출 — 다이어그램 재검토/임베딩",
+          "kind": "run"
         }
       ]
     },
