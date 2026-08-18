@@ -1,16 +1,16 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T07:29:49Z",
+  "updated_at": "2026-08-18T07:38:04Z",
   "jobs": [
     {
       "job_id": "JOB-88",
-      "state": "RESEARCHING",
-      "updated_at": "2026-08-18T07:29:49Z",
+      "state": "DRAFTING",
+      "updated_at": "2026-08-18T07:38:04Z",
       "issue_number": 88,
       "agents": {
-        "research-worker": "RUNNING",
-        "document-writer": "PENDING",
-        "qa-critic": "PENDING",
+        "research-worker": "COMPLETED",
+        "document-writer": "RUNNING",
+        "qa-critic": "RUNNING",
         "proofreader": "PENDING",
         "final-reviewer": "PENDING"
       },
