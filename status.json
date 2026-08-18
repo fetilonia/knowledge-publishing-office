@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T05:50:09Z",
+  "updated_at": "2026-08-18T05:50:12Z",
   "jobs": [
     {
       "job_id": "JOB-78",
       "state": "REWORK",
-      "updated_at": "2026-08-18T05:50:09Z",
+      "updated_at": "2026-08-18T05:50:12Z",
       "issue_number": 78,
       "agents": {
         "research-worker": "COMPLETED",
@@ -106,6 +106,13 @@
           "action": "score",
           "detail": "conformance_score=20 → REJECT",
           "kind": "bad"
+        },
+        {
+          "ts": "2026-08-18T05:50:12Z",
+          "agent": "document-writer",
+          "action": "invoke",
+          "detail": "REWORK: document-writer 재호출 (반려 사유 8건 반영)",
+          "kind": "run"
         }
       ]
     },
