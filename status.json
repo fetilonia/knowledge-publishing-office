@@ -1,7 +1,21 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T05:19:53Z",
+  "updated_at": "2026-08-18T05:19:56Z",
   "jobs": [
+    {
+      "job_id": "JOB-77",
+      "state": "RESEARCHING",
+      "updated_at": "2026-08-18T05:19:56Z",
+      "issue_number": 77,
+      "agents": {
+        "research-worker": "RUNNING",
+        "document-writer": "PENDING",
+        "proofreader": "PENDING",
+        "qa-critic": "PENDING",
+        "final-reviewer": "PENDING"
+      },
+      "title": "Microsoft Entra Workload ID를 이용한 CI/CD 파이프라인 무인증서 인증 구성 가이드"
+    },
     {
       "job_id": "JOB-78",
       "state": "RESEARCHING",
