@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T08:37:53Z",
+  "updated_at": "2026-08-18T08:37:54Z",
   "jobs": [
     {
       "job_id": "JOB-88",
       "state": "FAILED",
-      "updated_at": "2026-08-18T08:37:53Z",
+      "updated_at": "2026-08-18T08:37:54Z",
       "issue_number": 88,
       "agents": {
         "research-worker": "COMPLETED",
@@ -148,6 +148,13 @@
           "action": "invoke",
           "detail": "승인 완료 — Notion 발행 시작 (approval: agent:FR-JOB-88-02)",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T08:37:54Z",
+          "agent": "poster",
+          "action": "publish_notion",
+          "detail": "refused_no_approval: 발행 대상 콘텐츠에서 잠재적 민감정보 패턴이 발견되어 발행을 거부합니다.",
+          "kind": "bad"
         }
       ],
       "pr_number": 90
