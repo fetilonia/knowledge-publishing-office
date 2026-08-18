@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T05:56:28Z",
+  "updated_at": "2026-08-18T05:56:31Z",
   "jobs": [
     {
       "job_id": "JOB-78",
       "state": "DRAFTING",
-      "updated_at": "2026-08-18T05:56:28Z",
+      "updated_at": "2026-08-18T05:56:31Z",
       "issue_number": 78,
       "agents": {
         "research-worker": "COMPLETED",
@@ -113,6 +113,13 @@
           "action": "invoke",
           "detail": "REWORK: document-writer 재호출 (반려 사유 8건 반영)",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T05:56:31Z",
+          "agent": "document-writer",
+          "action": "gate_pass",
+          "detail": "document-draft DOC-JOB-78-02 draft gate 통과 (REWORK)",
+          "kind": "ok"
         }
       ]
     },
