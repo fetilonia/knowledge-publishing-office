@@ -1,18 +1,18 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T06:07:44Z",
+  "updated_at": "2026-08-18T06:09:27Z",
   "jobs": [
     {
       "job_id": "JOB-78",
       "state": "REWORK",
-      "updated_at": "2026-08-18T06:07:44Z",
+      "updated_at": "2026-08-18T06:09:27Z",
       "issue_number": 78,
       "agents": {
         "research-worker": "COMPLETED",
-        "document-writer": "COMPLETED",
-        "proofreader": "COMPLETED",
-        "qa-critic": "COMPLETED",
-        "final-reviewer": "COMPLETED"
+        "document-writer": "PENDING",
+        "proofreader": "PENDING",
+        "qa-critic": "PENDING",
+        "final-reviewer": "PENDING"
       },
       "title": "Microsoft Purview Audit(Premium)을 이용한 관리자 활동 이상 탐지 구성 가이드",
       "activity": [
