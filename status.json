@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T03:41:11Z",
+  "updated_at": "2026-08-18T03:49:15Z",
   "jobs": [
     {
       "job_id": "JOB-65",
       "state": "DRAFTING",
-      "updated_at": "2026-08-18T03:41:11Z",
+      "updated_at": "2026-08-18T03:49:15Z",
       "issue_number": 65,
       "agents": {
         "research-worker": "COMPLETED",
@@ -120,6 +120,13 @@
           "action": "invoke",
           "detail": "REWORK: document-writer 재호출 (DRAFTING 재개)",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T03:49:15Z",
+          "agent": "document-writer",
+          "action": "gate_pass",
+          "detail": "document-draft 스키마 및 draft_gate(claim_map/research_artifact_id) 통과 — REWORK 반영 완료",
+          "kind": "ok"
         }
       ]
     },
