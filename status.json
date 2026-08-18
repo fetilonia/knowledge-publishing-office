@@ -1,7 +1,30 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T02:12:48Z",
+  "updated_at": "2026-08-18T02:12:50Z",
   "jobs": [
+    {
+      "job_id": "JOB-65",
+      "state": "RESEARCHING",
+      "updated_at": "2026-08-18T02:12:50Z",
+      "issue_number": 65,
+      "agents": {
+        "research-worker": "RUNNING",
+        "document-writer": "PENDING",
+        "proofreader": "PENDING",
+        "qa-critic": "PENDING",
+        "final-reviewer": "PENDING"
+      },
+      "title": "Microsoft Defender for Identity와 Entra ID Protection 연동을 통한 위험 기반 자동 대응 구성 가이드",
+      "activity": [
+        {
+          "ts": "2026-08-18T02:12:50Z",
+          "agent": "research-worker",
+          "action": "invoke",
+          "detail": "research-worker 서브에이전트를 호출합니다",
+          "kind": "run"
+        }
+      ]
+    },
     {
       "job_id": "JOB-67",
       "state": "RESEARCHING",
@@ -24,20 +47,6 @@
           "kind": "run"
         }
       ]
-    },
-    {
-      "job_id": "JOB-65",
-      "state": "RESEARCHING",
-      "updated_at": "2026-08-18T02:12:44Z",
-      "issue_number": 65,
-      "agents": {
-        "research-worker": "RUNNING",
-        "document-writer": "PENDING",
-        "proofreader": "PENDING",
-        "qa-critic": "PENDING",
-        "final-reviewer": "PENDING"
-      },
-      "title": "Microsoft Defender for Identity와 Entra ID Protection 연동을 통한 위험 기반 자동 대응 구성 가이드"
     },
     {
       "job_id": "JOB-66",
