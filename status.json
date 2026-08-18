@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T04:07:35Z",
+  "updated_at": "2026-08-18T04:15:04Z",
   "jobs": [
     {
       "job_id": "JOB-65",
       "state": "REWORK",
-      "updated_at": "2026-08-18T04:07:35Z",
+      "updated_at": "2026-08-18T04:15:04Z",
       "issue_number": 65,
       "agents": {
         "research-worker": "COMPLETED",
@@ -16,13 +16,6 @@
       },
       "title": "Microsoft Defender for Identity와 Entra ID Protection 연동을 통한 위험 기반 자동 대응 구성 가이드",
       "activity": [
-        {
-          "ts": "2026-08-18T03:24:09Z",
-          "agent": "document-writer",
-          "action": "gate_pass",
-          "detail": "document-draft 스키마 및 draft_gate 통과 (claim_map 28건, image_map 5건 임베딩)",
-          "kind": "ok"
-        },
         {
           "ts": "2026-08-18T03:24:11Z",
           "agent": "proofreader",
@@ -155,6 +148,13 @@
           "action": "invoke",
           "detail": "REWORK 3차 사이클 시작: PR #73 반려(score=32) 사유 6건 반영 재작성",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T04:15:04Z",
+          "agent": "document-writer",
+          "action": "gate_pass",
+          "detail": "document-draft DOC-JOB-65-01 순방향 개정 draft_gate 통과 (반려 사유 6건 반영)",
+          "kind": "ok"
         }
       ]
     },
