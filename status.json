@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T03:36:05Z",
+  "updated_at": "2026-08-18T03:36:07Z",
   "jobs": [
     {
       "job_id": "JOB-65",
       "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-18T03:36:05Z",
+      "updated_at": "2026-08-18T03:36:07Z",
       "issue_number": 65,
       "agents": {
         "research-worker": "COMPLETED",
@@ -99,6 +99,13 @@
           "action": "embed_diagrams",
           "detail": "QA Critic이 제안한 다이어그램 3개 삽입 (시도 1/2, 통과)",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T03:36:07Z",
+          "agent": "final-reviewer",
+          "action": "invoke",
+          "detail": "final-reviewer 서브에이전트를 호출합니다",
+          "kind": "run"
         }
       ]
     },
