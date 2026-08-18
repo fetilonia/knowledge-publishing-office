@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T03:40:30Z",
+  "updated_at": "2026-08-18T03:41:09Z",
   "jobs": [
     {
       "job_id": "JOB-65",
       "state": "REWORK",
-      "updated_at": "2026-08-18T03:40:30Z",
+      "updated_at": "2026-08-18T03:41:09Z",
       "issue_number": 65,
       "agents": {
         "research-worker": "COMPLETED",
@@ -113,6 +113,13 @@
           "action": "score",
           "detail": "conformance_score=24 → REJECT",
           "kind": "bad"
+        },
+        {
+          "ts": "2026-08-18T03:41:09Z",
+          "agent": "document-writer",
+          "action": "invoke",
+          "detail": "REWORK: document-writer 재호출 (DRAFTING 재개)",
+          "kind": "run"
         }
       ]
     },
