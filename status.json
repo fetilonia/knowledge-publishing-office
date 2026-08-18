@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T02:26:21Z",
+  "updated_at": "2026-08-18T02:32:05Z",
   "jobs": [
     {
       "job_id": "JOB-66",
       "state": "PROOFREADING",
-      "updated_at": "2026-08-18T02:26:21Z",
+      "updated_at": "2026-08-18T02:32:05Z",
       "issue_number": 66,
       "agents": {
         "research-worker": "COMPLETED",
@@ -50,6 +50,13 @@
           "action": "invoke",
           "detail": "proofreader/qa-critic 병렬 호출을 시작합니다",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T02:32:05Z",
+          "agent": "proofreader",
+          "action": "gate_pass",
+          "detail": "proofread-result 스키마 통과 (PRF-JOB-66-01, decision=PASS advisory)",
+          "kind": "ok"
         }
       ]
     },
