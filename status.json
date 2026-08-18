@@ -1,7 +1,30 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T05:19:58Z",
+  "updated_at": "2026-08-18T05:20:00Z",
   "jobs": [
+    {
+      "job_id": "JOB-78",
+      "state": "RESEARCHING",
+      "updated_at": "2026-08-18T05:20:00Z",
+      "issue_number": 78,
+      "agents": {
+        "research-worker": "RUNNING",
+        "document-writer": "PENDING",
+        "proofreader": "PENDING",
+        "qa-critic": "PENDING",
+        "final-reviewer": "PENDING"
+      },
+      "title": "Microsoft Purview Audit(Premium)을 이용한 관리자 활동 이상 탐지 구성 가이드",
+      "activity": [
+        {
+          "ts": "2026-08-18T05:20:00Z",
+          "agent": "research-worker",
+          "action": "invoke",
+          "detail": "research-worker 서브에이전트를 호출합니다",
+          "kind": "run"
+        }
+      ]
+    },
     {
       "job_id": "JOB-77",
       "state": "RESEARCHING",
@@ -24,20 +47,6 @@
           "kind": "run"
         }
       ]
-    },
-    {
-      "job_id": "JOB-78",
-      "state": "RESEARCHING",
-      "updated_at": "2026-08-18T05:19:53Z",
-      "issue_number": 78,
-      "agents": {
-        "research-worker": "RUNNING",
-        "document-writer": "PENDING",
-        "proofreader": "PENDING",
-        "qa-critic": "PENDING",
-        "final-reviewer": "PENDING"
-      },
-      "title": "Microsoft Purview Audit(Premium)을 이용한 관리자 활동 이상 탐지 구성 가이드"
     },
     {
       "job_id": "JOB-79",
