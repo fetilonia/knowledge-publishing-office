@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T02:38:02Z",
+  "updated_at": "2026-08-18T02:43:02Z",
   "jobs": [
     {
       "job_id": "JOB-66",
       "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-18T02:38:02Z",
+      "updated_at": "2026-08-18T02:43:02Z",
       "issue_number": 66,
       "agents": {
         "research-worker": "COMPLETED",
@@ -85,6 +85,13 @@
           "action": "invoke",
           "detail": "final-reviewer 서브에이전트를 호출합니다",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T02:43:02Z",
+          "agent": "final-reviewer",
+          "action": "score",
+          "detail": "conformance_score=40 → REJECT. PR #68 반려 코멘트 후 close, kpo:rework 라벨 재부착",
+          "kind": "bad"
         }
       ]
     },
