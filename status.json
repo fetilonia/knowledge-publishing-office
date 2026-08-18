@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T03:29:47Z",
+  "updated_at": "2026-08-18T03:29:49Z",
   "jobs": [
     {
       "job_id": "JOB-66",
       "state": "FAILED",
-      "updated_at": "2026-08-18T03:29:47Z",
+      "updated_at": "2026-08-18T03:29:49Z",
       "issue_number": 66,
       "agents": {
         "research-worker": "COMPLETED",
@@ -16,13 +16,6 @@
       },
       "title": "Azure Key Vault와 Managed Identity를 이용한 애플리케이션 시크릿 무인 관리 가이드",
       "activity": [
-        {
-          "ts": "2026-08-18T02:12:41Z",
-          "agent": "research-worker",
-          "action": "invoke",
-          "detail": "research-worker 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
         {
           "ts": "2026-08-18T02:19:22Z",
           "agent": "research-worker",
@@ -155,6 +148,13 @@
           "action": "invoke",
           "detail": "승인 완료 — Notion 발행 시작 (approval: human:github:fetilonia)",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T03:29:49Z",
+          "agent": "poster",
+          "action": "publish_notion",
+          "detail": "refused_no_approval: 발행 대상 콘텐츠에서 잠재적 민감정보 패턴이 발견되어 발행을 거부합니다.",
+          "kind": "bad"
         }
       ],
       "pr_number": 70
