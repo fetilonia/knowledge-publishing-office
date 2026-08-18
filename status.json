@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T04:21:57Z",
+  "updated_at": "2026-08-18T04:22:00Z",
   "jobs": [
     {
       "job_id": "JOB-65",
       "state": "PROOFREADING",
-      "updated_at": "2026-08-18T04:21:57Z",
+      "updated_at": "2026-08-18T04:22:00Z",
       "issue_number": 65,
       "agents": {
         "research-worker": "COMPLETED",
@@ -16,13 +16,6 @@
       },
       "title": "Microsoft Defender for Identity와 Entra ID Protection 연동을 통한 위험 기반 자동 대응 구성 가이드",
       "activity": [
-        {
-          "ts": "2026-08-18T03:30:31Z",
-          "agent": "qa-critic",
-          "action": "gate_pass",
-          "detail": "qa-result 스키마 통과, decision=FAIL(advisory, 파이프라인 비차단), high 2/medium 2. technical-visualization 다이어그램 3건 제안",
-          "kind": "ok"
-        },
         {
           "ts": "2026-08-18T03:30:33Z",
           "agent": "document-writer",
@@ -154,6 +147,13 @@
           "agent": "proofreader",
           "action": "gate_pass",
           "detail": "PRF-JOB-65-03 스키마/게이트 통과 (decision=FAIL advisory, high 1/medium 1/low 1)",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T04:22:00Z",
+          "agent": "qa-critic",
+          "action": "gate_pass",
+          "detail": "QA-JOB-65-03 스키마/게이트 통과 (decision=FAIL advisory, high 2). VIZ-JOB-65-03 diagrams=0(no-op), powerpoint_spec 생성 완료",
           "kind": "ok"
         }
       ]
