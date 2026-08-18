@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T06:09:27Z",
+  "updated_at": "2026-08-18T06:09:30Z",
   "jobs": [
     {
       "job_id": "JOB-78",
       "state": "REWORK",
-      "updated_at": "2026-08-18T06:09:27Z",
+      "updated_at": "2026-08-18T06:09:30Z",
       "issue_number": 78,
       "agents": {
         "research-worker": "COMPLETED",
@@ -16,13 +16,6 @@
       },
       "title": "Microsoft Purview Audit(Premium)을 이용한 관리자 활동 이상 탐지 구성 가이드",
       "activity": [
-        {
-          "ts": "2026-08-18T05:27:21Z",
-          "agent": "research-worker",
-          "action": "gate_pass",
-          "detail": "research-result RES-JOB-78-01 스키마 및 research_gate 통과(claim 14개 유일성, source 8개, conflict 1건/evidence_gap 4건 명시)",
-          "kind": "ok"
-        },
         {
           "ts": "2026-08-18T05:27:26Z",
           "agent": "document-writer",
@@ -155,6 +148,13 @@
           "action": "score",
           "detail": "conformance_score=28 → REJECT",
           "kind": "bad"
+        },
+        {
+          "ts": "2026-08-18T06:09:30Z",
+          "agent": "document-writer",
+          "action": "invoke",
+          "detail": "REWORK 3차: DOC-JOB-78-03 작성을 위해 document-writer 호출",
+          "kind": "run"
         }
       ]
     },
