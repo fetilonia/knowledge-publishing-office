@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T02:32:12Z",
+  "updated_at": "2026-08-18T02:37:57Z",
   "jobs": [
     {
       "job_id": "JOB-66",
       "state": "QA_REVIEW",
-      "updated_at": "2026-08-18T02:32:12Z",
+      "updated_at": "2026-08-18T02:37:57Z",
       "issue_number": 66,
       "agents": {
         "research-worker": "COMPLETED",
@@ -71,6 +71,13 @@
           "action": "embed_diagrams",
           "detail": "QA Critic이 제안한 다이어그램 4개 삽입을 위해 document-writer를 재호출합니다",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T02:37:57Z",
+          "agent": "document-writer",
+          "action": "embed_diagrams",
+          "detail": "QA Critic이 제안한 다이어그램 4개 삽입 완료 (1차 시도 통과), architecture.pptx(3장) 생성",
+          "kind": "ok"
         }
       ]
     },
