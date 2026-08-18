@@ -1,17 +1,17 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T02:32:07Z",
+  "updated_at": "2026-08-18T02:32:09Z",
   "jobs": [
     {
       "job_id": "JOB-66",
-      "state": "PROOFREADING",
-      "updated_at": "2026-08-18T02:32:07Z",
+      "state": "QA_REVIEW",
+      "updated_at": "2026-08-18T02:32:09Z",
       "issue_number": 66,
       "agents": {
         "research-worker": "COMPLETED",
         "document-writer": "COMPLETED",
-        "proofreader": "RUNNING",
-        "qa-critic": "PENDING",
+        "proofreader": "COMPLETED",
+        "qa-critic": "RUNNING",
         "final-reviewer": "PENDING"
       },
       "title": "Azure Key Vault와 Managed Identity를 이용한 애플리케이션 시크릿 무인 관리 가이드",
