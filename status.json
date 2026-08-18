@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T08:37:51Z",
+  "updated_at": "2026-08-18T08:37:53Z",
   "jobs": [
     {
       "job_id": "JOB-88",
-      "state": "PUBLISHING",
-      "updated_at": "2026-08-18T08:37:51Z",
+      "state": "FAILED",
+      "updated_at": "2026-08-18T08:37:53Z",
       "issue_number": 88,
       "agents": {
         "research-worker": "COMPLETED",
