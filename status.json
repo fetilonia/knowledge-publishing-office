@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T06:26:41Z",
+  "updated_at": "2026-08-18T06:30:42Z",
   "jobs": [
     {
       "job_id": "JOB-79",
       "state": "QA_REVIEW",
-      "updated_at": "2026-08-18T06:26:41Z",
+      "updated_at": "2026-08-18T06:30:42Z",
       "issue_number": 79,
       "agents": {
         "research-worker": "COMPLETED",
@@ -16,13 +16,6 @@
       },
       "title": "Azure Policy를 이용한 Entra Conditional Access 정책 표준화 및 드리프트 방지 가이드",
       "activity": [
-        {
-          "ts": "2026-08-18T05:47:59Z",
-          "agent": "final-reviewer",
-          "action": "score",
-          "detail": "conformance_score=32 → REJECT",
-          "kind": "wait"
-        },
         {
           "ts": "2026-08-18T05:48:01Z",
           "agent": "orchestrator",
@@ -155,6 +148,13 @@
           "action": "invoke",
           "detail": "qa-critic이 제안한 다이어그램 1건(MMD-JOB-79-04) 임베딩을 위해 document-writer 재호출",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T06:30:42Z",
+          "agent": "document-writer",
+          "action": "embed_diagrams",
+          "detail": "QA Critic이 제안한 다이어그램 1건(MMD-JOB-79-04) 삽입, DRAFT_DIAGRAM 게이트(누적 4건) 통과",
+          "kind": "ok"
         }
       ]
     },
