@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T03:02:55Z",
+  "updated_at": "2026-08-18T03:02:57Z",
   "jobs": [
     {
       "job_id": "JOB-66",
       "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-18T03:02:55Z",
+      "updated_at": "2026-08-18T03:02:57Z",
       "issue_number": 66,
       "agents": {
         "research-worker": "COMPLETED",
@@ -134,6 +134,13 @@
           "action": "embed_diagrams",
           "detail": "qa-critic이 제안한 신규 다이어그램 1개 삽입, diagram_embedding_gate 통과(1차 시도). PPTX 3장 생성",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T03:02:57Z",
+          "agent": "final-reviewer",
+          "action": "invoke",
+          "detail": "final-reviewer 호출 (REWORK 2차 사이클)",
+          "kind": "run"
         }
       ]
     },
