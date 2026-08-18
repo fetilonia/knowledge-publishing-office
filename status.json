@@ -1,18 +1,18 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T08:33:07Z",
+  "updated_at": "2026-08-18T08:33:08Z",
   "jobs": [
     {
       "job_id": "JOB-88",
-      "state": "PROOFREADING",
-      "updated_at": "2026-08-18T08:33:07Z",
+      "state": "FINAL_REVIEW",
+      "updated_at": "2026-08-18T08:33:08Z",
       "issue_number": 88,
       "agents": {
         "research-worker": "COMPLETED",
         "document-writer": "COMPLETED",
         "qa-critic": "COMPLETED",
-        "proofreader": "RUNNING",
-        "final-reviewer": "PENDING"
+        "proofreader": "COMPLETED",
+        "final-reviewer": "RUNNING"
       },
       "title": "Microsoft Entra ID Governance Access Package를 이용한 외부 협력사 접근 수명주기 관리 가이드",
       "activity": [
