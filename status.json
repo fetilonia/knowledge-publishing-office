@@ -1,15 +1,15 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T06:36:39Z",
+  "updated_at": "2026-08-18T06:36:44Z",
   "jobs": [
     {
       "job_id": "JOB-79",
-      "state": "REWORK",
-      "updated_at": "2026-08-18T06:36:39Z",
+      "state": "DRAFTING",
+      "updated_at": "2026-08-18T06:36:44Z",
       "issue_number": 79,
       "agents": {
         "research-worker": "COMPLETED",
-        "document-writer": "PENDING",
+        "document-writer": "RUNNING",
         "proofreader": "PENDING",
         "qa-critic": "PENDING",
         "final-reviewer": "PENDING"
