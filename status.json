@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T05:56:36Z",
+  "updated_at": "2026-08-18T05:56:38Z",
   "jobs": [
     {
       "job_id": "JOB-78",
       "state": "PROOFREADING",
-      "updated_at": "2026-08-18T05:56:36Z",
+      "updated_at": "2026-08-18T05:56:38Z",
       "issue_number": 78,
       "agents": {
         "research-worker": "COMPLETED",
@@ -124,6 +124,13 @@
         {
           "ts": "2026-08-18T05:56:36Z",
           "agent": "proofreader",
+          "action": "invoke",
+          "detail": "proofreader + qa-critic 병렬 호출",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T05:56:38Z",
+          "agent": "qa-critic",
           "action": "invoke",
           "detail": "proofreader + qa-critic 병렬 호출",
           "kind": "run"
