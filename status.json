@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T03:49:17Z",
+  "updated_at": "2026-08-18T03:49:19Z",
   "jobs": [
     {
       "job_id": "JOB-65",
       "state": "PROOFREADING",
-      "updated_at": "2026-08-18T03:49:17Z",
+      "updated_at": "2026-08-18T03:49:19Z",
       "issue_number": 65,
       "agents": {
         "research-worker": "COMPLETED",
@@ -127,6 +127,13 @@
           "action": "gate_pass",
           "detail": "document-draft 스키마 및 draft_gate(claim_map/research_artifact_id) 통과 — REWORK 반영 완료",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T03:49:19Z",
+          "agent": "proofreader",
+          "action": "invoke",
+          "detail": "proofreader 서브에이전트를 호출합니다 (qa-critic과 병렬)",
+          "kind": "run"
         }
       ]
     },
