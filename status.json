@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T03:24:09Z",
+  "updated_at": "2026-08-18T03:24:11Z",
   "jobs": [
     {
       "job_id": "JOB-65",
       "state": "PROOFREADING",
-      "updated_at": "2026-08-18T03:24:09Z",
+      "updated_at": "2026-08-18T03:24:11Z",
       "issue_number": 65,
       "agents": {
         "research-worker": "COMPLETED",
@@ -57,6 +57,13 @@
           "action": "gate_pass",
           "detail": "document-draft 스키마 및 draft_gate 통과 (claim_map 28건, image_map 5건 임베딩)",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T03:24:11Z",
+          "agent": "proofreader",
+          "action": "invoke",
+          "detail": "proofreader/qa-critic 병렬 호출",
+          "kind": "run"
         }
       ]
     },
