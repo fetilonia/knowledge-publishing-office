@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T03:30:31Z",
+  "updated_at": "2026-08-18T03:30:33Z",
   "jobs": [
     {
       "job_id": "JOB-65",
       "state": "QA_REVIEW",
-      "updated_at": "2026-08-18T03:30:31Z",
+      "updated_at": "2026-08-18T03:30:33Z",
       "issue_number": 65,
       "agents": {
         "research-worker": "COMPLETED",
@@ -85,6 +85,13 @@
           "action": "gate_pass",
           "detail": "qa-result 스키마 통과, decision=FAIL(advisory, 파이프라인 비차단), high 2/medium 2. technical-visualization 다이어그램 3건 제안",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T03:30:33Z",
+          "agent": "document-writer",
+          "action": "invoke",
+          "detail": "qa-critic 제안 다이어그램 3건 임베딩을 위해 재호출 (시도 1/2)",
+          "kind": "run"
         }
       ]
     },
