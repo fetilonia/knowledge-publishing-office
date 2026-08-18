@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T04:27:11Z",
+  "updated_at": "2026-08-18T04:27:13Z",
   "jobs": [
     {
       "job_id": "JOB-65",
       "state": "REWORK",
-      "updated_at": "2026-08-18T04:27:11Z",
+      "updated_at": "2026-08-18T04:27:13Z",
       "issue_number": 65,
       "agents": {
         "research-worker": "COMPLETED",
@@ -16,13 +16,6 @@
       },
       "title": "Microsoft Defender for Identity와 Entra ID Protection 연동을 통한 위험 기반 자동 대응 구성 가이드",
       "activity": [
-        {
-          "ts": "2026-08-18T03:36:07Z",
-          "agent": "final-reviewer",
-          "action": "invoke",
-          "detail": "final-reviewer 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
         {
           "ts": "2026-08-18T03:38:40Z",
           "agent": "final-reviewer",
@@ -155,6 +148,13 @@
           "action": "score",
           "detail": "conformance_score=30 → REJECT",
           "kind": "bad"
+        },
+        {
+          "ts": "2026-08-18T04:27:13Z",
+          "agent": "document-writer",
+          "action": "invoke",
+          "detail": "REWORK 4차 사이클: PR #75 반려 사유(high 3/medium 1/low 1) 반영하여 document-writer 재호출",
+          "kind": "run"
         }
       ]
     },
