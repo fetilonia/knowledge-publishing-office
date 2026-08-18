@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T03:58:05Z",
+  "updated_at": "2026-08-18T04:02:12Z",
   "jobs": [
     {
       "job_id": "JOB-65",
       "state": "QA_REVIEW",
-      "updated_at": "2026-08-18T03:58:05Z",
+      "updated_at": "2026-08-18T04:02:12Z",
       "issue_number": 65,
       "agents": {
         "research-worker": "COMPLETED",
@@ -16,13 +16,6 @@
       },
       "title": "Microsoft Defender for Identity와 Entra ID Protection 연동을 통한 위험 기반 자동 대응 구성 가이드",
       "activity": [
-        {
-          "ts": "2026-08-18T02:19:11Z",
-          "agent": "research-worker",
-          "action": "retry",
-          "detail": "연결 끊김으로 세션 재개 중",
-          "kind": "wait"
-        },
         {
           "ts": "2026-08-18T03:07:39Z",
           "agent": "research-worker",
@@ -155,6 +148,13 @@
           "action": "invoke",
           "detail": "QA Critic이 제안한 신규 다이어그램 1건(MMD-JOB-65-04) 임베딩을 위해 재호출",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T04:02:12Z",
+          "agent": "document-writer",
+          "action": "embed_diagrams",
+          "detail": "QA Critic이 제안한 다이어그램 1건(MMD-JOB-65-04) 삽입, diagram_embedding_gate 통과, architecture.pptx(3장) 생성",
+          "kind": "ok"
         }
       ]
     },
