@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T05:38:44Z",
+  "updated_at": "2026-08-18T05:38:50Z",
   "jobs": [
     {
       "job_id": "JOB-79",
       "state": "QA_REVIEW",
-      "updated_at": "2026-08-18T05:38:44Z",
+      "updated_at": "2026-08-18T05:38:50Z",
       "issue_number": 79,
       "agents": {
         "research-worker": "COMPLETED",
@@ -85,6 +85,13 @@
           "action": "gate_pass",
           "detail": "qa-result/technical-visualization 스키마 통과 (decision=FAIL, advisory, high=1, diagrams=3)",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T05:38:50Z",
+          "agent": "document-writer",
+          "action": "invoke",
+          "detail": "qa-critic이 제안한 다이어그램 3개를 본문에 임베딩하기 위해 재호출합니다",
+          "kind": "run"
         }
       ]
     },
