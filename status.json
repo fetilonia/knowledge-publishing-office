@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T04:15:09Z",
+  "updated_at": "2026-08-18T04:15:12Z",
   "jobs": [
     {
       "job_id": "JOB-65",
       "state": "PROOFREADING",
-      "updated_at": "2026-08-18T04:15:09Z",
+      "updated_at": "2026-08-18T04:15:12Z",
       "issue_number": 65,
       "agents": {
         "research-worker": "COMPLETED",
@@ -16,13 +16,6 @@
       },
       "title": "Microsoft Defender for Identity와 Entra ID Protection 연동을 통한 위험 기반 자동 대응 구성 가이드",
       "activity": [
-        {
-          "ts": "2026-08-18T03:24:13Z",
-          "agent": "qa-critic",
-          "action": "invoke",
-          "detail": "proofreader/qa-critic 병렬 호출",
-          "kind": "run"
-        },
         {
           "ts": "2026-08-18T03:30:29Z",
           "agent": "proofreader",
@@ -152,6 +145,13 @@
         {
           "ts": "2026-08-18T04:15:09Z",
           "agent": "proofreader",
+          "action": "invoke",
+          "detail": "proofreader/qa-critic 병렬 호출 시작 (REWORK 3차)",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T04:15:12Z",
+          "agent": "qa-critic",
           "action": "invoke",
           "detail": "proofreader/qa-critic 병렬 호출 시작 (REWORK 3차)",
           "kind": "run"
