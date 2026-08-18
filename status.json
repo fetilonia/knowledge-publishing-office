@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T05:47:59Z",
+  "updated_at": "2026-08-18T05:48:01Z",
   "jobs": [
     {
       "job_id": "JOB-79",
       "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-18T05:47:59Z",
+      "updated_at": "2026-08-18T05:48:01Z",
       "issue_number": 79,
       "agents": {
         "research-worker": "COMPLETED",
@@ -113,6 +113,13 @@
           "action": "score",
           "detail": "conformance_score=32 → REJECT",
           "kind": "wait"
+        },
+        {
+          "ts": "2026-08-18T05:48:01Z",
+          "agent": "orchestrator",
+          "action": "reject",
+          "detail": "PR #80 반려 코멘트 후 close, kpo:rework 라벨 재부착 완료",
+          "kind": "bad"
         }
       ]
     },
