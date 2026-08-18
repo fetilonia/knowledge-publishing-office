@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T02:44:34Z",
+  "updated_at": "2026-08-18T02:44:36Z",
   "jobs": [
     {
       "job_id": "JOB-66",
       "state": "REWORK",
-      "updated_at": "2026-08-18T02:44:34Z",
+      "updated_at": "2026-08-18T02:44:36Z",
       "issue_number": 66,
       "agents": {
         "research-worker": "COMPLETED",
@@ -92,6 +92,13 @@
           "action": "score",
           "detail": "conformance_score=40 → REJECT. PR #68 반려 코멘트 후 close, kpo:rework 라벨 재부착",
           "kind": "bad"
+        },
+        {
+          "ts": "2026-08-18T02:44:36Z",
+          "agent": "document-writer",
+          "action": "invoke",
+          "detail": "REWORK 모드: PR #68 반려 사유(qa-critic 3건, proofreader 4건) 반영해 document-writer 재호출",
+          "kind": "run"
         }
       ]
     },
