@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T08:37:39Z",
+  "updated_at": "2026-08-18T08:37:41Z",
   "jobs": [
     {
       "job_id": "JOB-88",
       "state": "APPROVED",
-      "updated_at": "2026-08-18T08:37:39Z",
+      "updated_at": "2026-08-18T08:37:41Z",
       "issue_number": 88,
       "agents": {
         "research-worker": "COMPLETED",
@@ -134,6 +134,13 @@
           "action": "invoke",
           "detail": "final-reviewer 호출 — 기술 QA 판정 + conformance_score 산정",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T08:37:41Z",
+          "agent": "final-reviewer",
+          "action": "score",
+          "detail": "conformance_score=84 → AUTO_APPROVE, PR #90 셀프 merge 완료",
+          "kind": "ok"
         }
       ],
       "pr_number": 90
