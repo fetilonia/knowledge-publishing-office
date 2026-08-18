@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T03:30:29Z",
+  "updated_at": "2026-08-18T03:30:31Z",
   "jobs": [
     {
       "job_id": "JOB-65",
       "state": "QA_REVIEW",
-      "updated_at": "2026-08-18T03:30:29Z",
+      "updated_at": "2026-08-18T03:30:31Z",
       "issue_number": 65,
       "agents": {
         "research-worker": "COMPLETED",
@@ -77,6 +77,13 @@
           "agent": "proofreader",
           "action": "gate_pass",
           "detail": "proofread-result 스키마 통과, decision=PASS(advisory), medium 1/low 1",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T03:30:31Z",
+          "agent": "qa-critic",
+          "action": "gate_pass",
+          "detail": "qa-result 스키마 통과, decision=FAIL(advisory, 파이프라인 비차단), high 2/medium 2. technical-visualization 다이어그램 3건 제안",
           "kind": "ok"
         }
       ]
