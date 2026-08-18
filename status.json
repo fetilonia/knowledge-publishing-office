@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T06:03:36Z",
+  "updated_at": "2026-08-18T06:03:39Z",
   "jobs": [
     {
       "job_id": "JOB-78",
       "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-18T06:03:36Z",
+      "updated_at": "2026-08-18T06:03:39Z",
       "issue_number": 78,
       "agents": {
         "research-worker": "COMPLETED",
@@ -148,6 +148,13 @@
           "action": "gate_pass",
           "detail": "proofread-result/qa-result/technical-visualization 스키마·게이트 통과, pptx 3장 생성",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T06:03:39Z",
+          "agent": "final-reviewer",
+          "action": "invoke",
+          "detail": "final-reviewer 호출",
+          "kind": "run"
         }
       ]
     },
