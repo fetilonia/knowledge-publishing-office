@@ -1,7 +1,149 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T05:57:13Z",
+  "updated_at": "2026-08-18T06:03:29Z",
   "jobs": [
+    {
+      "job_id": "JOB-78",
+      "state": "PROOFREADING",
+      "updated_at": "2026-08-18T06:03:29Z",
+      "issue_number": 78,
+      "agents": {
+        "research-worker": "COMPLETED",
+        "document-writer": "COMPLETED",
+        "proofreader": "RUNNING",
+        "qa-critic": "PENDING",
+        "final-reviewer": "PENDING"
+      },
+      "title": "Microsoft Purview Audit(Premium)을 이용한 관리자 활동 이상 탐지 구성 가이드",
+      "activity": [
+        {
+          "ts": "2026-08-18T05:20:00Z",
+          "agent": "research-worker",
+          "action": "invoke",
+          "detail": "research-worker 서브에이전트를 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T05:27:21Z",
+          "agent": "research-worker",
+          "action": "gate_pass",
+          "detail": "research-result RES-JOB-78-01 스키마 및 research_gate 통과(claim 14개 유일성, source 8개, conflict 1건/evidence_gap 4건 명시)",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T05:27:26Z",
+          "agent": "document-writer",
+          "action": "invoke",
+          "detail": "document-writer 서브에이전트를 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T05:32:55Z",
+          "agent": "document-writer",
+          "action": "gate_pass",
+          "detail": "document-draft DOC-JOB-78-01 스키마 및 draft gate 통과(research_artifact_id 일치, claim_map 14건 전부 유효)",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T05:32:59Z",
+          "agent": "proofreader",
+          "action": "invoke",
+          "detail": "proofreader와 qa-critic을 병렬 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T05:33:01Z",
+          "agent": "qa-critic",
+          "action": "invoke",
+          "detail": "proofreader와 qa-critic을 병렬 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T05:40:10Z",
+          "agent": "proofreader",
+          "action": "gate_pass",
+          "detail": "proofread-result PRF-JOB-78-01 스키마 통과(decision=PASS advisory, critical/high=0)",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T05:40:12Z",
+          "agent": "qa-critic",
+          "action": "gate_pass",
+          "detail": "qa-result QA-JOB-78-01 스키마 통과(decision=FAIL advisory, critical/high=0, medium 4건); technical-visualization VIZ-JOB-78-01 다이어그램 3건 제안",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T05:40:17Z",
+          "agent": "document-writer",
+          "action": "embed_diagrams",
+          "detail": "QA Critic이 제안한 다이어그램 3개 임베딩을 위해 document-writer 재호출",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T05:44:40Z",
+          "agent": "document-writer",
+          "action": "gate_pass",
+          "detail": "diagram_embedding_gate 1차 시도에서 통과(마커 3개 전부 content_markdown에 실재, diagram_map 3건 기록)",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T05:44:50Z",
+          "agent": "document-writer",
+          "action": "generate_pptx",
+          "detail": "powerpoint_spec 존재하여 JOB-78.architecture.pptx(3장) 생성",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T05:44:55Z",
+          "agent": "final-reviewer",
+          "action": "invoke",
+          "detail": "final-reviewer 서브에이전트를 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T05:48:42Z",
+          "agent": "final-reviewer",
+          "action": "score",
+          "detail": "conformance_score=20 → REJECT",
+          "kind": "bad"
+        },
+        {
+          "ts": "2026-08-18T05:50:12Z",
+          "agent": "document-writer",
+          "action": "invoke",
+          "detail": "REWORK: document-writer 재호출 (반려 사유 8건 반영)",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T05:56:31Z",
+          "agent": "document-writer",
+          "action": "gate_pass",
+          "detail": "document-draft DOC-JOB-78-02 draft gate 통과 (REWORK)",
+          "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T05:56:36Z",
+          "agent": "proofreader",
+          "action": "invoke",
+          "detail": "proofreader + qa-critic 병렬 호출",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T05:56:38Z",
+          "agent": "qa-critic",
+          "action": "invoke",
+          "detail": "proofreader + qa-critic 병렬 호출",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T06:03:29Z",
+          "agent": "qa-critic",
+          "action": "embed_diagrams",
+          "detail": "diagrams 빈 배열 — 기존 3개 다이어그램 유지, 게이트 no-op",
+          "kind": "ok"
+        }
+      ]
+    },
     {
       "job_id": "JOB-79",
       "state": "PROOFREADING",
@@ -154,141 +296,6 @@
           "agent": "qa-critic",
           "action": "invoke",
           "detail": "proofreader/qa-critic 병렬 호출",
-          "kind": "run"
-        }
-      ]
-    },
-    {
-      "job_id": "JOB-78",
-      "state": "PROOFREADING",
-      "updated_at": "2026-08-18T05:56:38Z",
-      "issue_number": 78,
-      "agents": {
-        "research-worker": "COMPLETED",
-        "document-writer": "COMPLETED",
-        "proofreader": "RUNNING",
-        "qa-critic": "PENDING",
-        "final-reviewer": "PENDING"
-      },
-      "title": "Microsoft Purview Audit(Premium)을 이용한 관리자 활동 이상 탐지 구성 가이드",
-      "activity": [
-        {
-          "ts": "2026-08-18T05:20:00Z",
-          "agent": "research-worker",
-          "action": "invoke",
-          "detail": "research-worker 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T05:27:21Z",
-          "agent": "research-worker",
-          "action": "gate_pass",
-          "detail": "research-result RES-JOB-78-01 스키마 및 research_gate 통과(claim 14개 유일성, source 8개, conflict 1건/evidence_gap 4건 명시)",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-18T05:27:26Z",
-          "agent": "document-writer",
-          "action": "invoke",
-          "detail": "document-writer 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T05:32:55Z",
-          "agent": "document-writer",
-          "action": "gate_pass",
-          "detail": "document-draft DOC-JOB-78-01 스키마 및 draft gate 통과(research_artifact_id 일치, claim_map 14건 전부 유효)",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-18T05:32:59Z",
-          "agent": "proofreader",
-          "action": "invoke",
-          "detail": "proofreader와 qa-critic을 병렬 호출합니다",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T05:33:01Z",
-          "agent": "qa-critic",
-          "action": "invoke",
-          "detail": "proofreader와 qa-critic을 병렬 호출합니다",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T05:40:10Z",
-          "agent": "proofreader",
-          "action": "gate_pass",
-          "detail": "proofread-result PRF-JOB-78-01 스키마 통과(decision=PASS advisory, critical/high=0)",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-18T05:40:12Z",
-          "agent": "qa-critic",
-          "action": "gate_pass",
-          "detail": "qa-result QA-JOB-78-01 스키마 통과(decision=FAIL advisory, critical/high=0, medium 4건); technical-visualization VIZ-JOB-78-01 다이어그램 3건 제안",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-18T05:40:17Z",
-          "agent": "document-writer",
-          "action": "embed_diagrams",
-          "detail": "QA Critic이 제안한 다이어그램 3개 임베딩을 위해 document-writer 재호출",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T05:44:40Z",
-          "agent": "document-writer",
-          "action": "gate_pass",
-          "detail": "diagram_embedding_gate 1차 시도에서 통과(마커 3개 전부 content_markdown에 실재, diagram_map 3건 기록)",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-18T05:44:50Z",
-          "agent": "document-writer",
-          "action": "generate_pptx",
-          "detail": "powerpoint_spec 존재하여 JOB-78.architecture.pptx(3장) 생성",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-18T05:44:55Z",
-          "agent": "final-reviewer",
-          "action": "invoke",
-          "detail": "final-reviewer 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T05:48:42Z",
-          "agent": "final-reviewer",
-          "action": "score",
-          "detail": "conformance_score=20 → REJECT",
-          "kind": "bad"
-        },
-        {
-          "ts": "2026-08-18T05:50:12Z",
-          "agent": "document-writer",
-          "action": "invoke",
-          "detail": "REWORK: document-writer 재호출 (반려 사유 8건 반영)",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T05:56:31Z",
-          "agent": "document-writer",
-          "action": "gate_pass",
-          "detail": "document-draft DOC-JOB-78-02 draft gate 통과 (REWORK)",
-          "kind": "ok"
-        },
-        {
-          "ts": "2026-08-18T05:56:36Z",
-          "agent": "proofreader",
-          "action": "invoke",
-          "detail": "proofreader + qa-critic 병렬 호출",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-18T05:56:38Z",
-          "agent": "qa-critic",
-          "action": "invoke",
-          "detail": "proofreader + qa-critic 병렬 호출",
           "kind": "run"
         }
       ]
