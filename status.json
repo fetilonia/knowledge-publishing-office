@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T08:18:29Z",
+  "updated_at": "2026-08-18T08:27:32Z",
   "jobs": [
     {
       "job_id": "JOB-88",
       "state": "DRAFTING",
-      "updated_at": "2026-08-18T08:18:29Z",
+      "updated_at": "2026-08-18T08:27:32Z",
       "issue_number": 88,
       "agents": {
         "research-worker": "COMPLETED",
@@ -106,6 +106,13 @@
           "action": "invoke",
           "detail": "qa-critic(Technical Agent) 호출 — 다이어그램 재검토/임베딩",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T08:27:32Z",
+          "agent": "qa-critic",
+          "action": "gate_pass",
+          "detail": "technical-visualization(VIZ-JOB-88-02) 스키마·diagram_embedding_gate 통과 (다이어그램 3개)",
+          "kind": "ok"
         }
       ]
     },
