@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T07:29:46Z",
+  "updated_at": "2026-08-18T07:29:49Z",
   "jobs": [
     {
       "job_id": "JOB-88",
       "state": "RESEARCHING",
-      "updated_at": "2026-08-18T07:29:46Z",
+      "updated_at": "2026-08-18T07:29:49Z",
       "issue_number": 88,
       "agents": {
         "research-worker": "RUNNING",
@@ -14,7 +14,16 @@
         "proofreader": "PENDING",
         "final-reviewer": "PENDING"
       },
-      "title": "Microsoft Entra ID Governance Access Package를 이용한 외부 협력사 접근 수명주기 관리 가이드"
+      "title": "Microsoft Entra ID Governance Access Package를 이용한 외부 협력사 접근 수명주기 관리 가이드",
+      "activity": [
+        {
+          "ts": "2026-08-18T07:29:49Z",
+          "agent": "research-worker",
+          "action": "invoke",
+          "detail": "research-worker 서브에이전트를 호출합니다",
+          "kind": "run"
+        }
+      ]
     },
     {
       "job_id": "JOB-79",
