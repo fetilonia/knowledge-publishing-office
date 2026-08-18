@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T08:37:50Z",
+  "updated_at": "2026-08-18T08:37:51Z",
   "jobs": [
     {
       "job_id": "JOB-88",
       "state": "PUBLISHING",
-      "updated_at": "2026-08-18T08:37:50Z",
+      "updated_at": "2026-08-18T08:37:51Z",
       "issue_number": 88,
       "agents": {
         "research-worker": "COMPLETED",
@@ -141,6 +141,13 @@
           "action": "score",
           "detail": "conformance_score=84 → AUTO_APPROVE, PR #90 셀프 merge 완료",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-18T08:37:51Z",
+          "agent": "poster",
+          "action": "invoke",
+          "detail": "승인 완료 — Notion 발행 시작 (approval: agent:FR-JOB-88-02)",
+          "kind": "run"
         }
       ],
       "pr_number": 90
