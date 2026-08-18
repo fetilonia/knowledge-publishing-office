@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-18T06:43:40Z",
+  "updated_at": "2026-08-18T06:43:43Z",
   "jobs": [
     {
       "job_id": "JOB-79",
       "state": "PROOFREADING",
-      "updated_at": "2026-08-18T06:43:40Z",
+      "updated_at": "2026-08-18T06:43:43Z",
       "issue_number": 79,
       "agents": {
         "research-worker": "COMPLETED",
@@ -16,13 +16,6 @@
       },
       "title": "Azure Policy를 이용한 Entra Conditional Access 정책 표준화 및 드리프트 방지 가이드",
       "activity": [
-        {
-          "ts": "2026-08-18T05:57:08Z",
-          "agent": "document-writer",
-          "action": "gate_pass",
-          "detail": "document-draft(DOC-JOB-79-02) 스키마 및 교차검증 통과",
-          "kind": "ok"
-        },
         {
           "ts": "2026-08-18T05:57:11Z",
           "agent": "proofreader",
@@ -155,6 +148,13 @@
           "action": "invoke",
           "detail": "재작업 4차 사이클: PR #85(REJECT score=44) 반려 사유 반영, document-writer 재호출",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-18T06:43:43Z",
+          "agent": "document-writer",
+          "action": "gate_pass",
+          "detail": "document-draft DOC-JOB-79-04 schema/draft_gate 통과",
+          "kind": "ok"
         }
       ]
     },
