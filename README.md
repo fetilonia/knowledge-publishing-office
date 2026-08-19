@@ -10,6 +10,19 @@ Live 모드에서 오피스 화면은 **하나의 job이 아니라 전체 현황
 
 진행 기록은 워커 단위 상태 전이(RESEARCHING→DRAFTING 같은)만 보여주지 않는다. `status.json` 0.3.0부터 각 job은 `activity[]`(감사 목적의 세부 작업 로그 — 게이트 검증 통과/실패, 재시도 횟수, `final-reviewer`의 conformance_score)를 함께 실어 보내고, 이 게시판이 그 항목을 실시간으로 그대로 얹는다. `documentor` 같은 Skill을 orchestrator 없이 사람이 직접 실행한 경우도 같은 경로로 보고되며, 그 항목은 `[Skill]` 표시로 자동 파이프라인 항목과 구분된다 — 자세한 설계는 `knowledge-publishing-agents/docs/architecture/console-status-polling.md`의 "세부 진행 기록 — activity[]" 참고. 상태 전이 로그와 달리 이 세부 로그는 "내가 접수한 job"으로 좁히지 않는다 — 감사 게시판이므로 지금 폴링 중인 모든 job의 활동을 함께 보여준다.
 
+`state`(RESEARCHING 등 5개 값)와 `agents` 맵은 "어느 워커 차례인지"만
+말해 준다 — 그 워커가 실제로 몇 분씩 도는 동안에도 이 두 필드는 안
+바뀐다. `status.json`의 선택 필드 `activity`(2026-08-14 추가)는 그
+공백을 메우는, orchestrator가 각 단계 전환마다 새로 싣는 한 줄 설명이다
+(예: `"research_gate 통과 — document-writer가 문서 초안 작성 중"`).
+있으면 말풍선에 job번호 뒤로 이어 붙고, "진행 기록" 게시판에는 값이
+바뀔 때마다 별도 줄로 남으며, "주제 추적" 팝업 표에는 "지금 하는 일"
+칸으로 뜬다. `title`/`pr_number`와 달리 sticky가 아니라서 — 한 번
+받으면 다음 상태로 넘어가도 그 문구가 없어질 때까지는 남아 있는 게
+아니라, 다음 게시가 새 값을 보내지 않으면 그냥 사라진다(자세한 병합
+규칙은 `knowledge-publishing-agents/docs/architecture/console-status-polling.md`
+참고).
+
 각 게시판은 최근 몇 줄만 보여준다. 코르크 면 오른쪽 위의 **⤢** 버튼을 누르면 전체 목록을 **표**로 보는 팝업이 뜬다 — 코르크 미리보기는 "에이전트: 한 줄 요약"처럼 좁은 줄에 맞춘 형태지만, 팝업에서는 칸을 나눠 더 많은 정보를 보여준다. 진행 기록의 팝업은 에이전트 / 실행한 작업 / 결과 세 칸이고, 주제 추적의 팝업은 Job / 제목(원본 GitHub 이슈 제목) / 상태 / 진행 네 칸이다(코르크 미리보기는 `JOB-28`처럼 job_id만 보여 좁은 줄이 지저분해지지 않게 한다). 화면이 좁아지면 게시판은 사무실 아래 카드로 떨어지는데, 이때도 미리보기는 같은 상한만큼만 보이고 ⤢ 버튼은 그대로 남는다.
 
 ## 두 가지 모드
