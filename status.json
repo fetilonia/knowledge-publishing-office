@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-20T15:06:45Z",
+  "updated_at": "2026-08-20T15:06:46Z",
   "jobs": [
     {
       "job_id": "JOB-93",
       "state": "DRAFTING",
-      "updated_at": "2026-08-20T15:06:45Z",
+      "updated_at": "2026-08-20T15:06:46Z",
       "issue_number": 93,
       "agents": {
         "research-worker": "COMPLETED",
@@ -28,6 +28,13 @@
           "agent": "document-writer",
           "action": "invoke",
           "detail": "document-writer 서브에이전트를 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-20T15:06:46Z",
+          "agent": "qa-critic",
+          "action": "invoke",
+          "detail": "qa-critic(Technical Agent) 서브에이전트를 호출합니다",
           "kind": "run"
         }
       ]
