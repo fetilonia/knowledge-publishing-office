@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-20T15:26:28Z",
+  "updated_at": "2026-08-20T15:26:29Z",
   "jobs": [
     {
       "job_id": "JOB-94",
       "state": "DRAFTING",
-      "updated_at": "2026-08-20T15:26:28Z",
+      "updated_at": "2026-08-20T15:26:29Z",
       "issue_number": 94,
       "agents": {
         "research-worker": "COMPLETED",
@@ -28,6 +28,13 @@
           "agent": "orchestrator",
           "action": "rework_start",
           "detail": "PR #95 REJECT(score=50) 이후 kpo:rework 재부착으로 재개, research-result/document-draft를 브랜치 kpo/doc-JOB-94에서 회수",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-20T15:26:29Z",
+          "agent": "document-writer",
+          "action": "invoke",
+          "detail": "REWORK: DOC-JOB-94-01 개정(DOC-JOB-94-02) — PR #95 반려 사유(구조 high 1, 서술/논리 medium 2, 인용 low 1) 반영 지시와 함께 호출",
           "kind": "run"
         }
       ]
