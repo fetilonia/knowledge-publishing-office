@@ -1,55 +1,18 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-20T15:26:29Z",
+  "updated_at": "2026-08-20T15:27:51Z",
   "jobs": [
     {
-      "job_id": "JOB-94",
-      "state": "DRAFTING",
-      "updated_at": "2026-08-20T15:26:29Z",
-      "issue_number": 94,
-      "agents": {
-        "research-worker": "COMPLETED",
-        "document-writer": "RUNNING",
-        "qa-critic": "RUNNING",
-        "proofreader": "PENDING",
-        "final-reviewer": "PENDING"
-      },
-      "title": "Conditional Access 가 Authentication COntext 를 대상으로 동작 할 때 어떤 조건으로 조건부액세스 정책의 평가가 동작하는지에 대한 기술적 이해를 도울 수 잇는 문서를 작성해줘",
-      "activity": [
-        {
-          "ts": "2026-08-20T14:53:57Z",
-          "agent": "research-worker",
-          "action": "invoke",
-          "detail": "research-worker 서브에이전트를 호출합니다",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-20T15:25:29Z",
-          "agent": "orchestrator",
-          "action": "rework_start",
-          "detail": "PR #95 REJECT(score=50) 이후 kpo:rework 재부착으로 재개, research-result/document-draft를 브랜치 kpo/doc-JOB-94에서 회수",
-          "kind": "run"
-        },
-        {
-          "ts": "2026-08-20T15:26:29Z",
-          "agent": "document-writer",
-          "action": "invoke",
-          "detail": "REWORK: DOC-JOB-94-01 개정(DOC-JOB-94-02) — PR #95 반려 사유(구조 high 1, 서술/논리 medium 2, 인용 low 1) 반영 지시와 함께 호출",
-          "kind": "run"
-        }
-      ]
-    },
-    {
       "job_id": "JOB-93",
-      "state": "REWORK",
-      "updated_at": "2026-08-20T15:25:06Z",
+      "state": "FAILED",
+      "updated_at": "2026-08-20T15:27:51Z",
       "issue_number": 93,
       "agents": {
-        "research-worker": "COMPLETED",
-        "document-writer": "COMPLETED",
-        "qa-critic": "COMPLETED",
-        "proofreader": "COMPLETED",
-        "final-reviewer": "COMPLETED"
+        "research-worker": "PENDING",
+        "document-writer": "PENDING",
+        "qa-critic": "PENDING",
+        "proofreader": "PENDING",
+        "final-reviewer": "PENDING"
       },
       "title": "Conditional Access 가 Authentication COntext 를 대상으로 동작 할 때 어떤 조건으로 조건부액세스 정책의 평가가 동작하는지에 대한 기술적 이해를 도울 수 잇는 문서를 작성해줘",
       "activity": [
@@ -101,6 +64,43 @@
           "action": "score",
           "detail": "conformance_score=38 → REJECT, PR #96 반려 후 close, kpo:rework 재부착",
           "kind": "bad"
+        }
+      ]
+    },
+    {
+      "job_id": "JOB-94",
+      "state": "DRAFTING",
+      "updated_at": "2026-08-20T15:26:29Z",
+      "issue_number": 94,
+      "agents": {
+        "research-worker": "COMPLETED",
+        "document-writer": "RUNNING",
+        "qa-critic": "RUNNING",
+        "proofreader": "PENDING",
+        "final-reviewer": "PENDING"
+      },
+      "title": "Conditional Access 가 Authentication COntext 를 대상으로 동작 할 때 어떤 조건으로 조건부액세스 정책의 평가가 동작하는지에 대한 기술적 이해를 도울 수 잇는 문서를 작성해줘",
+      "activity": [
+        {
+          "ts": "2026-08-20T14:53:57Z",
+          "agent": "research-worker",
+          "action": "invoke",
+          "detail": "research-worker 서브에이전트를 호출합니다",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-20T15:25:29Z",
+          "agent": "orchestrator",
+          "action": "rework_start",
+          "detail": "PR #95 REJECT(score=50) 이후 kpo:rework 재부착으로 재개, research-result/document-draft를 브랜치 kpo/doc-JOB-94에서 회수",
+          "kind": "run"
+        },
+        {
+          "ts": "2026-08-20T15:26:29Z",
+          "agent": "document-writer",
+          "action": "invoke",
+          "detail": "REWORK: DOC-JOB-94-01 개정(DOC-JOB-94-02) — PR #95 반려 사유(구조 high 1, 서술/논리 medium 2, 인용 low 1) 반영 지시와 함께 호출",
+          "kind": "run"
         }
       ]
     },
