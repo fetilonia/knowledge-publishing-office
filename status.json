@@ -1,7 +1,30 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-20T14:53:57Z",
+  "updated_at": "2026-08-20T14:59:42Z",
   "jobs": [
+    {
+      "job_id": "JOB-93",
+      "state": "DRAFTING",
+      "updated_at": "2026-08-20T14:59:42Z",
+      "issue_number": 93,
+      "agents": {
+        "research-worker": "COMPLETED",
+        "document-writer": "RUNNING",
+        "qa-critic": "RUNNING",
+        "proofreader": "PENDING",
+        "final-reviewer": "PENDING"
+      },
+      "title": "Conditional Access 가 Authentication COntext 를 대상으로 동작 할 때 어떤 조건으로 조건부액세스 정책의 평가가 동작하는지에 대한 기술적 이해를 도울 수 잇는 문서를 작성해줘",
+      "activity": [
+        {
+          "ts": "2026-08-20T14:53:16Z",
+          "agent": "research-worker",
+          "action": "invoke",
+          "detail": "research-worker 서브에이전트를 호출합니다",
+          "kind": "run"
+        }
+      ]
+    },
     {
       "job_id": "JOB-94",
       "state": "RESEARCHING",
@@ -18,29 +41,6 @@
       "activity": [
         {
           "ts": "2026-08-20T14:53:57Z",
-          "agent": "research-worker",
-          "action": "invoke",
-          "detail": "research-worker 서브에이전트를 호출합니다",
-          "kind": "run"
-        }
-      ]
-    },
-    {
-      "job_id": "JOB-93",
-      "state": "RESEARCHING",
-      "updated_at": "2026-08-20T14:53:16Z",
-      "issue_number": 93,
-      "agents": {
-        "research-worker": "RUNNING",
-        "document-writer": "PENDING",
-        "qa-critic": "PENDING",
-        "proofreader": "PENDING",
-        "final-reviewer": "PENDING"
-      },
-      "title": "Conditional Access 가 Authentication COntext 를 대상으로 동작 할 때 어떤 조건으로 조건부액세스 정책의 평가가 동작하는지에 대한 기술적 이해를 도울 수 잇는 문서를 작성해줘",
-      "activity": [
-        {
-          "ts": "2026-08-20T14:53:16Z",
           "agent": "research-worker",
           "action": "invoke",
           "detail": "research-worker 서브에이전트를 호출합니다",
