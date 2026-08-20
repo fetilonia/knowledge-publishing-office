@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-20T16:08:23Z",
+  "updated_at": "2026-08-20T16:08:25Z",
   "jobs": [
     {
       "job_id": "JOB-94",
       "state": "PUBLISHING",
-      "updated_at": "2026-08-20T16:08:23Z",
+      "updated_at": "2026-08-20T16:08:25Z",
       "issue_number": 94,
       "agents": {
         "research-worker": "COMPLETED",
@@ -85,6 +85,13 @@
           "action": "score",
           "detail": "conformance_score=76 → REQUEST_APPROVAL",
           "kind": "wait"
+        },
+        {
+          "ts": "2026-08-20T16:08:25Z",
+          "agent": "poster",
+          "action": "invoke",
+          "detail": "승인 완료 — Notion 발행 시작 (approval: human:github:fetilonia)",
+          "kind": "run"
         }
       ],
       "pr_number": 97
