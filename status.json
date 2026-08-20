@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-20T15:50:42Z",
+  "updated_at": "2026-08-20T15:56:09Z",
   "jobs": [
     {
       "job_id": "JOB-94",
       "state": "FINAL_REVIEW",
-      "updated_at": "2026-08-20T15:50:42Z",
+      "updated_at": "2026-08-20T15:56:09Z",
       "issue_number": 94,
       "agents": {
         "research-worker": "COMPLETED",
@@ -78,6 +78,13 @@
           "action": "invoke",
           "detail": "DOC-JOB-94-02 기술 QA 판정 + conformance_score 산정 호출",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-20T15:56:09Z",
+          "agent": "final-reviewer",
+          "action": "score",
+          "detail": "conformance_score=76 → REQUEST_APPROVAL",
+          "kind": "wait"
         }
       ]
     },
