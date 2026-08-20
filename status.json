@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-20T15:46:47Z",
+  "updated_at": "2026-08-20T15:46:49Z",
   "jobs": [
     {
       "job_id": "JOB-94",
       "state": "PROOFREADING",
-      "updated_at": "2026-08-20T15:46:47Z",
+      "updated_at": "2026-08-20T15:46:49Z",
       "issue_number": 94,
       "agents": {
         "research-worker": "COMPLETED",
@@ -57,6 +57,13 @@
           "action": "embed_diagrams",
           "detail": "qa-critic이 다이어그램 3개(재사용 2개 + 신규 1개, MMD-JOB-94-03) 삽입, diagram_embedding_gate 1차 시도 통과, JOB-94.architecture.pptx(4장) 생성",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-20T15:46:49Z",
+          "agent": "proofreader",
+          "action": "invoke",
+          "detail": "DOC-JOB-94-02 톤/서술/논리 검토 호출",
+          "kind": "run"
         }
       ]
     },
