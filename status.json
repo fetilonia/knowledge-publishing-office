@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-20T15:38:29Z",
+  "updated_at": "2026-08-20T15:46:46Z",
   "jobs": [
     {
       "job_id": "JOB-94",
       "state": "DRAFTING",
-      "updated_at": "2026-08-20T15:38:29Z",
+      "updated_at": "2026-08-20T15:46:46Z",
       "issue_number": 94,
       "agents": {
         "research-worker": "COMPLETED",
@@ -50,6 +50,13 @@
           "action": "invoke",
           "detail": "DOC-JOB-94-02에 다이어그램 재배치 확인 및 삽입 호출",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-20T15:46:46Z",
+          "agent": "document-writer",
+          "action": "embed_diagrams",
+          "detail": "qa-critic이 다이어그램 3개(재사용 2개 + 신규 1개, MMD-JOB-94-03) 삽입, diagram_embedding_gate 1차 시도 통과, JOB-94.architecture.pptx(4장) 생성",
+          "kind": "ok"
         }
       ]
     },
