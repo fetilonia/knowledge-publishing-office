@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-20T14:39:41Z",
+  "updated_at": "2026-08-20T14:39:45Z",
   "jobs": [
     {
       "job_id": "JOB-92",
       "state": "RESEARCHING",
-      "updated_at": "2026-08-20T14:39:41Z",
+      "updated_at": "2026-08-20T14:39:45Z",
       "issue_number": 92,
       "agents": {
         "research-worker": "RUNNING",
@@ -14,7 +14,16 @@
         "proofreader": "PENDING",
         "final-reviewer": "PENDING"
       },
-      "title": "게임에대한 고찰"
+      "title": "게임에대한 고찰",
+      "activity": [
+        {
+          "ts": "2026-08-20T14:39:45Z",
+          "agent": "research-worker",
+          "action": "gate_check",
+          "detail": "이슈 제목/본문에 실질적 기술 질문 부재 — 조사 시작 전 중단",
+          "kind": "bad"
+        }
+      ]
     }
   ]
 }
