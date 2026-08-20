@@ -1,28 +1,15 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-20T15:01:31Z",
+  "updated_at": "2026-08-20T15:06:45Z",
   "jobs": [
-    {
-      "job_id": "",
-      "state": "DRAFTING",
-      "updated_at": "2026-08-20T15:01:31Z",
-      "issue_number": 94,
-      "agents": {
-        "research-worker": "COMPLETED",
-        "document-writer": "RUNNING",
-        "qa-critic": "RUNNING",
-        "proofreader": "PENDING",
-        "final-reviewer": "PENDING"
-      }
-    },
     {
       "job_id": "JOB-93",
       "state": "DRAFTING",
-      "updated_at": "2026-08-20T14:59:43Z",
+      "updated_at": "2026-08-20T15:06:45Z",
       "issue_number": 93,
       "agents": {
         "research-worker": "COMPLETED",
-        "document-writer": "RUNNING",
+        "document-writer": "COMPLETED",
         "qa-critic": "RUNNING",
         "proofreader": "PENDING",
         "final-reviewer": "PENDING"
