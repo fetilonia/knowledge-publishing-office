@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-20T15:38:28Z",
+  "updated_at": "2026-08-20T15:38:29Z",
   "jobs": [
     {
       "job_id": "JOB-94",
       "state": "DRAFTING",
-      "updated_at": "2026-08-20T15:38:28Z",
+      "updated_at": "2026-08-20T15:38:29Z",
       "issue_number": 94,
       "agents": {
         "research-worker": "COMPLETED",
@@ -43,6 +43,13 @@
           "action": "gate_pass",
           "detail": "DOC-JOB-94-02 draft gate 통과(schema, claim/source/image 대조)",
           "kind": "ok"
+        },
+        {
+          "ts": "2026-08-20T15:38:29Z",
+          "agent": "qa-critic",
+          "action": "invoke",
+          "detail": "DOC-JOB-94-02에 다이어그램 재배치 확인 및 삽입 호출",
+          "kind": "run"
         }
       ]
     },
