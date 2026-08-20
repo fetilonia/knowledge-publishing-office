@@ -1,7 +1,21 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-20T14:39:57Z",
+  "updated_at": "2026-08-20T14:53:15Z",
   "jobs": [
+    {
+      "job_id": "JOB-93",
+      "state": "RESEARCHING",
+      "updated_at": "2026-08-20T14:53:15Z",
+      "issue_number": 93,
+      "agents": {
+        "research-worker": "RUNNING",
+        "document-writer": "PENDING",
+        "qa-critic": "PENDING",
+        "proofreader": "PENDING",
+        "final-reviewer": "PENDING"
+      },
+      "title": "Conditional Access 가 Authentication COntext 를 대상으로 동작 할 때 어떤 조건으로 조건부액세스 정책의 평가가 동작하는지에 대한 기술적 이해를 도울 수 잇는 문서를 작성해줘"
+    },
     {
       "job_id": "JOB-92",
       "state": "FAILED",
