@@ -1,11 +1,11 @@
 {
   "schema_version": "0.3.0",
-  "updated_at": "2026-08-20T15:46:49Z",
+  "updated_at": "2026-08-20T15:50:40Z",
   "jobs": [
     {
       "job_id": "JOB-94",
       "state": "PROOFREADING",
-      "updated_at": "2026-08-20T15:46:49Z",
+      "updated_at": "2026-08-20T15:50:40Z",
       "issue_number": 94,
       "agents": {
         "research-worker": "COMPLETED",
@@ -64,6 +64,13 @@
           "action": "invoke",
           "detail": "DOC-JOB-94-02 톤/서술/논리 검토 호출",
           "kind": "run"
+        },
+        {
+          "ts": "2026-08-20T15:50:40Z",
+          "agent": "proofreader",
+          "action": "gate_pass",
+          "detail": "PRF-JOB-94-02 proofread_gate 통과(decision=PASS advisory, medium 1/low 3)",
+          "kind": "ok"
         }
       ]
     },
